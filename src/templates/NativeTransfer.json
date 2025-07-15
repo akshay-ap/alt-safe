@@ -1,0 +1,71 @@
+{
+  "groupName": "Native",
+  "logoUrl": "https://cryptologos.cc/logos/ethereum-eth-logo.svg?v=040",
+  "chainIds": [0],
+  "tags": ["Token"],
+  "actions": [
+    {
+      "name": "ETH Transfer",
+      "display": {
+        "description": "Send native tokens (e.g., ETH) to another address"
+      },
+      "summaryView": "ethTransfer",
+      "context": {
+        "balance": {
+          "type": "uint256",
+          "defaultValue": "0"
+        },
+        "data": {
+          "type": "string",
+          "defaultValue": "0x"
+        }
+      },
+      "inputs": [
+        {
+          "name": "to",
+          "label": "Recipient Address",
+          "type": "address"
+        },
+        {
+          "name": "amount",
+          "label": "Amount to Send",
+          "type": "text"
+        }
+      ],
+      "detailsView": [
+        {
+          "label": "Current Balance",
+          "value": "context.balance / pow(10, 18)",
+          "type": "Text"
+        }
+      ],
+      "onUpdateValidations": [
+        {
+          "variable": "inputs.amount",
+          "type": "regex",
+          "id": "validate_amount",
+          "value": "^\\d+(\\.\\d{1,18})?$",
+          "errorMessage": "Amount must be a positive integer"
+        }
+      ],
+      "onInputUpdate": [
+        {
+          "variable": "context.balance",
+          "value": {
+            "type": "eth_getBalance",
+            "id": "eth_call_balance",
+            "data": {
+              "params": ["context.safeAddress"],
+              "errorMessage": "Unable to fetch balance."
+            }
+          }
+        }
+      ],
+      "onFinalize": {
+        "to": "inputs.to",
+        "value": "inputs.amount * pow(10, 18)",
+        "data": "context.data"
+      }
+    }
+  ]
+}

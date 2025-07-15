@@ -1,0 +1,453 @@
+{
+  "groupName": "ERC20",
+  "logo": {
+    "type": "character",
+    "value": "T"
+  },
+  "tags": ["Token"],
+  "chainIds": [0],
+  "actions": [
+    {
+      "name": "Transfer",
+      "display": {
+        "description": "ERC20 Transfer tokens"
+      },
+      "functionSignature": "function transfer(address _to, uint256 _value) public returns (bool success)",
+      "summaryView": "contractCall",
+      "context": {
+        "balance": {
+          "type": "uint256",
+          "defaultValue": ""
+        },
+        "decimals": {
+          "type": "uint256",
+          "defaultValue": ""
+        },
+        "value": {
+          "type": "uint256",
+          "defaultValue": "0"
+        }
+      },
+      "inputs": [
+        {
+          "name": "tokenAddress",
+          "type": "selectOneWithFreeSolo",
+          "label": "Token Address",
+          "options": [
+            {
+              "chainId": 1,
+              "options": [
+                {
+                  "name": "USDT",
+                  "value": "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+                }
+              ]
+            },
+            {
+              "chainId": 0,
+              "options": [
+                {
+                  "name": "USDT",
+                  "value": "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+                }
+              ]
+            },
+            {
+              "chainId": 31337,
+              "options": [
+                {
+                  "name": "Test",
+                  "value": "0x0B306BF915C4d645ff596e518fAf3F9669b97016"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "to",
+          "label": "To",
+          "type": "address"
+        },
+        {
+          "name": "value",
+          "label": "Token amount",
+          "type": "text"
+        }
+      ],
+      "onInputUpdate": [
+        {
+          "variable": "context.balance",
+          "value": {
+            "type": "eth_call",
+            "id": "eth_call_balance",
+            "data": {
+              "method": "function balanceOf(address _owner) public view returns (uint256 balance)",
+              "to": "inputs.tokenAddress",
+              "args": ["context.safeAddress"],
+              "errorMessage": "Unable to fetch balance. Check if the token address is correct."
+            }
+          }
+        },
+        {
+          "variable": "context.decimals",
+          "value": {
+            "type": "eth_call",
+            "id": "eth_call_decimals",
+            "data": {
+              "method": "function decimals() public view returns (uint8)",
+              "to": "inputs.tokenAddress",
+              "args": [],
+              "errorMessage": "Unable to fetch decimals. Check if the token address is correct."
+            }
+          }
+        }
+      ],
+      "detailsView": [
+        {
+          "label": "Decimals",
+          "value": "context.decimals",
+          "type": "Text"
+        },
+        {
+          "label": "Current Balance",
+          "value": "context.balance / pow(10, context.decimals)",
+          "type": "Text"
+        }
+      ],
+      "onUpdateValidations": [
+        {
+          "variable": "inputs.to",
+          "type": "regex",
+          "id": "validate_address",
+          "value": "^0x[a-fA-F0-9]{40}$",
+          "errorMessage": "Invalid address"
+        },
+        {
+          "variable": "inputs.value",
+          "type": "expression",
+          "id": "validate_balance",
+          "value": "context.balance>=inputs.value * pow(10, context.decimals)",
+          "errorMessage": "Insufficient balance"
+        },
+        {
+          "variable": "inputs.value",
+          "type": "regex",
+          "id": "validate_balance_number",
+          "value": "^\\d+(\\.\\d+)?$",
+          "errorMessage": "Token amount should be a number"
+        }
+      ],
+      "onFinalize": {
+        "to": "inputs.tokenAddress",
+        "value": "context.value",
+        "calldataArgs": ["inputs.to", "inputs.value * pow(10, context.decimals)"]
+      }
+    },
+    {
+      "name": "Approve",
+      "display": {
+        "description": "ERC20 Approve tokens"
+      },
+      "functionSignature": "function approve(address _spender, uint256 _value) public returns (bool success)",
+      "summaryView": "contractCall",
+      "context": {
+        "balance": {
+          "type": "uint256",
+          "defaultValue": ""
+        },
+        "decimals": {
+          "type": "uint256",
+          "defaultValue": ""
+        },
+        "value": {
+          "type": "uint256",
+          "defaultValue": "0"
+        },
+        "allowance": {
+          "type": "uint256",
+          "defaultValue": "0"
+        }
+      },
+      "inputs": [
+        {
+          "name": "tokenAddress",
+          "type": "selectOneWithFreeSolo",
+          "label": "Token Address",
+          "options": [
+            {
+              "chainId": 1,
+              "options": [
+                {
+                  "name": "USDT",
+                  "value": "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+                }
+              ]
+            },
+            {
+              "chainId": 0,
+              "options": [
+                {
+                  "name": "USDT",
+                  "value": "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+                }
+              ]
+            },
+            {
+              "chainId": 31337,
+              "options": [
+                {
+                  "name": "Test",
+                  "value": "0x0B306BF915C4d645ff596e518fAf3F9669b97016"
+                }
+              ]
+            },
+            {
+              "chainId": 11155111,
+              "options": [
+                {
+                  "name": "USDT",
+                  "value": "0xaA8E23Fb1079EA71e0a56F48a2aA51851D8433D0"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "spender",
+          "label": "Spender",
+          "type": "address"
+        },
+        {
+          "name": "value",
+          "label": "Token amount",
+          "type": "text"
+        }
+      ],
+      "onInputUpdate": [
+        {
+          "variable": "context.balance",
+          "value": {
+            "type": "eth_call",
+            "id": "eth_call_balance",
+            "data": {
+              "method": "function balanceOf(address _owner) public view returns (uint256 balance)",
+              "to": "inputs.tokenAddress",
+              "args": ["context.safeAddress"]
+            }
+          }
+        },
+        {
+          "variable": "context.decimals",
+          "value": {
+            "type": "eth_call",
+            "id": "eth_call_decimals",
+            "data": {
+              "method": "function decimals() public view returns (uint8)",
+              "to": "inputs.tokenAddress",
+              "args": []
+            }
+          }
+        },
+        {
+          "variable": "context.allowance",
+          "value": {
+            "type": "eth_call",
+            "id": "eth_call_allowance",
+            "data": {
+              "method": "function allowance(address _owner, address _spender) public view returns (uint256 remaining)",
+              "to": "inputs.tokenAddress",
+              "args": ["context.safeAddress", "inputs.spender"],
+              "errorMessage": "Unable to fetch allowance."
+            }
+          }
+        }
+      ],
+      "detailsView": [
+        {
+          "label": "Current Allowance",
+          "value": "context.allowance / pow(10, context.decimals)",
+          "type": "Text"
+        },
+        {
+          "label": "Current Balance",
+          "value": "context.balance / pow(10, context.decimals)",
+          "type": "Text"
+        }
+      ],
+      "onUpdateValidations": [
+        {
+          "variable": "inputs.spender",
+          "type": "regex",
+          "id": "validate_address",
+          "value": "^0x[a-fA-F0-9]{40}$",
+          "errorMessage": "Invalid address"
+        },
+        {
+          "variable": "inputs.value",
+          "type": "expression",
+          "id": "validate_balance",
+          "value": "context.balance>=inputs.value * pow(10, context.decimals)",
+          "errorMessage": "Insufficient balance"
+        },
+        {
+          "variable": "inputs.value",
+          "type": "regex",
+          "id": "validate_balance_number",
+          "value": "^\\d+(\\.\\d+)?$",
+          "errorMessage": "Token amount should be a number"
+        }
+      ],
+      "onFinalize": {
+        "to": "inputs.tokenAddress",
+        "value": "context.value",
+        "calldataArgs": ["inputs.spender", "inputs.value * pow(10, context.decimals)"]
+      }
+    },
+    {
+      "name": "TransferFrom",
+      "display": {
+        "description": "ERC20 Transfer tokens from an approved address"
+      },
+      "functionSignature": "function transferFrom(address _from, address _to, uint256 _value) public returns (bool success)",
+      "summaryView": "contractCall",
+      "context": {
+        "balance": {
+          "type": "uint256",
+          "defaultValue": ""
+        },
+        "decimals": {
+          "type": "uint256",
+          "defaultValue": ""
+        },
+        "value": {
+          "type": "uint256",
+          "defaultValue": "0"
+        }
+      },
+      "inputs": [
+        {
+          "name": "tokenAddress",
+          "type": "selectOneWithFreeSolo",
+          "label": "Token Address",
+          "options": [
+            {
+              "chainId": 1,
+              "options": [
+                {
+                  "name": "USDT",
+                  "value": "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+                }
+              ]
+            },
+            {
+              "chainId": 0,
+              "options": [
+                {
+                  "name": "USDT",
+                  "value": "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+                }
+              ]
+            },
+            {
+              "chainId": 31337,
+              "options": [
+                {
+                  "name": "Test",
+                  "value": "0x0B306BF915C4d645ff596e518fAf3F9669b97016"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "from",
+          "label": "From",
+          "type": "address"
+        },
+        {
+          "name": "to",
+          "label": "To",
+          "type": "address"
+        },
+        {
+          "name": "value",
+          "label": "Token amount",
+          "type": "text"
+        }
+      ],
+      "onInputUpdate": [
+        {
+          "variable": "context.balance",
+          "value": {
+            "type": "eth_call",
+            "id": "eth_call_balance",
+            "data": {
+              "method": "function balanceOf(address _owner) public view returns (uint256 balance)",
+              "to": "inputs.tokenAddress",
+              "args": ["context.safeAddress"]
+            }
+          }
+        },
+        {
+          "variable": "context.decimals",
+          "value": {
+            "type": "eth_call",
+            "id": "eth_call_decimals",
+            "data": {
+              "method": "function decimals() public view returns (uint8)",
+              "to": "inputs.tokenAddress",
+              "args": []
+            }
+          }
+        }
+      ],
+      "detailsView": [
+        {
+          "label": "Decimals",
+          "value": "context.decimals",
+          "type": "Text"
+        },
+        {
+          "label": "Current Balance",
+          "value": "context.balance / pow(10, context.decimals)",
+          "type": "Text"
+        }
+      ],
+      "onUpdateValidations": [
+        {
+          "variable": "inputs.from",
+          "type": "regex",
+          "id": "validate_address",
+          "value": "^0x[a-fA-F0-9]{40}$",
+          "errorMessage": "Invalid address"
+        },
+        {
+          "variable": "inputs.to",
+          "type": "regex",
+          "id": "validate_address",
+          "value": "^0x[a-fA-F0-9]{40}$",
+          "errorMessage": "Invalid address"
+        },
+        {
+          "variable": "inputs.value",
+          "type": "expression",
+          "id": "validate_balance",
+          "value": "context.balance>=inputs.value * pow(10, context.decimals)",
+          "errorMessage": "Insufficient balance"
+        },
+        {
+          "variable": "inputs.value",
+          "type": "regex",
+          "id": "validate_balance_number",
+          "value": "^\\d+(\\.\\d+)?$",
+          "errorMessage": "Token amount should be a number"
+        }
+      ],
+      "onFinalize": {
+        "to": "inputs.tokenAddress",
+        "value": "context.value",
+        "calldataArgs": ["inputs.from", "inputs.to", "inputs.value * pow(10, context.decimals)"]
+      }
+    }
+  ]
+}
