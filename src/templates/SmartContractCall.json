@@ -1,0 +1,78 @@
+{
+  "groupName": "Contract call",
+  "chainIds": [0],
+  "tags": ["Other"],
+  "actions": [
+    {
+      "name": "Execute Contract Call",
+      "display": {
+        "description": "Execute a custom smart contract call"
+      },
+      "summaryView": "contractCall",
+      "context": {
+        "balance": {
+          "type": "uint256",
+          "defaultValue": "0"
+        }
+      },
+      "inputs": [
+        {
+          "name": "to",
+          "label": "Contract Address",
+          "type": "address"
+        },
+        {
+          "name": "value",
+          "label": "ETH Value (in wei)",
+          "type": "text"
+        },
+        {
+          "name": "data",
+          "label": "Calldata (hex encoded)",
+          "type": "text"
+        }
+      ],
+      "detailsView": [
+        {
+          "label": "Current Balance",
+          "value": "context.balance / pow(10, 18)",
+          "type": "Text"
+        }
+      ],
+      "onUpdateValidations": [
+        {
+          "variable": "inputs.value",
+          "type": "regex",
+          "id": "validate_value",
+          "value": "^\\d+$",
+          "errorMessage": "Value must be a positive integer"
+        },
+        {
+          "variable": "inputs.data",
+          "type": "regex",
+          "id": "validate_data",
+          "value": "^0x[a-fA-F0-9]*$",
+          "errorMessage": "Invalid calldata (must be hex encoded)"
+        }
+      ],
+      "onInputUpdate": [
+        {
+          "variable": "context.balance",
+          "value": {
+            "type": "eth_getBalance",
+            "id": "eth_call_balance",
+            "data": {
+              "params": ["context.safeAddress"],
+              "errorMessage": "Unable to fetch balance."
+            }
+          }
+        }
+      ],
+      "onFinalize": {
+        "to": "inputs.to",
+        "value": "inputs.value",
+        "data": "inputs.data"
+      }
+    }
+  ]
+}
