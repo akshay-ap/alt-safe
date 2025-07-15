@@ -1,0 +1,271 @@
+{
+  "groupName": "Settings",
+  "chainIds": [0],
+  "tags": ["Safe"],
+  "actions": [
+    {
+      "name": "Add Owner",
+      "display": {
+        "description": "Add a new owner to the Safe and set a new threshold"
+      },
+      "functionSignature": "function addOwnerWithThreshold(address owner, uint256 _threshold)",
+      "summaryView": "contractCall",
+      "context": {
+        "threshold": {
+          "type": "uint256",
+          "defaultValue": "0"
+        }
+      },
+      "inputs": [
+        {
+          "name": "owner",
+          "label": "New Owner Address",
+          "type": "address"
+        },
+        {
+          "name": "_threshold",
+          "label": "Threshold",
+          "type": "text"
+        }
+      ],
+      "detailsView": [],
+      "onUpdateValidations": [
+        {
+          "variable": "inputs.owner",
+          "type": "regex",
+          "id": "validate_address",
+          "value": "^0x[a-fA-F0-9]{40}$",
+          "errorMessage": "Invalid owner address"
+        },
+        {
+          "variable": "inputs._threshold",
+          "type": "regex",
+          "id": "validate_threshold",
+          "value": "^\\d+$",
+          "errorMessage": "Threshold must be a positive integer"
+        }
+      ],
+      "onInputUpdate": [],
+      "onFinalize": {
+        "to": "context.safeAddress",
+        "value": "0",
+        "calldataArgs": ["inputs.owner", "inputs._threshold"]
+      }
+    },
+    {
+      "name": "Remove Owner",
+      "display": {
+        "description": "Remove an owner from the Safe and update the threshold"
+      },
+      "functionSignature": "function removeOwner(address prevOwner, address owner, uint256 _threshold)",
+      "summaryView": "contractCall",
+      "inputs": [
+        {
+          "name": "prevOwner",
+          "label": "Previous Owner Address",
+          "type": "address"
+        },
+        {
+          "name": "owner",
+          "label": "Owner Address to Remove",
+          "type": "address"
+        },
+        {
+          "name": "_threshold",
+          "label": "New Threshold",
+          "type": "text"
+        }
+      ],
+      "detailsView": [],
+      "onUpdateValidations": [
+        {
+          "variable": "inputs.prevOwner",
+          "type": "regex",
+          "id": "validate_address",
+          "value": "^0x[a-fA-F0-9]{40}$",
+          "errorMessage": "Invalid previous owner address"
+        },
+        {
+          "variable": "inputs.owner",
+          "type": "regex",
+          "id": "validate_address",
+          "value": "^0x[a-fA-F0-9]{40}$",
+          "errorMessage": "Invalid owner address"
+        },
+        {
+          "variable": "inputs._threshold",
+          "type": "regex",
+          "id": "validate_threshold",
+          "value": "^\\d+$",
+          "errorMessage": "Threshold must be a positive integer"
+        }
+      ],
+      "onInputUpdate": [],
+      "onFinalize": {
+        "to": "context.safeAddress",
+        "value": "0",
+        "calldataArgs": ["inputs.prevOwner", "inputs.owner", "inputs._threshold"]
+      }
+    },
+    {
+      "name": "Swap Owner",
+      "display": {
+        "description": "Replace an owner in the Safe with a new owner"
+      },
+      "functionSignature": "function swapOwner(address prevOwner, address oldOwner, address newOwner)",
+      "summaryView": "contractCall",
+      "inputs": [
+        {
+          "name": "prevOwner",
+          "label": "Previous Owner Address",
+          "type": "address"
+        },
+        {
+          "name": "oldOwner",
+          "label": "Old Owner Address",
+          "type": "address"
+        },
+        {
+          "name": "newOwner",
+          "label": "New Owner Address",
+          "type": "address"
+        }
+      ],
+      "detailsView": [],
+      "onUpdateValidations": [
+        {
+          "variable": "inputs.prevOwner",
+          "type": "regex",
+          "id": "validate_address",
+          "value": "^0x[a-fA-F0-9]{40}$",
+          "errorMessage": "Invalid previous owner address"
+        },
+        {
+          "variable": "inputs.oldOwner",
+          "type": "regex",
+          "id": "validate_address",
+          "value": "^0x[a-fA-F0-9]{40}$",
+          "errorMessage": "Invalid old owner address"
+        },
+        {
+          "variable": "inputs.newOwner",
+          "type": "regex",
+          "id": "validate_address",
+          "value": "^0x[a-fA-F0-9]{40}$",
+          "errorMessage": "Invalid new owner address"
+        }
+      ],
+      "onInputUpdate": [],
+      "onFinalize": {
+        "to": "context.safeAddress",
+        "value": "0",
+        "calldataArgs": ["inputs.prevOwner", "inputs.oldOwner", "inputs.newOwner"]
+      }
+    },
+    {
+      "name": "Change Threshold",
+      "display": {
+        "description": "Change the threshold of the Safe"
+      },
+      "functionSignature": "function changeThreshold(uint256 _threshold)",
+      "summaryView": "contractCall",
+      "inputs": [
+        {
+          "name": "_threshold",
+          "label": "New Threshold",
+          "type": "text"
+        }
+      ],
+      "detailsView": [],
+      "onUpdateValidations": [
+        {
+          "variable": "inputs._threshold",
+          "type": "regex",
+          "id": "validate_threshold",
+          "value": "^\\d+$",
+          "errorMessage": "Threshold must be a positive integer"
+        }
+      ],
+      "onInputUpdate": [],
+      "onFinalize": {
+        "to": "context.safeAddress",
+        "value": "0",
+        "calldataArgs": ["inputs._threshold"]
+      }
+    },
+    {
+      "name": "Enable Module",
+      "display": {
+        "description": "Enable a module for the Safe"
+      },
+      "functionSignature": "function enableModule(address module)",
+      "summaryView": "contractCall",
+      "inputs": [
+        {
+          "name": "module",
+          "label": "Module Address",
+          "type": "address"
+        }
+      ],
+      "detailsView": [],
+      "onUpdateValidations": [
+        {
+          "variable": "inputs.module",
+          "type": "regex",
+          "id": "validate_address",
+          "value": "^0x[a-fA-F0-9]{40}$",
+          "errorMessage": "Invalid module address"
+        }
+      ],
+      "onInputUpdate": [],
+      "onFinalize": {
+        "to": "context.safeAddress",
+        "value": "0",
+        "calldataArgs": ["inputs.module"]
+      }
+    },
+    {
+      "name": "Disable Module",
+      "display": {
+        "description": "Disable a module for the Safe"
+      },
+      "functionSignature": "function disableModule(address prevModule, address module)",
+      "summaryView": "contractCall",
+      "inputs": [
+        {
+          "name": "prevModule",
+          "label": "Previous Module Address",
+          "type": "address"
+        },
+        {
+          "name": "module",
+          "label": "Module Address",
+          "type": "address"
+        }
+      ],
+      "detailsView": [],
+      "onUpdateValidations": [
+        {
+          "variable": "inputs.prevModule",
+          "type": "regex",
+          "id": "validate_address",
+          "value": "^0x[a-fA-F0-9]{40}$",
+          "errorMessage": "Invalid previous module address"
+        },
+        {
+          "variable": "inputs.module",
+          "type": "regex",
+          "id": "validate_address",
+          "value": "^0x[a-fA-F0-9]{40}$",
+          "errorMessage": "Invalid module address"
+        }
+      ],
+      "onInputUpdate": [],
+      "onFinalize": {
+        "to": "context.safeAddress",
+        "value": "0",
+        "calldataArgs": ["inputs.prevModule", "inputs.module"]
+      }
+    }
+  ]
+}

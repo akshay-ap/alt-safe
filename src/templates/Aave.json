@@ -1,0 +1,408 @@
+{
+  "groupName": "Aave",
+  "logo": {
+    "type": "character",
+    "value": "A"
+  },
+  "tags": ["DeFi"],
+  "chainIds": [0],
+  "actions": [
+    {
+      "name": "Supply",
+      "display": {
+        "description": "Aave Supply"
+      },
+      "functionSignature": "function supply(address asset, uint256 amount, address onBehalfOf, uint16 referralCode)",
+      "summaryView": "contractCall",
+      "context": {
+        "balance": {
+          "type": "uint256",
+          "defaultValue": ""
+        },
+        "decimals": {
+          "type": "uint256",
+          "defaultValue": ""
+        },
+        "allowance": {
+          "type": "uint256",
+          "defaultValue": "0"
+        }
+      },
+      "inputs": [
+        {
+          "name": "asset",
+          "label": "Token Address",
+          "type": "text"
+        },
+        {
+          "name": "pool",
+          "label": "Pool Address",
+          "type": "text"
+        },
+        {
+          "name": "amount",
+          "label": "Token Amount",
+          "type": "text"
+        },
+        {
+          "name": "onBehalfOf",
+          "label": "Behalf Of",
+          "type": "text"
+        },
+        {
+          "name": "referralCode",
+          "label": "Referral Code",
+          "type": "text"
+        }
+      ],
+      "detailsView": [
+        {
+          "label": "Current Balance",
+          "value": "context.balance / pow(10, context.decimals)",
+          "type": "Text"
+        },
+        {
+          "label": "Pool allowance",
+          "value": "context.allowance / pow(10, context.decimals)",
+          "type": "Text"
+        }
+      ],
+      "onUpdateValidations": [],
+      "onInputUpdate": [
+        {
+          "variable": "context.decimals",
+          "value": {
+            "type": "eth_call",
+            "id": "eth_call_decimals",
+            "data": {
+              "method": "function decimals() public view returns (uint8)",
+              "to": "inputs.asset",
+              "args": [],
+              "errorMessage": "Unable to fetch decimals."
+            }
+          }
+        },
+        {
+          "variable": "context.allowance",
+          "value": {
+            "type": "eth_call",
+            "id": "eth_call_allowance",
+            "data": {
+              "method": "function allowance(address _owner, address _spender) public view returns (uint256 remaining)",
+              "to": "inputs.asset",
+              "args": ["context.safeAddress", "inputs.pool"],
+              "errorMessage": "Unable to fetch allowance."
+            }
+          }
+        },
+        {
+          "variable": "context.balance",
+          "value": {
+            "type": "eth_call",
+            "id": "eth_call_balance",
+            "data": {
+              "method": "function balanceOf(address _owner) public view returns (uint256 balance)",
+              "to": "inputs.asset",
+              "args": ["context.safeAddress"],
+              "errorMessage": "Unable to fetch balance."
+            }
+          }
+        }
+      ],
+      "onFinalize": {
+        "to": "inputs.pool",
+        "value": "0",
+        "calldataArgs": [
+          "inputs.asset",
+          "inputs.amount * pow(10, context.decimals)",
+          "inputs.onBehalfOf",
+          "inputs.referralCode"
+        ]
+      }
+    },
+    {
+      "name": "Withdraw",
+      "display": {
+        "description": "Aave Withdraw"
+      },
+      "functionSignature": "function withdraw(address asset, uint256 amount, address to)",
+      "summaryView": "contractCall",
+      "context": {
+        "balance": {
+          "type": "uint256",
+          "defaultValue": ""
+        },
+        "decimals": {
+          "type": "uint256",
+          "defaultValue": ""
+        }
+      },
+      "inputs": [
+        {
+          "name": "pool",
+          "label": "Pool Address",
+          "type": "text"
+        },
+        {
+          "name": "asset",
+          "label": "Token Address",
+          "type": "text"
+        },
+        {
+          "name": "amount",
+          "label": "Token Amount",
+          "type": "text"
+        },
+        {
+          "name": "to",
+          "label": "Recipient Address",
+          "type": "text"
+        }
+      ],
+      "detailsView": [
+        {
+          "label": "Current Balance",
+          "value": "context.balance / pow(10, context.decimals)",
+          "type": "Text"
+        }
+      ],
+      "onUpdateValidations": [],
+      "onInputUpdate": [
+        {
+          "variable": "context.decimals",
+          "value": {
+            "type": "eth_call",
+            "id": "eth_call_decimals",
+            "data": {
+              "method": "function decimals() public view returns (uint8)",
+              "to": "inputs.asset",
+              "args": [],
+              "errorMessage": "Unable to fetch decimals."
+            }
+          }
+        },
+        {
+          "variable": "context.balance",
+          "value": {
+            "type": "eth_call",
+            "id": "eth_call_balance",
+            "data": {
+              "method": "function balanceOf(address _owner) public view returns (uint256 balance)",
+              "to": "inputs.asset",
+              "args": ["context.safeAddress"],
+              "errorMessage": "Unable to fetch balance."
+            }
+          }
+        }
+      ],
+      "onFinalize": {
+        "to": "inputs.pool",
+        "value": "0",
+        "calldataArgs": ["inputs.asset", "inputs.amount * pow(10, context.decimals)", "inputs.to"]
+      }
+    },
+    {
+      "name": "Borrow",
+      "display": {
+        "description": "Aave Borrow"
+      },
+      "functionSignature": "function borrow(address asset, uint256 amount, uint256 interestRateMode, uint16 referralCode, address onBehalfOf)",
+      "summaryView": "contractCall",
+      "context": {
+        "balance": {
+          "type": "uint256",
+          "defaultValue": ""
+        },
+        "decimals": {
+          "type": "uint256",
+          "defaultValue": ""
+        }
+      },
+      "inputs": [
+        {
+          "name": "pool",
+          "label": "Pool Address",
+          "type": "text"
+        },
+        {
+          "name": "asset",
+          "label": "Token Address",
+          "type": "text"
+        },
+        {
+          "name": "amount",
+          "label": "Borrow Amount",
+          "type": "text"
+        },
+        {
+          "name": "interestRateMode",
+          "label": "Interest Rate Mode",
+          "type": "selectOneRadio",
+          "options": [
+            {
+              "chainId": 0,
+              "options": [
+                {
+                  "name": "Stable",
+                  "value": "1"
+                },
+                {
+                  "name": "Variable",
+                  "value": "2"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "referralCode",
+          "label": "Referral Code",
+          "type": "text"
+        },
+        {
+          "name": "onBehalfOf",
+          "label": "On Behalf Of",
+          "type": "text"
+        }
+      ],
+      "detailsView": [
+        {
+          "label": "Current Balance",
+          "value": "context.balance / pow(10, context.decimals)",
+          "type": "Text"
+        }
+      ],
+      "onUpdateValidations": [],
+      "onInputUpdate": [
+        {
+          "variable": "context.decimals",
+          "value": {
+            "type": "eth_call",
+            "id": "eth_call_decimals",
+            "data": {
+              "method": "function decimals() public view returns (uint8)",
+              "to": "inputs.asset",
+              "args": [],
+              "errorMessage": "Unable to fetch decimals."
+            }
+          }
+        },
+        {
+          "variable": "context.balance",
+          "value": {
+            "type": "eth_call",
+            "id": "eth_call_balance",
+            "data": {
+              "method": "function balanceOf(address _owner) public view returns (uint256 balance)",
+              "to": "inputs.asset",
+              "args": ["context.safeAddress"],
+              "errorMessage": "Unable to fetch balance."
+            }
+          }
+        }
+      ],
+      "onFinalize": {
+        "to": "inputs.pool",
+        "value": "0",
+        "calldataArgs": [
+          "inputs.asset",
+          "inputs.amount * pow(10, context.decimals)",
+          "inputs.interestRateMode",
+          "inputs.referralCode",
+          "inputs.onBehalfOf"
+        ]
+      }
+    },
+    {
+      "name": "Repay",
+      "display": {
+        "description": "Aave Repay"
+      },
+      "functionSignature": "function repay(address asset, uint256 amount, uint256 interestRateMode, address onBehalfOf)",
+      "summaryView": "contractCall",
+      "context": {
+        "balance": {
+          "type": "uint256",
+          "defaultValue": ""
+        },
+        "decimals": {
+          "type": "uint256",
+          "defaultValue": ""
+        }
+      },
+      "inputs": [
+        {
+          "name": "pool",
+          "label": "Pool Address",
+          "type": "address"
+        },
+        {
+          "name": "asset",
+          "label": "Token Address",
+          "type": "address"
+        },
+        {
+          "name": "amount",
+          "label": "Repay Amount",
+          "type": "text"
+        },
+        {
+          "name": "interestRateMode",
+          "label": "Interest Rate Mode (1 for Stable, 2 for Variable)",
+          "type": "text"
+        },
+        {
+          "name": "onBehalfOf",
+          "label": "On Behalf Of",
+          "type": "address"
+        }
+      ],
+      "detailsView": [
+        {
+          "label": "Current Balance",
+          "value": "context.balance / pow(10, context.decimals)",
+          "type": "Text"
+        }
+      ],
+      "onUpdateValidations": [],
+      "onInputUpdate": [
+        {
+          "variable": "context.decimals",
+          "value": {
+            "type": "eth_call",
+            "id": "eth_call_decimals",
+            "data": {
+              "method": "function decimals() public view returns (uint8)",
+              "to": "inputs.asset",
+              "args": [],
+              "errorMessage": "Unable to fetch decimals."
+            }
+          }
+        },
+        {
+          "variable": "context.balance",
+          "value": {
+            "type": "eth_call",
+            "id": "eth_call_balance",
+            "data": {
+              "method": "function balanceOf(address _owner) public view returns (uint256 balance)",
+              "to": "inputs.asset",
+              "args": ["context.safeAddress"],
+              "errorMessage": "Unable to fetch balance."
+            }
+          }
+        }
+      ],
+      "onFinalize": {
+        "to": "inputs.pool",
+        "value": "0",
+        "calldataArgs": [
+          "inputs.asset",
+          "inputs.amount * pow(10, context.decimals)",
+          "inputs.interestRateMode",
+          "inputs.onBehalfOf"
+        ]
+      }
+    }
+  ]
+}
