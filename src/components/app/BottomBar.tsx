@@ -12,26 +12,6 @@ const BottomBar: React.FC = () => {
           Help
         </Link>
       </Grid>
-      <Grid>
-        <Link
-          component="button"
-          onClick={() => {
-            navigate("/privacy-policy");
-          }}
-        >
-          Privacy Policy
-        </Link>
-      </Grid>
-      <Grid>
-        <Link
-          component="button"
-          onClick={() => {
-            navigate("/about");
-          }}
-        >
-          About
-        </Link>
-      </Grid>
     </Grid>
   );
 };
