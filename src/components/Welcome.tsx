@@ -179,7 +179,7 @@ const Welcome: React.FC = () => {
           <Button
             variant="outlined"
             component={Link}
-            href="https://github.com/akshay-ap/alt-wallet"
+            href="https://github.com/akshay-ap/alt-safe"
             target="_blank"
             sx={{ borderRadius: 4 }}
           >
