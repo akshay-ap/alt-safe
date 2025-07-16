@@ -1,10 +1,8 @@
 import { Link } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import type React from "react";
-import { useNavigate } from "react-router-dom";
 
 const BottomBar: React.FC = () => {
-  const navigate = useNavigate();
   return (
     <Grid container direction="row" alignItems="center" justifyContent="right" sx={{ padding: 2 }} spacing={2}>
       <Grid>
