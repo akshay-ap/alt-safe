@@ -119,6 +119,8 @@ const ViewSafeStorage: React.FC<{
               value={<Typography sx={{ fontFamily: "monospace" }}>{safeStorage.nonce?.toString() || "0"}</Typography>}
             />
 
+            <StorageField label="Guard" value={<AccountAddress address={safeStorage.guard} />} />
+
             <StorageField
               label="Owner Count"
               value={
