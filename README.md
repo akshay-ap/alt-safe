@@ -75,7 +75,3 @@ This app is built using the following frameworks:
 - Wagmi
 - React
 - MUI
-
-## Contributing
-
-Contributions, be it a bug report or a pull request, are very welcome. Please check our [contribution guidelines](CONTRIBUTING.md) beforehand.
