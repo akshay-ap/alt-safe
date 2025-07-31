@@ -1,6 +1,8 @@
 import DeveloperModeIcon from "@mui/icons-material/DeveloperMode";
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import {
   Alert,
+  Autocomplete,
   Box,
   Button,
   Container,
@@ -13,8 +15,9 @@ import {
   TextField,
   Tooltip,
   Typography,
+  alpha,
+  useTheme,
 } from "@mui/material";
-import Autocomplete from "@mui/material/Autocomplete";
 import Grid from "@mui/material/Grid2";
 import { readContract } from "@wagmi/core";
 import { Parser } from "expr-eval";
@@ -46,6 +49,7 @@ const TransactionInputBuilder: React.FC<TransactionInputBuilderProps> = ({ onAdd
   const { chainId } = useAccount();
   const { safeAccount } = useSafeWalletContext();
   const publicClient = usePublicClient();
+  const theme = useTheme();
 
   const parser = new Parser();
 
@@ -82,7 +86,7 @@ const TransactionInputBuilder: React.FC<TransactionInputBuilderProps> = ({ onAdd
     }
     const parsedValue = val.toString();
     if (type === "Text") {
-      return <Typography>{parsedValue}</Typography>;
+      return <Typography variant="body2">{parsedValue}</Typography>;
     }
 
     if (type === "Address") {
@@ -95,7 +99,7 @@ const TransactionInputBuilder: React.FC<TransactionInputBuilderProps> = ({ onAdd
       );
     }
 
-    return <Typography>{value}</Typography>;
+    return <Typography variant="body2">{value}</Typography>;
   };
 
   // Fetch context values from blockchain
@@ -263,175 +267,365 @@ const TransactionInputBuilder: React.FC<TransactionInputBuilderProps> = ({ onAdd
   };
 
   return (
-    <Container sx={{ overflowY: "auto", height: "100%", position: "relative" }}>
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-        <Typography variant="h6">{spec.display.description}</Typography>
-        <Tooltip title="Show Debug Information">
-          <IconButton onClick={() => setDebugDialogOpen(true)} size="small">
-            <DeveloperModeIcon />
-          </IconButton>
-        </Tooltip>
-      </Box>
+    <Container
+      id={`transaction-input-${spec.name?.toLowerCase().replace(/\s+/g, "-")}`}
+      sx={{ overflowY: "auto", height: "100%", position: "relative", p: 0 }}
+    >
+      {/* Single Unified Card */}
+      <Paper
+        elevation={2}
+        sx={{
+          borderRadius: 3,
+          overflow: "hidden",
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          border: `1px solid ${alpha(theme.palette.divider, 0.12)}`,
+        }}
+      >
+        {/* Header Section */}
+        <Box
+          sx={{
+            background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.08)} 0%, ${alpha(theme.palette.primary.main, 0.02)} 100%)`,
+            borderBottom: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+            p: 3,
+          }}
+        >
+          {/* Breadcrumb */}
+          <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+            <Typography
+              variant="caption"
+              sx={{
+                color: theme.palette.text.secondary,
+                fontWeight: 500,
+                textTransform: "uppercase",
+                letterSpacing: 0.5,
+              }}
+            >
+              {groupInfo.name}
+            </Typography>
+            <PlayArrowIcon sx={{ mx: 1, color: theme.palette.text.disabled, fontSize: 14 }} />
+            <Typography
+              variant="caption"
+              sx={{
+                color: theme.palette.text.secondary,
+                fontWeight: 500,
+                textTransform: "uppercase",
+                letterSpacing: 0.5,
+              }}
+            >
+              {spec.name}
+            </Typography>
+            <Box sx={{ ml: "auto" }}>
+              <Tooltip title="Show Debug Information">
+                <IconButton onClick={() => setDebugDialogOpen(true)} size="small">
+                  <DeveloperModeIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </Box>
+          </Box>
 
-      {spec.inputs.map((input) => (
-        <div key={input.name}>
-          {input.type === "text" && (
-            <TextField
-              key={`textfield-${spec.name}-${input.name}`}
-              id={`textfield-${spec.name}-${input.name}`}
-              label={input.label}
-              value={inputs[input.name]}
-              onChange={(e) => handleInputChange(input.name, e.target.value)}
-              error={!!errors[input.name]?.length}
-              helperText={errors[input.name]?.map((err) => err.errorMessage).join(", ")}
-              fullWidth
-              margin="normal"
-            />
-          )}
+          {/* Title */}
+          <Typography
+            variant="h5"
+            sx={{
+              fontWeight: 600,
+              color: theme.palette.text.primary,
+              mb: 1,
+              lineHeight: 1.3,
+            }}
+          >
+            {spec.display.description}
+          </Typography>
 
-          {input.type === "address" && (
-            <TextField
-              key={`address-${spec.name}-${input.name}`}
-              id={`address-${spec.name}-${input.name}`}
-              label={input.label}
-              value={inputs[input.name]}
-              onChange={(e) => handleInputChange(input.name, e.target.value)}
-              error={!!errors[input.name]?.length}
-              helperText={errors[input.name]?.map((err) => err.errorMessage).join(", ")}
-              fullWidth
-              margin="normal"
-            />
-          )}
+          <Typography
+            variant="body2"
+            sx={{
+              color: theme.palette.text.secondary,
+              lineHeight: 1.5,
+              opacity: 0.8,
+            }}
+          >
+            Configure the parameters for this {spec.name.toLowerCase()} transaction
+          </Typography>
+        </Box>
 
-          {input.type === "selectOneRadio" && (
-            <Box>
-              <Typography variant="subtitle1" gutterBottom>
-                {input.label}
-              </Typography>
-              <RadioGroup
-                row
-                name={input.name}
-                value={inputs[input.name]}
-                onChange={(e) => handleInputChange(input.name, e.target.value)}
+        {/* Content Section */}
+        <Box sx={{ flex: 1, p: 3, overflow: "auto" }}>
+          {/* Input Fields */}
+          {spec.inputs.length > 0 && (
+            <Box sx={{ mb: 3 }}>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  mb: 2,
+                  fontWeight: 600,
+                  color: theme.palette.text.primary,
+                }}
               >
-                {(
-                  input.options?.find((option) => option.chainId === chainId)?.options ||
-                  input.options?.find((option) => option.chainId === 0)?.options ||
-                  []
-                ).map((option) => (
-                  <FormControlLabel
-                    key={`${input.name}-${option.value}`}
-                    value={option.value}
-                    control={<Radio />}
-                    label={option.name}
-                  />
+                Parameters
+              </Typography>
+
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                {spec.inputs.map((input) => (
+                  <Box key={input.name}>
+                    {input.type === "text" && (
+                      <TextField
+                        key={`textfield-${spec.name}-${input.name}`}
+                        id={`textfield-${spec.name}-${input.name}`}
+                        label={input.label}
+                        value={inputs[input.name]}
+                        onChange={(e) => handleInputChange(input.name, e.target.value)}
+                        error={!!errors[input.name]?.length}
+                        helperText={errors[input.name]?.map((err) => err.errorMessage).join(", ")}
+                        fullWidth
+                        variant="outlined"
+                        size="medium"
+                      />
+                    )}
+
+                    {input.type === "address" && (
+                      <TextField
+                        key={`address-${spec.name}-${input.name}`}
+                        id={`address-${spec.name}-${input.name}`}
+                        label={input.label}
+                        value={inputs[input.name]}
+                        onChange={(e) => handleInputChange(input.name, e.target.value)}
+                        error={!!errors[input.name]?.length}
+                        helperText={errors[input.name]?.map((err) => err.errorMessage).join(", ")}
+                        fullWidth
+                        variant="outlined"
+                        size="medium"
+                      />
+                    )}
+
+                    {input.type === "selectOneRadio" && (
+                      <Box>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            fontWeight: 500,
+                            color: theme.palette.text.primary,
+                            mb: 1,
+                          }}
+                        >
+                          {input.label}
+                        </Typography>
+                        <RadioGroup
+                          row
+                          name={input.name}
+                          value={inputs[input.name]}
+                          onChange={(e) => handleInputChange(input.name, e.target.value)}
+                        >
+                          {(
+                            input.options?.find((option) => option.chainId === chainId)?.options ||
+                            input.options?.find((option) => option.chainId === 0)?.options ||
+                            []
+                          ).map((option) => (
+                            <FormControlLabel
+                              key={`${input.name}-${option.value}`}
+                              value={option.value}
+                              control={<Radio />}
+                              label={option.name}
+                            />
+                          ))}
+                        </RadioGroup>
+                      </Box>
+                    )}
+
+                    {input.type === "selectOne" && (
+                      <Autocomplete
+                        id={`selectOne-${spec.name}-${input.name}`}
+                        options={
+                          input.options?.find((option) => option.chainId === chainId)?.options ||
+                          input.options?.find((option) => option.chainId === 0)?.options ||
+                          []
+                        }
+                        getOptionLabel={(option) => (typeof option === "string" ? option : option.name)}
+                        renderOption={(props, option) => (
+                          <ListItem {...props} key={`${option.name}-${option.value}`}>
+                            <Grid container justifyContent="space-between" width="100%">
+                              <Grid>
+                                <Typography>{option.name}</Typography>
+                              </Grid>
+                              <Grid>
+                                <Typography>{option.value}</Typography>
+                              </Grid>
+                            </Grid>
+                          </ListItem>
+                        )}
+                        renderInput={(params) => (
+                          <TextField {...params} label={input.label} fullWidth variant="outlined" size="medium" />
+                        )}
+                        onInputChange={(_event, newValue) => {
+                          const selected = input.options
+                            ?.find((opt) => opt.chainId === chainId)
+                            ?.options.find((opt) => opt.name === newValue);
+                          handleInputChange(input.name, selected ? selected.value : newValue);
+                        }}
+                      />
+                    )}
+
+                    {input.type === "selectOneWithFreeSolo" && (
+                      <Autocomplete
+                        id={`selectOneWithFreeSolo-${spec.name}-${input.name}`}
+                        freeSolo={true}
+                        options={
+                          input.options?.find((option) => option.chainId === chainId)?.options ||
+                          input.options?.find((option) => option.chainId === 0)?.options ||
+                          []
+                        }
+                        getOptionLabel={(option) => (typeof option === "string" ? option : option.name)}
+                        renderOption={(props, option) => (
+                          <ListItem {...props} key={`${option.name}-${option.value}`}>
+                            <Grid container justifyContent="space-between" width="100%">
+                              <Grid>
+                                <Typography>{option.name}</Typography>
+                              </Grid>
+                              <Grid>
+                                <Typography>{option.value}</Typography>
+                              </Grid>
+                            </Grid>
+                          </ListItem>
+                        )}
+                        renderInput={(params) => (
+                          <TextField {...params} label={input.label} fullWidth variant="outlined" size="medium" />
+                        )}
+                        onInputChange={(_event, newValue) => {
+                          const selected = input.options
+                            ?.find((opt) => opt.chainId === chainId)
+                            ?.options.find((opt) => opt.name === newValue);
+                          handleInputChange(input.name, selected ? selected.value : newValue);
+                        }}
+                      />
+                    )}
+                  </Box>
                 ))}
-              </RadioGroup>
+              </Box>
             </Box>
           )}
 
-          {input.type === "selectOne" && (
-            <Autocomplete
-              id={`selectOne-${spec.name}-${input.name}`}
-              options={
-                input.options?.find((option) => option.chainId === chainId)?.options ||
-                input.options?.find((option) => option.chainId === 0)?.options ||
-                []
-              }
-              getOptionLabel={(option) => (typeof option === "string" ? option : option.name)}
-              renderOption={(props, option) => (
-                <ListItem {...props} key={`${option.name}-${option.value}`}>
-                  <Grid container justifyContent="space-between" width="100%">
-                    <Grid>
-                      <Typography>{option.name}</Typography>
-                    </Grid>
-                    <Grid>
-                      <Typography>{option.value}</Typography>
-                    </Grid>
-                  </Grid>
-                </ListItem>
-              )}
-              renderInput={(params) => <TextField {...params} label={input.label} fullWidth margin="normal" />}
-              onInputChange={(_event, newValue) => {
-                const selected = input.options
-                  ?.find((opt) => opt.chainId === chainId)
-                  ?.options.find((opt) => opt.name === newValue);
-                handleInputChange(input.name, selected ? selected.value : newValue);
-              }}
-            />
+          {/* Transaction Preview */}
+          {spec.detailsView.length > 0 && (
+            <Box sx={{ mb: 3 }}>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  mb: 2,
+                  fontWeight: 600,
+                  color: theme.palette.text.primary,
+                }}
+              >
+                Context
+              </Typography>
+
+              <Box
+                sx={{
+                  bgcolor: alpha(theme.palette.info.main, 0.02),
+                  border: `1px solid ${alpha(theme.palette.info.main, 0.1)}`,
+                  borderRadius: 2,
+                  p: 2,
+                }}
+              >
+                {spec.detailsView.map((detail, index) => (
+                  <Box
+                    key={`${index}-${detail.label}`}
+                    sx={{
+                      display: "flex",
+                      py: 1,
+                      borderBottom:
+                        index < spec.detailsView.length - 1
+                          ? `1px solid ${alpha(theme.palette.divider, 0.05)}`
+                          : "none",
+                    }}
+                  >
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontWeight: 500,
+                        color: theme.palette.text.secondary,
+                        minWidth: "100px",
+                        flexShrink: 0,
+                      }}
+                    >
+                      {detail.label}:
+                    </Typography>
+                    <Box sx={{ ml: 2, flex: 1 }}>{getDetailValue(detail.type, detail.value)}</Box>
+                  </Box>
+                ))}
+              </Box>
+            </Box>
           )}
 
-          {input.type === "selectOneWithFreeSolo" && (
-            <Autocomplete
-              id={`selectOneWithFreeSolo-${spec.name}-${input.name}`}
-              freeSolo={true}
-              options={
-                input.options?.find((option) => option.chainId === chainId)?.options ||
-                input.options?.find((option) => option.chainId === 0)?.options ||
-                []
-              }
-              getOptionLabel={(option) => (typeof option === "string" ? option : option.name)}
-              renderOption={(props, option) => (
-                <ListItem {...props} key={`${option.name}-${option.value}`}>
-                  <Grid container justifyContent="space-between" width="100%">
-                    <Grid>
-                      <Typography>{option.name}</Typography>
-                    </Grid>
-                    <Grid>
-                      <Typography>{option.value}</Typography>
-                    </Grid>
-                  </Grid>
-                </ListItem>
-              )}
-              renderInput={(params) => <TextField {...params} label={input.label} fullWidth margin="normal" />}
-              onInputChange={(_event, newValue) => {
-                const selected = input.options
-                  ?.find((opt) => opt.chainId === chainId)
-                  ?.options.find((opt) => opt.name === newValue);
-                handleInputChange(input.name, selected ? selected.value : newValue);
-              }}
-            />
+          {/* Error Messages */}
+          {Object.values(errors).flat().length > 0 && (
+            <Box sx={{ mb: 3 }}>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  mb: 2,
+                  fontWeight: 600,
+                  color: theme.palette.error.main,
+                }}
+              >
+                Issues
+              </Typography>
+
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                {Object.values(errors)
+                  .flat()
+                  .map((error, index) => (
+                    <Alert
+                      key={`${error.id}-${index}`}
+                      severity="error"
+                      sx={{
+                        borderRadius: 1,
+                        "& .MuiAlert-message": {
+                          fontSize: "0.875rem",
+                        },
+                      }}
+                    >
+                      {error.errorMessage}
+                    </Alert>
+                  ))}
+              </Box>
+            </Box>
           )}
-        </div>
-      ))}
+        </Box>
 
-      {spec.detailsView.length > 0 && (
-        <Paper elevation={0} sx={{ padding: 1, marginTop: 1 }}>
-          <Grid container spacing={1} sx={{ overflow: "auto" }}>
-            {spec.detailsView.map((detail, index) => (
-              <Grid size={12} key={`${index}-${detail.label}`}>
-                <Grid container spacing={2}>
-                  <Grid size={5}>
-                    <Typography>{detail.label}</Typography>
-                  </Grid>
-                  <Grid size={7}>{getDetailValue(detail.type, detail.value)} </Grid>
-                </Grid>
-              </Grid>
-            ))}
-          </Grid>
-        </Paper>
-      )}
-
-      <Grid container spacing={1} sx={{ marginTop: 1 }}>
-        {Object.values(errors)
-          .flat()
-          .map((error, index) => (
-            <Grid size={12} key={`${error.id}-${index}`}>
-              <Alert severity="error">{error.errorMessage}</Alert>
-            </Grid>
-          ))}
-      </Grid>
-
-      <Button
-        variant="contained"
-        color="primary"
-        sx={{ marginTop: 1 }}
-        onClick={handleSubmit}
-        fullWidth
-        disabled={Object.values(errors).some((err) => err.length > 0)}
-      >
-        Add to batch
-      </Button>
+        {/* Footer with Submit Button */}
+        <Box
+          sx={{
+            borderTop: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
+            p: 3,
+            bgcolor: alpha(theme.palette.background.default, 0.3),
+          }}
+        >
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleSubmit}
+            fullWidth
+            disabled={Object.values(errors).some((err) => err.length > 0)}
+            sx={{
+              py: 1.5,
+              fontSize: "1rem",
+              fontWeight: 600,
+              borderRadius: 2,
+              boxShadow: "none",
+              "&:hover": {
+                boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.3)}`,
+              },
+              "&:disabled": {
+                bgcolor: alpha(theme.palette.action.disabled, 0.12),
+                color: theme.palette.action.disabled,
+              },
+            }}
+          >
+            Add to Batch
+          </Button>
+        </Box>
+      </Paper>
 
       {/* Debug dialog */}
       <TransactionDebugDialog
