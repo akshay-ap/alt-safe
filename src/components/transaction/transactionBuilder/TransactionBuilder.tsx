@@ -29,12 +29,20 @@ const TransactionBuilder: React.FC<TransactionBuilderProps> = ({
   };
 
   return (
-    <Grid container spacing={2}>
-      <Grid size={4} sx={{ overflowY: "scroll", height: "60vh", scrollbarWidth: "thin" }}>
+    <Grid container spacing={2} id="transaction-builder-container">
+      <Grid
+        size={4}
+        sx={{ overflowY: "scroll", height: "60vh", scrollbarWidth: "thin" }}
+        id="transaction-type-panel-container"
+      >
         <TransactionTypePanel onSelect={handleTransactionTypeSelect} />
       </Grid>
 
-      <Grid size={8} sx={{ overflowY: "scroll", height: "60vh", scrollbarWidth: "thin" }}>
+      <Grid
+        size={8}
+        sx={{ overflowY: "scroll", height: "60vh", scrollbarWidth: "thin" }}
+        id="transaction-input-panel-container"
+      >
         <Routes>
           <Route
             path="/:group/:type"
@@ -69,49 +77,60 @@ const TransactionInputForm: React.FC<{
 
   if (type === "Import") {
     return (
-      <>
-        <Typography variant="h6">Import Transactions</Typography>
+      <div id="import-transaction-form">
+        <Typography variant="h6" id="import-transaction-title">
+          Import Transactions
+        </Typography>
         <TextField
+          id="import-hex-input"
           label="Hex Encoded JSON"
           value={importHex}
           onChange={(e) => setImportHex(e.target.value as `0x${string}`)}
           fullWidth
           margin="normal"
         />
-        <Button variant="contained" color="primary" onClick={handleImportTransactions}>
+        <Button id="import-transaction-button" variant="contained" color="primary" onClick={handleImportTransactions}>
           Import
         </Button>
-      </>
+      </div>
     );
   }
 
   if (type === "encodeFunctionCall") {
     return (
-      <EncodeFunctionCall
-        onAdd={handleAddTransaction}
-        groupInfo={{
-          name: group as string,
-        }}
-      />
+      <div id="encode-function-call-form">
+        <EncodeFunctionCall
+          onAdd={handleAddTransaction}
+          groupInfo={{
+            name: group as string,
+          }}
+        />
+      </div>
     );
   }
 
   if (transactionSpec && groupSpec) {
     return (
-      <ErrorBoundary key={`error-boundary-${group}-${type}`}>
-        <TransactionInputBuilder
-          key={`${group}-${type}`}
-          onAdd={handleAddTransaction}
-          spec={transactionSpec as TransactionSpec}
-          groupInfo={{
-            name: group as string,
-          }}
-        />
-      </ErrorBoundary>
+      <div id={`transaction-input-form-${group}-${type}`}>
+        <ErrorBoundary key={`error-boundary-${group}-${type}`}>
+          <TransactionInputBuilder
+            key={`${group}-${type}`}
+            onAdd={handleAddTransaction}
+            spec={transactionSpec as TransactionSpec}
+            groupInfo={{
+              name: group as string,
+            }}
+          />
+        </ErrorBoundary>
+      </div>
     );
   }
 
-  return <Typography variant="body1">Invalid transaction type selected.</Typography>;
+  return (
+    <div id="invalid-transaction-type">
+      <Typography variant="body1">Invalid transaction type selected.</Typography>
+    </div>
+  );
 };
 
 export default TransactionBuilder;

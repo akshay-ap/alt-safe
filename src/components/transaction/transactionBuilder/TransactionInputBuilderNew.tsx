@@ -1,10 +1,12 @@
 import DeveloperModeIcon from "@mui/icons-material/DeveloperMode";
+import FolderIcon from "@mui/icons-material/Folder";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import {
   Alert,
   Autocomplete,
   Box,
   Button,
+  Chip,
   Container,
   FormControlLabel,
   IconButton,
@@ -293,6 +295,7 @@ const TransactionInputBuilder: React.FC<TransactionInputBuilderProps> = ({ onAdd
         >
           {/* Breadcrumb */}
           <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+            <FolderIcon sx={{ color: theme.palette.text.secondary, fontSize: 18, mr: 1 }} />
             <Typography
               variant="caption"
               sx={{
@@ -305,17 +308,16 @@ const TransactionInputBuilder: React.FC<TransactionInputBuilderProps> = ({ onAdd
               {groupInfo.name}
             </Typography>
             <PlayArrowIcon sx={{ mx: 1, color: theme.palette.text.disabled, fontSize: 14 }} />
-            <Typography
-              variant="caption"
+            <Chip
+              label={spec.name}
+              size="small"
+              color="primary"
               sx={{
-                color: theme.palette.text.secondary,
+                fontSize: "0.7rem",
+                height: 20,
                 fontWeight: 500,
-                textTransform: "uppercase",
-                letterSpacing: 0.5,
               }}
-            >
-              {spec.name}
-            </Typography>
+            />
             <Box sx={{ ml: "auto" }}>
               <Tooltip title="Show Debug Information">
                 <IconButton onClick={() => setDebugDialogOpen(true)} size="small">
@@ -516,7 +518,7 @@ const TransactionInputBuilder: React.FC<TransactionInputBuilderProps> = ({ onAdd
                   color: theme.palette.text.primary,
                 }}
               >
-                Context
+                Preview
               </Typography>
 
               <Box
