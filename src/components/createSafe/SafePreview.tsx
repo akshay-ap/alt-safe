@@ -1,42 +1,36 @@
-import { Alert, Box, Button, Card, CardContent, Chip, Link, Paper, Typography } from "@mui/material";
+import OpenInFullIcon from "@mui/icons-material/OpenInFull";
+import { Alert, Box, Button, Card, CardContent, Chip, IconButton, Link, Paper, Typography } from "@mui/material";
 import Grid from "@mui/material/Grid2";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import type { Address } from "viem";
 import { zeroAddress } from "viem";
 import AccountAddress from "../common/AccountAddress";
+import { useCreateSafeContext } from "./CreateSafeContext";
+import InitDataDialog from "./InitDataDialog";
 
-interface SafePreviewProps {
-  safeName: string;
-  safeLabels: string[];
-  owners: Address[];
-  threshold: number;
-  salt: bigint;
-  modules: Address[];
-  setupModulesAddress: Address;
-  proxyAddress?: Address;
-  isAlreadyDeployed: boolean;
-  error?: string;
-  safeCreationTxHash?: string;
-  onCreateSafe: () => void;
-  isCreating: boolean;
-}
-
-const SafePreview: React.FC<SafePreviewProps> = ({
-  safeName,
-  safeLabels,
-  owners,
-  threshold,
-  salt,
-  modules,
-  setupModulesAddress,
-  proxyAddress,
-  isAlreadyDeployed,
-  error,
-  safeCreationTxHash,
-  onCreateSafe,
-  isCreating,
-}) => {
+const SafePreview: React.FC = () => {
   const navigate = useNavigate();
+  const [initDataDialogOpen, setInitDataDialogOpen] = useState(false);
+
+  const {
+    safeName,
+    safeLabels,
+    owners,
+    threshold,
+    salt,
+    modules,
+    initData,
+    setupModulesAddress,
+    proxyAddress,
+    isAlreadyDeployed,
+    error,
+    safeCreationTxHash,
+    handleCreateSafe,
+    isCreating,
+  } = useCreateSafeContext();
+
+  // Check if initData is valid and there are no errors to show the expand icon
+  const hasValidInitData = initData !== "0x" && error === undefined;
 
   return (
     <Paper sx={{ p: { xs: 2, md: 3 }, mb: { xs: 2, md: 3 } }}>
@@ -46,9 +40,21 @@ const SafePreview: React.FC<SafePreviewProps> = ({
 
       <Card variant="outlined" sx={{ mb: 3 }}>
         <CardContent>
-          <Typography variant="subtitle1" gutterBottom>
-            Configuration Summary
-          </Typography>
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <Typography variant="subtitle1" gutterBottom>
+              Configuration Summary
+            </Typography>
+            {hasValidInitData && (
+              <IconButton
+                onClick={() => setInitDataDialogOpen(true)}
+                size="small"
+                sx={{ color: "primary.main" }}
+                title="View InitData Details"
+              >
+                <OpenInFullIcon />
+              </IconButton>
+            )}
+          </Box>
 
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, sm: 6 }}>
@@ -174,7 +180,7 @@ const SafePreview: React.FC<SafePreviewProps> = ({
 
       <Button
         variant="contained"
-        onClick={onCreateSafe}
+        onClick={handleCreateSafe}
         disabled={isAlreadyDeployed || safeCreationTxHash !== undefined || isCreating}
         fullWidth
         size="large"
@@ -182,6 +188,13 @@ const SafePreview: React.FC<SafePreviewProps> = ({
       >
         {isCreating ? "Creating Safe..." : "Create Safe"}
       </Button>
+
+      <InitDataDialog
+        open={initDataDialogOpen}
+        onClose={() => setInitDataDialogOpen(false)}
+        initData={initData}
+        error={error}
+      />
     </Paper>
   );
 };
