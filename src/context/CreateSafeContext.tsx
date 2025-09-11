@@ -3,11 +3,11 @@ import type React from "react";
 import { createContext, useContext, useEffect, useState } from "react";
 import { type Address, isAddress, zeroAddress } from "viem";
 import { useAccount, usePublicClient } from "wagmi";
-import safeProxyFactoryABI from "../../abis/SafeProxyFactory.json";
-import { STORAGE_KEY } from "../../constants";
-import { useSafeWalletContext } from "../../context/WalletContext";
-import { calculateInitData, getProxyAddress } from "../../utils/utils";
-import { config } from "../../wagmi";
+import safeProxyFactoryABI from "../abis/SafeProxyFactory.json";
+import { STORAGE_KEY } from "../constants";
+import { useSafeWalletContext } from "./WalletContext";
+import { calculateInitData, getProxyAddress } from "../utils/utils";
+import { config } from "../wagmi";
 
 interface CreateSafeState {
   // Basic Safe configuration

@@ -23,7 +23,7 @@ import {
 } from "@mui/material";
 import type React from "react";
 import { Fragment, useState } from "react";
-import { useCreateSafeContext } from "./CreateSafeContext";
+import { useCreateSafeContext } from "../../context/CreateSafeContext";
 import FallbackHandlerPanel from "./panels/FallbackHandlerPanel";
 import ModulesPanel from "./panels/ModulesPanel";
 import NameLabelsPanel from "./panels/NameLabelsPanel";
@@ -99,11 +99,6 @@ const ConfigurationPanels: React.FC = () => {
     // Salt
     salt,
     setSalt,
-    // Modules
-    modules,
-    setModules,
-    setupModulesAddress,
-    setSetupModulesAddress,
     // Fallback Handler
     fallbackHandler,
     setFallbackHandler,
@@ -140,14 +135,7 @@ const ConfigurationPanels: React.FC = () => {
       case ConfigurationSection.SALT:
         return <SaltPanel salt={salt} setSalt={setSalt} />;
       case ConfigurationSection.MODULES:
-        return (
-          <ModulesPanel
-            modules={modules}
-            setModules={setModules}
-            setupModulesAddress={setupModulesAddress}
-            setSetupModulesAddress={setSetupModulesAddress}
-          />
-        );
+        return <ModulesPanel />;
       case ConfigurationSection.FALLBACK_HANDLER:
         return <FallbackHandlerPanel fallbackHandler={fallbackHandler} setFallbackHandler={setFallbackHandler} />;
       default:

@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { zeroAddress } from "viem";
 import AccountAddress from "../common/AccountAddress";
-import { useCreateSafeContext } from "./CreateSafeContext";
+import { useCreateSafeContext } from "../../context/CreateSafeContext";
 import InitDataDialog from "./InitDataDialog";
 
 const SafePreview: React.FC = () => {
