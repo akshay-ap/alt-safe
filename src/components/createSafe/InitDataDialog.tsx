@@ -25,7 +25,6 @@ const InitDataDialog: React.FC<InitDataDialogProps> = ({ open, onClose, initData
               abi: safeABI,
               data: initData,
             });
-            console.log("Decoded initData:", { functionName, args });
             return { functionName, args };
           } catch (err) {
             console.error("Failed to decode initData:", err);

@@ -4,8 +4,8 @@ import Grid from "@mui/material/Grid2";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { zeroAddress } from "viem";
-import AccountAddress from "../common/AccountAddress";
 import { useCreateSafeContext } from "../../context/CreateSafeContext";
+import AccountAddress from "../common/AccountAddress";
 import InitDataDialog from "./InitDataDialog";
 
 const SafePreview: React.FC = () => {
