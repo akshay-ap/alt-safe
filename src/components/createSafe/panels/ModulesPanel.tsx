@@ -6,20 +6,11 @@ import { useState } from "react";
 import type { Address } from "viem";
 import { isAddress } from "viem";
 import AddressInput from "../../common/AddressInput";
+import { useCreateSafeContext } from "../../../context/CreateSafeContext";
 
-interface ModulesPanelProps {
-  modules: Address[];
-  setModules: (modules: Address[]) => void;
-  setupModulesAddress: Address;
-  setSetupModulesAddress: (address: Address) => void;
-}
+const ModulesPanel: React.FC = () => {
+  const { modules, setModules, setupModulesAddress, setSetupModulesAddress } = useCreateSafeContext();
 
-const ModulesPanel: React.FC<ModulesPanelProps> = ({
-  modules,
-  setModules,
-  setupModulesAddress,
-  setSetupModulesAddress,
-}) => {
   const [newModuleAddress, setNewModuleAddress] = useState<string>("");
   const [isValidAddress, setIsValidAddress] = useState<boolean>(false);
 
