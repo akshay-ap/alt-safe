@@ -5,11 +5,13 @@ import { type Address, isAddress, zeroAddress } from "viem";
 import { useAccount, usePublicClient } from "wagmi";
 import safeProxyFactoryABI from "../abis/SafeProxyFactory.json";
 import { STORAGE_KEY } from "../constants";
-import { useSafeWalletContext } from "./WalletContext";
 import { calculateInitData, getProxyAddress } from "../utils/utils";
 import { config } from "../wagmi";
+import { useSafeWalletContext } from "./WalletContext";
 
-interface CreateSafeState {
+type DefaultModules = Array<{ name: string; address: Address }>;
+
+type CreateSafeState = {
   // Basic Safe configuration
   owners: Address[];
   threshold: number;
@@ -36,10 +38,10 @@ interface CreateSafeState {
   // Modules configuration
   setupModulesAddress: Address;
   modules: Address[];
-
+  defaultModules: DefaultModules;
   // Proxy Factory
   proxyFactory: string;
-}
+};
 
 interface CreateSafeActions {
   // Basic Safe configuration setters
@@ -104,6 +106,26 @@ export const CreateSafeProvider: React.FC<CreateSafeProviderProps> = ({ children
   const [error, setError] = useState<string>();
   const [safeCreationTxHash, setSafeCreationTxHash] = useState<string>();
   const [isCreating, setIsCreating] = useState<boolean>(false);
+  const [defaultModules] = useState<DefaultModules>((): DefaultModules => {
+    const modulesEnv = import.meta.env.VITE_DEFAULT_MODULES;
+    if (modulesEnv) {
+      try {
+                console.log("Raw modulesEnv:", modulesEnv);
+
+        const parsedModules: DefaultModules = JSON.parse(modulesEnv);
+        console.log("Raw default modules from env:", parsedModules);
+        const validModules = parsedModules.filter(
+          (module) => module.name && module.address && isAddress(module.address),
+        );
+        console.log("Parsed default modules from env:", validModules);
+        return validModules;
+      } catch (err) {
+        console.error("Error parsing VITE_DEFAULT_MODULES:", err);
+        return [];
+      }
+    }
+    return [];
+  });
 
   // Name and Labels
   const [safeName, setSafeName] = useState<string>("");
@@ -287,6 +309,7 @@ export const CreateSafeProvider: React.FC<CreateSafeProviderProps> = ({ children
     setupModulesAddress,
     modules,
     proxyFactory,
+    defaultModules,
 
     // Actions
     setOwners,

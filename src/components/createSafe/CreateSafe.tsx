@@ -1,7 +1,7 @@
 import { Box } from "@mui/material";
 import type React from "react";
-import ConfigurationPanels from "./ConfigurationPanels";
 import { CreateSafeProvider } from "../../context/CreateSafeContext";
+import ConfigurationPanels from "./ConfigurationPanels";
 import CreateSafeHeader from "./CreateSafeHeader";
 import SafePreview from "./SafePreview";
 
