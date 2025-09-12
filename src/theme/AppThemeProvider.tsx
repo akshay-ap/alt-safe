@@ -125,6 +125,15 @@ const gradientTheme = createTheme({
           "&:active": {
             transform: "translateY(1px)",
           },
+          "&.Mui-disabled": {
+            "&:hover": {
+              transform: "none",
+              boxShadow: "none",
+            },
+            "&:active": {
+              transform: "none",
+            },
+          },
         },
         contained: {
           background: "linear-gradient(135deg, #5FDDFF 0%, #12FF80 100%)",
@@ -135,12 +144,26 @@ const gradientTheme = createTheme({
             transform: "translateY(-1px)",
             boxShadow: "0 4px 12px rgba(95, 221, 255, 0.3)",
           },
+          "&.Mui-disabled": {
+            background: "rgba(60, 60, 70, 0.6)",
+            color: "rgba(255, 255, 255, 0.4)",
+            border: "1px solid rgba(255, 255, 255, 0.1)",
+            cursor: "not-allowed",
+            transform: "none",
+            boxShadow: "none",
+          },
         },
         containedSecondary: {
           background: "linear-gradient(135deg, #12FF80 0%, #5FDDFF 100%)",
           color: "#000000",
           "&:hover": {
             background: "linear-gradient(135deg, #42FF9A 0%, #7FE5FF 100%)",
+          },
+          "&.Mui-disabled": {
+            background: "rgba(60, 60, 70, 0.6)",
+            color: "rgba(255, 255, 255, 0.4)",
+            border: "1px solid rgba(255, 255, 255, 0.1)",
+            cursor: "not-allowed",
           },
         },
         outlined: {
@@ -150,11 +173,22 @@ const gradientTheme = createTheme({
             backgroundColor: "rgba(95, 221, 255, 0.1)",
             borderColor: "#5FDDFF",
           },
+          "&.Mui-disabled": {
+            borderColor: "rgba(255, 255, 255, 0.15)",
+            color: "rgba(255, 255, 255, 0.3)",
+            backgroundColor: "transparent",
+            cursor: "not-allowed",
+          },
         },
         text: {
           color: "#FFFFFF",
           "&:hover": {
             backgroundColor: "rgba(95, 221, 255, 0.1)",
+          },
+          "&.Mui-disabled": {
+            color: "rgba(255, 255, 255, 0.3)",
+            backgroundColor: "transparent",
+            cursor: "not-allowed",
           },
         },
       },
