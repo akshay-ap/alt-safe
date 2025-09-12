@@ -45,9 +45,8 @@ const ModulesPanel: React.FC = () => {
     setSelectedDefaultModules((prev) => {
       if (prev.includes(moduleAddress)) {
         return prev.filter((addr) => addr !== moduleAddress);
-      } else {
-        return [...prev, moduleAddress];
       }
+      return [...prev, moduleAddress];
     });
   };
 
@@ -77,54 +76,53 @@ const ModulesPanel: React.FC = () => {
       </Alert>
 
       {/* Default Modules Section */}
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="subtitle1" gutterBottom>
-            Default Modules
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Select from pre-configured trusted modules
-          </Typography>
-          <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
-            <FormGroup>
-              {defaultModules.map((module) => (
-                <FormControlLabel
-                  key={module.address}
-                  control={
-                    <Checkbox
-                      checked={selectedDefaultModules.includes(module.address)}
-                      onChange={() => handleDefaultModuleToggle(module.address)}
-                      disabled={modules.includes(module.address)}
-                    />
-                  }
-                  label={
-                    <Box>
-                      <Typography variant="body2" fontWeight="medium">
-                        {module.name}
-                      </Typography>
-                      <Typography variant="caption" fontFamily="monospace" color="text.secondary">
-                        {module.address}
-                      </Typography>
-                      {modules.includes(module.address) && (
-                        <Chip size="small" label="Already Added" color="success" sx={{ ml: 1 }} />
-                      )}
-                    </Box>
-                  }
-                />
-              ))}
-            </FormGroup>
-            {selectedDefaultModules.length > 0 && (
-              <Button
-                variant="contained"
-                onClick={handleAddSelectedDefaultModules}
-                sx={{ mt: 2 }}
-                startIcon={<AddCircleOutlineIcon />}
-              >
-                Add Selected ({selectedDefaultModules.length})
-              </Button>
-            )}
-          </Paper>
-        </Box>
-     
+      <Box sx={{ mb: 3 }}>
+        <Typography variant="subtitle1" gutterBottom>
+          Default Modules
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          Select from pre-configured trusted modules
+        </Typography>
+        <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+          <FormGroup>
+            {defaultModules.map((module) => (
+              <FormControlLabel
+                key={module.address}
+                control={
+                  <Checkbox
+                    checked={selectedDefaultModules.includes(module.address)}
+                    onChange={() => handleDefaultModuleToggle(module.address)}
+                    disabled={modules.includes(module.address)}
+                  />
+                }
+                label={
+                  <Box>
+                    <Typography variant="body2" fontWeight="medium">
+                      {module.name}
+                    </Typography>
+                    <Typography variant="caption" fontFamily="monospace" color="text.secondary">
+                      {module.address}
+                    </Typography>
+                    {modules.includes(module.address) && (
+                      <Chip size="small" label="Already Added" color="success" sx={{ ml: 1 }} />
+                    )}
+                  </Box>
+                }
+              />
+            ))}
+          </FormGroup>
+          {selectedDefaultModules.length > 0 && (
+            <Button
+              variant="contained"
+              onClick={handleAddSelectedDefaultModules}
+              sx={{ mt: 2 }}
+              startIcon={<AddCircleOutlineIcon />}
+            >
+              Add Selected ({selectedDefaultModules.length})
+            </Button>
+          )}
+        </Paper>
+      </Box>
 
       <Box sx={{ mb: 3 }}>
         <Typography variant="subtitle1" gutterBottom>
@@ -137,6 +135,7 @@ const ModulesPanel: React.FC = () => {
           label="Setup Modules Address"
           value={setupModulesAddress}
           onChange={(value) => setSetupModulesAddress(value as Address)}
+          showAddressBook={true}
           helperText="Contract address for module setup"
           allowEmpty={true}
         />
@@ -151,6 +150,7 @@ const ModulesPanel: React.FC = () => {
             label="Module Address"
             value={newModuleAddress}
             onChange={setNewModuleAddress}
+            showAddressBook={true}
             helperText="Enter a valid contract address"
             allowEmpty={false}
             onValidationChange={setIsValidAddress}

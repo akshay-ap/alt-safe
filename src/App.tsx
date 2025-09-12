@@ -15,6 +15,7 @@ import AggregateSignaturesAndExecute from "./components/transaction/AggregateSig
 import ApproveSafeTransactionForm from "./components/transaction/ApproveSafeTransaction.tsx";
 import ApproveTransactionHash from "./components/transaction/ApproveTransctionHash.tsx";
 import CreateTransaction from "./components/transaction/CreateTransaction.tsx";
+import { AddressBookProvider } from "./context/AddressBookContext";
 import { WalletProvider } from "./context/WalletContext";
 import AppThemeProvider from "./theme/AppThemeProvider.tsx";
 
@@ -35,31 +36,32 @@ function App() {
     <>
       <AppThemeProvider>
         <WalletProvider>
-          <Router>
-            <Routes>
-              <Route path="/" element={<Welcome />} />
-              <Route path="/welcome" element={<Welcome />} />
-              <Route element={<NavbarLayout />}>
-                <Route path="/create-transaction/*" element={<CreateTransaction />} />
-                <Route path="/home" element={<Home />} />
-                <Route path="/history" element={<SafeTransactionHistory />} />
-                <Route path="/import" element={<ImportSafe />} />
-                <Route path="/add-custom-deployment" element={<AddCustomDeployment />} />
-                <Route path="/create" element={<CreateSafe />} />
-                <Route path="/approve-transaction-hash" element={<ApproveTransactionHash />} />
-                <Route path="/approve-transaction" element={<ApproveSafeTransactionForm />} />
-                <Route path="/aggregate-signatures" element={<AggregateSignaturesAndExecute />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route path="/sign-message" element={<SignMessage />} />
-                <Route path="/safe-info" element={<SafeInfo />} />
-              </Route>
-            </Routes>
-            <BottomBar />
-          </Router>
+          <AddressBookProvider>
+            <Router>
+              <Routes>
+                <Route path="/" element={<Welcome />} />
+                <Route path="/welcome" element={<Welcome />} />
+                <Route element={<NavbarLayout />}>
+                  <Route path="/create-transaction/*" element={<CreateTransaction />} />
+                  <Route path="/home" element={<Home />} />
+                  <Route path="/history" element={<SafeTransactionHistory />} />
+                  <Route path="/import" element={<ImportSafe />} />
+                  <Route path="/add-custom-deployment" element={<AddCustomDeployment />} />
+                  <Route path="/create" element={<CreateSafe />} />
+                  <Route path="/approve-transaction-hash" element={<ApproveTransactionHash />} />
+                  <Route path="/approve-transaction" element={<ApproveSafeTransactionForm />} />
+                  <Route path="/aggregate-signatures" element={<AggregateSignaturesAndExecute />} />
+                  <Route path="/settings" element={<Settings />} />
+                  <Route path="/sign-message" element={<SignMessage />} />
+                  <Route path="/safe-info" element={<SafeInfo />} />
+                </Route>
+              </Routes>
+              <BottomBar />
+            </Router>
+          </AddressBookProvider>
         </WalletProvider>
       </AppThemeProvider>
     </>
   );
 }
-
 export default App;

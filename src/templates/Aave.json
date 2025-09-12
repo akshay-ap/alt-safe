@@ -32,12 +32,12 @@
         {
           "name": "asset",
           "label": "Token Address",
-          "type": "text"
+          "type": "address"
         },
         {
           "name": "pool",
           "label": "Pool Address",
-          "type": "text"
+          "type": "address"
         },
         {
           "name": "amount",
@@ -47,7 +47,7 @@
         {
           "name": "onBehalfOf",
           "label": "Behalf Of",
-          "type": "text"
+          "type": "address"
         },
         {
           "name": "referralCode",
@@ -141,12 +141,12 @@
         {
           "name": "pool",
           "label": "Pool Address",
-          "type": "text"
+          "type": "address"
         },
         {
           "name": "asset",
           "label": "Token Address",
-          "type": "text"
+          "type": "address"
         },
         {
           "name": "amount",
@@ -156,7 +156,7 @@
         {
           "name": "to",
           "label": "Recipient Address",
-          "type": "text"
+          "type": "address"
         }
       ],
       "detailsView": [
@@ -222,17 +222,17 @@
         {
           "name": "pool",
           "label": "Pool Address",
-          "type": "text"
+          "type": "address"
         },
         {
           "name": "asset",
           "label": "Token Address",
-          "type": "text"
+          "type": "address"
         },
         {
           "name": "amount",
           "label": "Borrow Amount",
-          "type": "text"
+          "type": "address"
         },
         {
           "name": "interestRateMode",
@@ -262,7 +262,7 @@
         {
           "name": "onBehalfOf",
           "label": "On Behalf Of",
-          "type": "text"
+          "type": "address"
         }
       ],
       "detailsView": [
