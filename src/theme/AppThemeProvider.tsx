@@ -9,7 +9,7 @@ const gradientTheme = createTheme({
       light: "#7FE5FF",
       dark: "#3FC7E8",
       contrastText: "#000000", // Dark text for better contrast on bright colors
-    },    
+    },
     secondary: {
       main: "#12FF80", // End of gradient
       light: "#42FF9A",
@@ -36,7 +36,7 @@ const gradientTheme = createTheme({
     },
     info: {
       main: "#5FDDFF",
-      light: "#7FE5FF", 
+      light: "#7FE5FF",
       dark: "#3FC7E8",
     },
     success: {
