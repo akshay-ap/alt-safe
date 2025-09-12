@@ -1,42 +1,50 @@
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
 import type { ReactNode } from "react";
 
-const classicTheme = createTheme({
+const gradientTheme = createTheme({
   palette: {
     mode: "dark",
     primary: {
-      main: "#0078d7",
-      light: "#3395df",
-      dark: "#005a9e",
-      contrastText: "#ffffff",
-    },
+      main: "#5FDDFF", // Start of gradient
+      light: "#7FE5FF",
+      dark: "#3FC7E8",
+      contrastText: "#000000", // Dark text for better contrast on bright colors
+    },    
     secondary: {
-      main: "#107c10",
-      light: "#2d9d2d",
-      dark: "#0c5c0c",
-      contrastText: "#ffffff",
+      main: "#12FF80", // End of gradient
+      light: "#42FF9A",
+      dark: "#0EE070",
+      contrastText: "#000000",
     },
     background: {
-      default: "#202020",
-      paper: "#2b2b2b",
+      default: "#0A0A0F", // Very dark background for contrast
+      paper: "#151520", // Slightly lighter dark background
     },
     text: {
-      primary: "#e8e8e8",
-      secondary: "#a0a0a0",
+      primary: "#FFFFFF",
+      secondary: "#B8B8C8",
     },
     error: {
-      main: "#d83b01",
+      main: "#FF4757",
+      light: "#FF6B7A",
+      dark: "#E8313F",
     },
     warning: {
-      main: "#f7630c",
+      main: "#FFA726",
+      light: "#FFB84D",
+      dark: "#F57C00",
     },
     info: {
-      main: "#0078d7",
+      main: "#5FDDFF",
+      light: "#7FE5FF", 
+      dark: "#3FC7E8",
     },
     success: {
-      main: "#107c10",
+      main: "#12FF80",
+      light: "#42FF9A",
+      dark: "#0EE070",
     },
-    divider: "rgba(255, 255, 255, 0.08)",
+    divider: "rgba(255, 255, 255, 0.1)",
   },
   typography: {
     fontFamily: "'Segoe UI', 'Roboto', 'Arial', sans-serif",
@@ -119,26 +127,34 @@ const classicTheme = createTheme({
           },
         },
         contained: {
-          background: "#0078d7",
+          background: "linear-gradient(135deg, #5FDDFF 0%, #12FF80 100%)",
+          color: "#000000",
+          fontWeight: 600,
           "&:hover": {
-            background: "#0086f0",
+            background: "linear-gradient(135deg, #7FE5FF 0%, #42FF9A 100%)",
+            transform: "translateY(-1px)",
+            boxShadow: "0 4px 12px rgba(95, 221, 255, 0.3)",
           },
         },
         containedSecondary: {
-          background: "#107c10",
+          background: "linear-gradient(135deg, #12FF80 0%, #5FDDFF 100%)",
+          color: "#000000",
           "&:hover": {
-            background: "#138a13",
+            background: "linear-gradient(135deg, #42FF9A 0%, #7FE5FF 100%)",
           },
         },
         outlined: {
-          borderColor: "rgba(255, 255, 255, 0.15)",
+          borderColor: "rgba(95, 221, 255, 0.5)",
+          color: "#5FDDFF",
           "&:hover": {
-            backgroundColor: "rgba(255, 255, 255, 0.05)",
+            backgroundColor: "rgba(95, 221, 255, 0.1)",
+            borderColor: "#5FDDFF",
           },
         },
         text: {
+          color: "#FFFFFF",
           "&:hover": {
-            backgroundColor: "rgba(255, 255, 255, 0.05)",
+            backgroundColor: "rgba(95, 221, 255, 0.1)",
           },
         },
       },
@@ -146,12 +162,13 @@ const classicTheme = createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
-          boxShadow: "0 2px 4px rgba(0, 0, 0, 0.15)",
-          background: "#2b2b2b",
-          border: "1px solid rgba(255, 255, 255, 0.03)",
-          transition: "none",
+          boxShadow: "0 4px 20px rgba(0, 0, 0, 0.3)",
+          background: "linear-gradient(145deg, #1A1A25 0%, #151520 100%)",
+          border: "1px solid rgba(95, 221, 255, 0.1)",
+          transition: "all 0.3s ease",
           "&:hover": {
-            boxShadow: "0 2px 4px rgba(0, 0, 0, 0.15)",
+            boxShadow: "0 8px 30px rgba(95, 221, 255, 0.2)",
+            border: "1px solid rgba(95, 221, 255, 0.2)",
           },
         },
       },
@@ -160,16 +177,18 @@ const classicTheme = createTheme({
       styleOverrides: {
         root: {
           "& .MuiOutlinedInput-root": {
-            borderRadius: 4,
-            backgroundColor: "rgba(255, 255, 255, 0.03)",
+            borderRadius: 8,
+            backgroundColor: "rgba(21, 21, 32, 0.8)",
             "& fieldset": {
-              borderColor: "rgba(255, 255, 255, 0.15)",
+              borderColor: "rgba(95, 221, 255, 0.3)",
             },
             "&:hover fieldset": {
-              borderColor: "rgba(255, 255, 255, 0.25)",
+              borderColor: "rgba(95, 221, 255, 0.5)",
             },
             "&.Mui-focused fieldset": {
-              borderColor: "#0078d7",
+              borderColor: "#5FDDFF",
+              borderWidth: "2px",
+              boxShadow: "0 0 10px rgba(95, 221, 255, 0.3)",
             },
           },
         },
@@ -179,38 +198,42 @@ const classicTheme = createTheme({
       styleOverrides: {
         root: {
           backgroundImage: "none",
-          backgroundColor: "#2b2b2b",
-          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.12)",
+          backgroundColor: "#151520",
+          boxShadow: "0 4px 20px rgba(0, 0, 0, 0.3)",
+          border: "1px solid rgba(95, 221, 255, 0.1)",
         },
         outlined: {
-          border: "1px solid rgba(255, 255, 255, 0.08)",
+          border: "1px solid rgba(95, 221, 255, 0.2)",
         },
       },
     },
     MuiAppBar: {
       styleOverrides: {
         root: {
-          background: "#1f1f1f",
-          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.2)",
+          background: "linear-gradient(135deg, rgba(21, 21, 32, 0.95) 0%, rgba(10, 10, 15, 0.95) 100%)",
+          backdropFilter: "blur(10px)",
+          boxShadow: "0 4px 20px rgba(0, 0, 0, 0.4)",
+          borderBottom: "1px solid rgba(95, 221, 255, 0.1)",
         },
       },
     },
     MuiChip: {
       styleOverrides: {
         root: {
-          borderRadius: 2,
-          backgroundColor: "rgba(255, 255, 255, 0.05)",
-          border: "1px solid rgba(255, 255, 255, 0.1)",
+          borderRadius: 6,
+          backgroundColor: "rgba(95, 221, 255, 0.1)",
+          border: "1px solid rgba(95, 221, 255, 0.3)",
+          color: "#5FDDFF",
         },
         outlined: {
-          border: "1px solid rgba(255, 255, 255, 0.15)",
+          border: "1px solid rgba(95, 221, 255, 0.4)",
         },
       },
     },
     MuiDivider: {
       styleOverrides: {
         root: {
-          backgroundColor: "rgba(255, 255, 255, 0.08)",
+          backgroundColor: "rgba(95, 221, 255, 0.2)",
         },
       },
     },
@@ -246,9 +269,10 @@ const classicTheme = createTheme({
     MuiIconButton: {
       styleOverrides: {
         root: {
-          transition: "background-color 0.1s",
+          transition: "all 0.2s ease",
           "&:hover": {
-            backgroundColor: "rgba(255, 255, 255, 0.08)",
+            backgroundColor: "rgba(95, 221, 255, 0.1)",
+            transform: "scale(1.05)",
           },
         },
       },
@@ -265,7 +289,7 @@ const classicTheme = createTheme({
       styleOverrides: {
         root: {
           "&:hover": {
-            backgroundColor: "rgba(255, 255, 255, 0.04)",
+            backgroundColor: "rgba(95, 221, 255, 0.08)",
           },
         },
       },
@@ -275,7 +299,7 @@ const classicTheme = createTheme({
 
 const AppThemeProvider = ({ children }: { children: ReactNode }) => {
   return (
-    <ThemeProvider theme={classicTheme}>
+    <ThemeProvider theme={gradientTheme}>
       <CssBaseline />
       {children}
     </ThemeProvider>
