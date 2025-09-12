@@ -110,14 +110,10 @@ export const CreateSafeProvider: React.FC<CreateSafeProviderProps> = ({ children
     const modulesEnv = import.meta.env.VITE_DEFAULT_MODULES;
     if (modulesEnv) {
       try {
-                console.log("Raw modulesEnv:", modulesEnv);
-
         const parsedModules: DefaultModules = JSON.parse(modulesEnv);
-        console.log("Raw default modules from env:", parsedModules);
         const validModules = parsedModules.filter(
           (module) => module.name && module.address && isAddress(module.address),
         );
-        console.log("Parsed default modules from env:", validModules);
         return validModules;
       } catch (err) {
         console.error("Error parsing VITE_DEFAULT_MODULES:", err);

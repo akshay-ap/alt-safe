@@ -12,6 +12,7 @@ export enum STORAGE_KEY {
   TOKEN_LIST = "tokenList",
   RPC = "rpc",
   DRAFT_TRANSACTIONS = "draft_transactions",
+  ADDRESS_BOOK = "addressBook",
 }
 
 export const WALLET_STORAGE_KEY = "alt_wallet";

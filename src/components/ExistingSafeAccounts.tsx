@@ -1,8 +1,10 @@
 import AddIcon from "@mui/icons-material/Add";
+import ContactsIcon from "@mui/icons-material/Contacts";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
 import SettingsIcon from "@mui/icons-material/Settings";
 import {
+  Alert,
   Box,
   Button,
   Card,
@@ -20,12 +22,13 @@ import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { getChains } from "@wagmi/core";
 import type React from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { Address } from "viem";
 import { formatUnits } from "viem";
 import { useAccount, useBalance } from "wagmi";
 import { STORAGE_KEY } from "../constants";
+import { type AddressBookEntry, useAddressBook } from "../context/AddressBookContext";
 import { useSafeWalletContext } from "../context/WalletContext";
 import type { SafeAccount } from "../context/types";
 import { config } from "../wagmi";
@@ -34,10 +37,17 @@ import AccountAddress from "./common/AccountAddress";
 const ExistingSafeAccounts: React.FC = () => {
   const [safeAccounts, setSafeAccounts] = useState<SafeAccount[]>([]);
   const { setSafeAccount, storage } = useSafeWalletContext();
+  const { importEntries } = useAddressBook();
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [copySnackbar, setCopySnackbar] = useState({ open: false, message: "" });
+  const [importAlert, setImportAlert] = useState<{ open: boolean; message: string; severity: "success" | "error" }>({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     (async () => {
@@ -79,6 +89,83 @@ const ExistingSafeAccounts: React.FC = () => {
 
   const handleCloseSnackbar = () => {
     setCopySnackbar({ ...copySnackbar, open: false });
+  };
+
+  const handleImportCSV = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      const lines = text.split("\n").filter((line) => line.trim());
+
+      if (lines.length === 0) {
+        setImportAlert({ open: true, message: "CSV file is empty", severity: "error" });
+        return;
+      }
+
+      const entries: AddressBookEntry[] = [];
+      const headers = lines[0]
+        .toLowerCase()
+        .split(",")
+        .map((h) => h.trim());
+
+      // Validate headers
+      const requiredHeaders = ["address", "name", "chainid"];
+      const missingHeaders = requiredHeaders.filter((h) => !headers.includes(h));
+      if (missingHeaders.length > 0) {
+        setImportAlert({
+          open: true,
+          message: `CSV must include headers: ${requiredHeaders.join(", ")}`,
+          severity: "error",
+        });
+        return;
+      }
+
+      const addressIndex = headers.indexOf("address");
+      const nameIndex = headers.indexOf("name");
+      const chainIdIndex = headers.indexOf("chainid");
+
+      for (let i = 1; i < lines.length; i++) {
+        const values = lines[i].split(",").map((v) => v.trim());
+        if (values.length < 3) continue;
+
+        const address = values[addressIndex];
+        const name = values[nameIndex];
+        const chainId = Number.parseInt(values[chainIdIndex]);
+
+        if (address && name && !Number.isNaN(chainId)) {
+          entries.push({ address: address as Address, name, chainId });
+        }
+      }
+
+      if (entries.length > 0) {
+        await importEntries(entries);
+        setImportAlert({
+          open: true,
+          message: `Successfully imported ${entries.length} address${entries.length !== 1 ? "es" : ""}`,
+          severity: "success",
+        });
+      } else {
+        setImportAlert({ open: true, message: "No valid entries found in CSV", severity: "error" });
+      }
+    } catch (error) {
+      console.error("Error importing CSV:", error);
+      setImportAlert({ open: true, message: "Error reading CSV file", severity: "error" });
+    }
+
+    // Reset the file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const handleCloseImportAlert = () => {
+    setImportAlert({ ...importAlert, open: false });
   };
 
   const calculateListHeight = () => {
@@ -172,6 +259,10 @@ const ExistingSafeAccounts: React.FC = () => {
         <Button variant="outlined" startIcon={<FileUploadIcon />} onClick={handleImportSafe} fullWidth={isMobile}>
           Import Safe
         </Button>
+        <Button variant="outlined" startIcon={<ContactsIcon />} onClick={handleImportCSV} fullWidth={isMobile}>
+          Import Address Book
+        </Button>
+        <input ref={fileInputRef} type="file" accept=".csv" onChange={handleFileUpload} style={{ display: "none" }} />
       </Box>
 
       <Snackbar
@@ -180,6 +271,17 @@ const ExistingSafeAccounts: React.FC = () => {
         onClose={handleCloseSnackbar}
         message={copySnackbar.message}
       />
+
+      <Snackbar
+        open={importAlert.open}
+        autoHideDuration={6000}
+        onClose={handleCloseImportAlert}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert onClose={handleCloseImportAlert} severity={importAlert.severity} sx={{ width: "100%" }}>
+          {importAlert.message}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 };
