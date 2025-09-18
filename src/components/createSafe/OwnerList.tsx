@@ -18,6 +18,7 @@ const OwnerList: React.FC<{
             label={`Owner ${index + 1}`}
             value={owner}
             onChange={(value: string) => onOwnerChange(index, value)}
+            showAddressBook={true}
             fullWidth
             margin="normal"
             slotProps={{

@@ -35,6 +35,8 @@ import {
 } from "../../../context/types";
 import { config } from "../../../wagmi";
 import AccountAddress from "../../common/AccountAddress";
+import AddressAutocomplete from "../../common/AddressAutocomplete";
+import AddressInput from "../../common/AddressInput";
 import TransactionDebugDialog from "../../dialogs/TransactionDebugDialog";
 
 interface TransactionInputBuilderProps {
@@ -385,14 +387,14 @@ const TransactionInputBuilder: React.FC<TransactionInputBuilderProps> = ({ onAdd
                     )}
 
                     {input.type === "address" && (
-                      <TextField
+                      <AddressInput
                         key={`address-${spec.name}-${input.name}`}
-                        id={`address-${spec.name}-${input.name}`}
                         label={input.label}
                         value={inputs[input.name]}
-                        onChange={(e) => handleInputChange(input.name, e.target.value)}
-                        error={!!errors[input.name]?.length}
-                        helperText={errors[input.name]?.map((err) => err.errorMessage).join(", ")}
+                        onChange={(value) => handleInputChange(input.name, value)}
+                        errorText={errors[input.name]?.map((err) => err.errorMessage).join(", ")}
+                        helperText={errors[input.name]?.length > 0 ? undefined : `Enter ${input.label.toLowerCase()}`}
+                        showAddressBook={true}
                         fullWidth
                         variant="outlined"
                         size="medium"
@@ -497,6 +499,25 @@ const TransactionInputBuilder: React.FC<TransactionInputBuilderProps> = ({ onAdd
                             ?.options.find((opt) => opt.name === newValue);
                           handleInputChange(input.name, selected ? selected.value : newValue);
                         }}
+                      />
+                    )}
+
+                    {input.type === "selectOneWithFreeSoloAddress" && (
+                      <AddressAutocomplete
+                        value={inputs[input.name]}
+                        onChange={(value) => handleInputChange(input.name, value)}
+                        options={
+                          input.options?.find((option) => option.chainId === chainId)?.options ||
+                          input.options?.find((option) => option.chainId === 0)?.options ||
+                          []
+                        }
+                        label={input.label}
+                        showAddressBook={true}
+                        helperText={
+                          errors[input.name]?.length > 0 ? undefined : `Enter or select ${input.label.toLowerCase()}`
+                        }
+                        errorText={errors[input.name]?.map((err) => err.errorMessage).join(", ")}
+                        freeSolo={true}
                       />
                     )}
                   </Box>

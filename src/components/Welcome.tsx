@@ -31,21 +31,34 @@ const Welcome: React.FC = () => {
           elevation={0}
           sx={{
             width: "100%",
-            padding: { xs: 3, md: 6 },
-            marginBottom: 6,
+            padding: { xs: 4, md: 8 },
+            marginBottom: 8,
             background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.background.default} 100%)`,
-            borderRadius: 2,
+            borderRadius: 3,
             border: `1px solid ${theme.palette.divider}`,
             position: "relative",
             overflow: "hidden",
+            boxShadow: "0 20px 60px rgba(0, 0, 0, 0.3)",
             "&::before": {
               content: '""',
               position: "absolute",
               top: 0,
               left: 0,
               width: "100%",
-              height: "5px",
+              height: "6px",
               background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+              boxShadow: "0 0 20px rgba(95, 221, 255, 0.5)",
+            },
+            "&::after": {
+              content: '""',
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: "200%",
+              height: "200%",
+              background: "radial-gradient(circle, rgba(95, 221, 255, 0.03) 0%, transparent 70%)",
+              pointerEvents: "none",
             },
           }}
         >
@@ -57,22 +70,49 @@ const Welcome: React.FC = () => {
               background: `linear-gradient(45deg, ${theme.palette.primary.main} 30%, ${theme.palette.secondary.main} 90%)`,
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
-              marginBottom: 2,
+              marginBottom: 3,
+              fontSize: "3rem",
+              lineHeight: 0.9,
+              letterSpacing: "-0.02em",
+              textShadow: "0 0 40px rgba(95, 221, 255, 0.3)",
+              position: "relative",
+              "&::after": {
+                content: '""',
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+                background: `linear-gradient(45deg, ${theme.palette.primary.main} 30%, ${theme.palette.secondary.main} 90%)`,
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                filter: "blur(20px)",
+                opacity: 0.6,
+                zIndex: -1,
+              },
             }}
           >
             &lt;ALT&gt; Safe
           </Typography>
           <Typography
-            variant="h5"
+            variant="h4"
             gutterBottom
             sx={{
-              maxWidth: "800px",
+              maxWidth: "900px",
               margin: "0 auto",
-              marginBottom: 4,
-              color: theme.palette.text.secondary,
+              marginBottom: 5,
+              fontSize: "1.5rem",
+              fontWeight: 300,
+              lineHeight: 1.3,
+              letterSpacing: "0.01em",
+              color: theme.palette.text.primary,
+              textShadow: "0 2px 10px rgba(0, 0, 0, 0.5)",
+              background: `linear-gradient(135deg, ${theme.palette.text.primary} 0%, rgba(255, 255, 255, 0.8) 100%)`,
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
             }}
           >
-            A modern, user-friendly interface to interact with Safe Smart Account contracts
+            Interact with Safe Smart Account contracts with ease.
           </Typography>
           <Button
             onClick={() => navigate("/home")}
@@ -80,8 +120,20 @@ const Welcome: React.FC = () => {
             size="large"
             endIcon={<ArrowForwardIcon />}
             sx={{
-              padding: "12px 30px",
-              fontSize: "1.1rem",
+              padding: "16px 40px",
+              fontSize: "1.2rem",
+              fontWeight: 600,
+              borderRadius: 3,
+              background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
+              color: "#000000",
+              textTransform: "none",
+              boxShadow: "0 8px 25px rgba(95, 221, 255, 0.4)",
+              transition: "all 0.3s ease",
+              "&:hover": {
+                transform: "translateY(-2px)",
+                boxShadow: "0 12px 35px rgba(95, 221, 255, 0.6)",
+                background: `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.secondary.light} 100%)`,
+              },
             }}
           >
             Get Started
@@ -92,17 +144,22 @@ const Welcome: React.FC = () => {
         <Typography
           variant="h3"
           sx={{
-            marginBottom: 4,
+            marginBottom: 5,
+            marginTop: 4,
+            fontSize: { xs: "2rem", md: "2.5rem" },
+            fontWeight: 400,
+            color: theme.palette.text.secondary,
+            opacity: 0.9,
             position: "relative",
             "&::after": {
               content: '""',
               position: "absolute",
-              bottom: -10,
+              bottom: -15,
               left: "50%",
               transform: "translateX(-50%)",
-              width: "60px",
+              width: "80px",
               height: "3px",
-              background: theme.palette.primary.main,
+              background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
               borderRadius: "2px",
             },
           }}
@@ -122,7 +179,7 @@ const Welcome: React.FC = () => {
             <FeatureBox
               icon={<ShieldIcon sx={{ fontSize: 40, color: theme.palette.primary.main }} />}
               title="Privacy"
-              description="Enhanced security with no trackers or data collection"
+              description="No trackers or data collection"
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>

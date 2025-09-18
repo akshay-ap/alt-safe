@@ -1,27 +1,33 @@
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { Alert, Box, Button, Chip, IconButton, List, ListItem, ListItemText, Typography } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  Checkbox,
+  Chip,
+  FormControlLabel,
+  FormGroup,
+  IconButton,
+  List,
+  ListItem,
+  ListItemText,
+  Paper,
+  Typography,
+} from "@mui/material";
 import type React from "react";
 import { useState } from "react";
 import type { Address } from "viem";
 import { isAddress } from "viem";
+import { useCreateSafeContext } from "../../../context/CreateSafeContext";
 import AddressInput from "../../common/AddressInput";
 
-interface ModulesPanelProps {
-  modules: Address[];
-  setModules: (modules: Address[]) => void;
-  setupModulesAddress: Address;
-  setSetupModulesAddress: (address: Address) => void;
-}
+const ModulesPanel: React.FC = () => {
+  const { modules, setModules, setupModulesAddress, setSetupModulesAddress, defaultModules } = useCreateSafeContext();
 
-const ModulesPanel: React.FC<ModulesPanelProps> = ({
-  modules,
-  setModules,
-  setupModulesAddress,
-  setSetupModulesAddress,
-}) => {
   const [newModuleAddress, setNewModuleAddress] = useState<string>("");
   const [isValidAddress, setIsValidAddress] = useState<boolean>(false);
+  const [selectedDefaultModules, setSelectedDefaultModules] = useState<Address[]>([]);
 
   const handleAddModule = () => {
     if (isValidAddress && isAddress(newModuleAddress) && !modules.includes(newModuleAddress as Address)) {
@@ -33,6 +39,23 @@ const ModulesPanel: React.FC<ModulesPanelProps> = ({
   const handleRemoveModule = (index: number) => {
     const updatedModules = modules.filter((_, i) => i !== index);
     setModules(updatedModules);
+  };
+
+  const handleDefaultModuleToggle = (moduleAddress: Address) => {
+    setSelectedDefaultModules((prev) => {
+      if (prev.includes(moduleAddress)) {
+        return prev.filter((addr) => addr !== moduleAddress);
+      }
+      return [...prev, moduleAddress];
+    });
+  };
+
+  const handleAddSelectedDefaultModules = () => {
+    const newModules = selectedDefaultModules.filter((addr) => !modules.includes(addr));
+    if (newModules.length > 0) {
+      setModules([...modules, ...newModules]);
+      setSelectedDefaultModules([]);
+    }
   };
 
   return (
@@ -52,6 +75,55 @@ const ModulesPanel: React.FC<ModulesPanelProps> = ({
         </Typography>
       </Alert>
 
+      {/* Default Modules Section */}
+      <Box sx={{ mb: 3 }}>
+        <Typography variant="subtitle1" gutterBottom>
+          Default Modules
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          Select from pre-configured trusted modules
+        </Typography>
+        <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+          <FormGroup>
+            {defaultModules.map((module) => (
+              <FormControlLabel
+                key={module.address}
+                control={
+                  <Checkbox
+                    checked={selectedDefaultModules.includes(module.address)}
+                    onChange={() => handleDefaultModuleToggle(module.address)}
+                    disabled={modules.includes(module.address)}
+                  />
+                }
+                label={
+                  <Box>
+                    <Typography variant="body2" fontWeight="medium">
+                      {module.name}
+                    </Typography>
+                    <Typography variant="caption" fontFamily="monospace" color="text.secondary">
+                      {module.address}
+                    </Typography>
+                    {modules.includes(module.address) && (
+                      <Chip size="small" label="Already Added" color="success" sx={{ ml: 1 }} />
+                    )}
+                  </Box>
+                }
+              />
+            ))}
+          </FormGroup>
+          {selectedDefaultModules.length > 0 && (
+            <Button
+              variant="contained"
+              onClick={handleAddSelectedDefaultModules}
+              sx={{ mt: 2 }}
+              startIcon={<AddCircleOutlineIcon />}
+            >
+              Add Selected ({selectedDefaultModules.length})
+            </Button>
+          )}
+        </Paper>
+      </Box>
+
       <Box sx={{ mb: 3 }}>
         <Typography variant="subtitle1" gutterBottom>
           Setup Modules Contract Address
@@ -63,6 +135,7 @@ const ModulesPanel: React.FC<ModulesPanelProps> = ({
           label="Setup Modules Address"
           value={setupModulesAddress}
           onChange={(value) => setSetupModulesAddress(value as Address)}
+          showAddressBook={true}
           helperText="Contract address for module setup"
           allowEmpty={true}
         />
@@ -77,6 +150,7 @@ const ModulesPanel: React.FC<ModulesPanelProps> = ({
             label="Module Address"
             value={newModuleAddress}
             onChange={setNewModuleAddress}
+            showAddressBook={true}
             helperText="Enter a valid contract address"
             allowEmpty={false}
             onValidationChange={setIsValidAddress}

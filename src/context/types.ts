@@ -50,7 +50,13 @@ export enum GroupTagType {
   Safe = "Safe",
 }
 
-export type InputTypeType = "text" | "address" | "selectOne" | "selectOneWithFreeSolo" | "selectOneRadio";
+export type InputTypeType =
+  | "text"
+  | "address"
+  | "selectOne"
+  | "selectOneWithFreeSolo"
+  | "selectOneWithFreeSoloAddress"
+  | "selectOneRadio";
 
 export type ContextType = { [key: string]: { type: string; defaultValue: string } | undefined };
 export type InputType = { name: string; type: InputTypeType; options?: Option[]; label: string };

@@ -31,7 +31,7 @@
       "inputs": [
         {
           "name": "tokenAddress",
-          "type": "selectOneWithFreeSolo",
+          "type": "selectOneWithFreeSoloAddress",
           "label": "Token Address",
           "options": [
             {
@@ -171,7 +171,7 @@
       "inputs": [
         {
           "name": "tokenAddress",
-          "type": "selectOneWithFreeSolo",
+          "type": "selectOneWithFreeSoloAddress",
           "label": "Token Address",
           "options": [
             {
@@ -327,7 +327,7 @@
       "inputs": [
         {
           "name": "tokenAddress",
-          "type": "selectOneWithFreeSolo",
+          "type": "selectOneWithFreeSoloAddress",
           "label": "Token Address",
           "options": [
             {
