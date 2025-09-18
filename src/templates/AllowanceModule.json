@@ -1,0 +1,347 @@
+{
+  "groupName": "Allowance Module",
+  "logo": {
+    "type": "character",
+    "value": "A"
+  },
+  "tags": ["Allowance", "Token", "Delegation"],
+  "chainIds": [0],
+  "actions": [
+    {
+      "name": "Set Allowance",
+      "display": {
+        "description": "Set or update token allowance for a delegate"
+      },
+      "functionSignature": "function setAllowance(address delegate, address token, uint96 allowanceAmount, uint16 resetTimeMin, uint32 resetBaseMin)",
+      "summaryView": "contractCall",
+      "context": {
+        "tokenDecimals": {
+          "type": "uint256",
+          "defaultValue": "18"
+        },
+        "tokenSymbol": {
+          "type": "string",
+          "defaultValue": ""
+        },
+        "currentAllowance": {
+          "type": "uint256",
+          "defaultValue": "0"
+        }
+      },
+      "inputs": [
+        {
+          "name": "moduleAddress",
+          "label": "Allowance Module Address",
+          "type": "address"
+        },
+        {
+          "name": "delegate",
+          "label": "Delegate Address",
+          "type": "address"
+        },
+        {
+          "name": "token",
+          "label": "Token Address",
+          "type": "selectOneWithFreeSoloAddress",
+          "options": [
+            {
+              "chainId": 1,
+              "options": [
+                {
+                  "name": "USDT",
+                  "value": "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+                },
+                {
+                  "name": "USDC",
+                  "value": "0xA0b86a33E6441446656fe5b58Bcf32E6b76e2688"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "allowanceAmount",
+          "label": "Allowance Amount",
+          "type": "text"
+        },
+        {
+          "name": "resetTimeMin",
+          "label": "Reset Time (minutes)",
+          "type": "text"
+        },
+        {
+          "name": "resetBaseMin",
+          "label": "Reset Base Time (minutes, 0 for current time)",
+          "type": "text"
+        }
+      ],
+      "onInputUpdate": [
+        {
+          "variable": "context.tokenDecimals",
+          "value": {
+            "type": "eth_call",
+            "id": "eth_call_decimals",
+            "data": {
+              "method": "function decimals() public view returns (uint8)",
+              "to": "inputs.token",
+              "args": [],
+              "errorMessage": "Unable to fetch token decimals. Check if the token address is correct."
+            }
+          }
+        },
+        {
+          "variable": "context.tokenSymbol",
+          "value": {
+            "type": "eth_call",
+            "id": "eth_call_symbol",
+            "data": {
+              "method": "function symbol() public view returns (string)",
+              "to": "inputs.token",
+              "args": [],
+              "errorMessage": "Unable to fetch token symbol."
+            }
+          }
+        }
+      ],
+      "onUpdateValidations": [],
+      "onFinalize": {
+        "to": "inputs.moduleAddress",
+        "value": "0",
+        "calldataArgs": [
+          "inputs.delegate",
+          "inputs.token",
+          "inputs.allowanceAmount",
+          "inputs.resetTimeMin",
+          "inputs.resetBaseMin"
+        ]
+      },
+      "detailsView": [
+        {
+          "label": "Module Address",
+          "value": "inputs.moduleAddress",
+          "type": "Text"
+        },
+        {
+          "label": "Token",
+          "value": "context.tokenSymbol",
+          "type": "Text"
+        },
+        {
+          "label": "Token Decimals",
+          "value": "context.tokenDecimals",
+          "type": "Text"
+        },
+        {
+          "label": "Delegate Address",
+          "value": "inputs.delegate",
+          "type": "Text"
+        },
+        {
+          "label": "Allowance Amount",
+          "value": "inputs.allowanceAmount",
+          "type": "Text"
+        },
+        {
+          "label": "Reset Time (minutes)",
+          "value": "inputs.resetTimeMin",
+          "type": "Text"
+        }
+      ]
+    },
+    {
+      "name": "Reset Allowance",
+      "display": {
+        "description": "Reset the spent amount for a delegate's token allowance"
+      },
+      "functionSignature": "function resetAllowance(address delegate, address token)",
+      "summaryView": "contractCall",
+      "context": {
+        "tokenSymbol": {
+          "type": "string",
+          "defaultValue": ""
+        },
+        "currentSpent": {
+          "type": "uint256",
+          "defaultValue": "0"
+        },
+        "totalAllowance": {
+          "type": "uint256",
+          "defaultValue": "0"
+        }
+      },
+      "inputs": [
+        {
+          "name": "moduleAddress",
+          "label": "Allowance Module Address",
+          "type": "address"
+        },
+        {
+          "name": "delegate",
+          "label": "Delegate Address",
+          "type": "address"
+        },
+        {
+          "name": "token",
+          "label": "Token Address",
+          "type": "selectOneWithFreeSoloAddress",
+          "options": [
+            {
+              "chainId": 1,
+              "options": [
+                {
+                  "name": "USDT",
+                  "value": "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+                },
+                {
+                  "name": "USDC",
+                  "value": "0xA0b86a33E6441446656fe5b58Bcf32E6b76e2688"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "onInputUpdate": [
+        {
+          "variable": "context.tokenSymbol",
+          "value": {
+            "type": "eth_call",
+            "id": "eth_call_symbol",
+            "data": {
+              "method": "function symbol() public view returns (string)",
+              "to": "inputs.token",
+              "args": [],
+              "errorMessage": "Unable to fetch token symbol."
+            }
+          }
+        }
+      ],
+      "onUpdateValidations": [],
+      "onFinalize": {
+        "to": "inputs.moduleAddress",
+        "value": "0",
+        "calldataArgs": ["inputs.delegate", "inputs.token"]
+      },
+      "detailsView": [
+        {
+          "label": "Module Address",
+          "value": "inputs.moduleAddress",
+          "type": "Text"
+        },
+        {
+          "label": "Token",
+          "value": "context.tokenSymbol",
+          "type": "Text"
+        },
+        {
+          "label": "Delegate Address",
+          "value": "inputs.delegate",
+          "type": "Text"
+        },
+        {
+          "label": "Current Spent",
+          "value": "context.currentSpent",
+          "type": "Text"
+        },
+        {
+          "label": "Total Allowance",
+          "value": "context.totalAllowance",
+          "type": "Text"
+        }
+      ]
+    },
+    {
+      "name": "Delete Allowance",
+      "display": {
+        "description": "Completely remove a delegate's token allowance"
+      },
+      "functionSignature": "function deleteAllowance(address delegate, address token)",
+      "summaryView": "contractCall",
+      "context": {
+        "tokenSymbol": {
+          "type": "string",
+          "defaultValue": ""
+        },
+        "currentAllowance": {
+          "type": "uint256",
+          "defaultValue": "0"
+        }
+      },
+      "inputs": [
+        {
+          "name": "moduleAddress",
+          "label": "Allowance Module Address",
+          "type": "address"
+        },
+        {
+          "name": "delegate",
+          "label": "Delegate Address",
+          "type": "address"
+        },
+        {
+          "name": "token",
+          "label": "Token Address",
+          "type": "selectOneWithFreeSoloAddress",
+          "options": [
+            {
+              "chainId": 1,
+              "options": [
+                {
+                  "name": "USDT",
+                  "value": "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+                },
+                {
+                  "name": "USDC",
+                  "value": "0xA0b86a33E6441446656fe5b58Bcf32E6b76e2688"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "onInputUpdate": [
+        {
+          "variable": "context.tokenSymbol",
+          "value": {
+            "type": "eth_call",
+            "id": "eth_call_symbol",
+            "data": {
+              "method": "function symbol() public view returns (string)",
+              "to": "inputs.token",
+              "args": [],
+              "errorMessage": "Unable to fetch token symbol."
+            }
+          }
+        }
+      ],
+      "onUpdateValidations": [],
+      "onFinalize": {
+        "to": "inputs.moduleAddress",
+        "value": "0",
+        "calldataArgs": ["inputs.delegate", "inputs.token"]
+      },
+      "detailsView": [
+        {
+          "label": "Module Address",
+          "value": "inputs.moduleAddress",
+          "type": "Text"
+        },
+        {
+          "label": "Token",
+          "value": "context.tokenSymbol",
+          "type": "Text"
+        },
+        {
+          "label": "Delegate Address",
+          "value": "inputs.delegate",
+          "type": "Text"
+        },
+        {
+          "label": "Current Allowance",
+          "value": "context.currentAllowance",
+          "type": "Text"
+        }
+      ]
+    }
+  ]
+}

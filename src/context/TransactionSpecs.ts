@@ -1,4 +1,5 @@
 import Aave from "../templates/Aave.json";
+import AllowanceModule from "../templates/AllowanceModule.json";
 import ERC20Spec from "../templates/ERC20.json";
 import NativeTransfer from "../templates/NativeTransfer.json";
 import SafeSpec from "../templates/Safe.json";
@@ -12,6 +13,7 @@ const transactionBuilderSpec: TransactionGroupSpec[] = [
   ERC20Spec,
   SmartContractCall,
   SafeSpec,
+  AllowanceModule,
 ] as TransactionGroupSpec[];
 
 export default transactionBuilderSpec;
