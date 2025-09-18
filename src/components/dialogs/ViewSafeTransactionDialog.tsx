@@ -1,8 +1,20 @@
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Paper,
+  Typography,
+  useTheme,
+} from "@mui/material";
 import type React from "react";
 import type { SafeTransactionParams } from "../../utils/utils";
 import SafeTransactionForm from "../common/SafeTransactionForm";
+import TransactionHash from "../common/TransactionHash";
 
 interface ViewSafeTransactionDialogProps {
   open: boolean;
@@ -17,6 +29,8 @@ const ViewSafeTransactionDialog: React.FC<ViewSafeTransactionDialogProps> = ({
   safeTransaction,
   safeTransactionHash,
 }) => {
+  const theme = useTheme();
+
   const handleCopyToClipboard = () => {
     const transactionDetails = {
       to: safeTransaction?.to,
@@ -38,13 +52,47 @@ const ViewSafeTransactionDialog: React.FC<ViewSafeTransactionDialogProps> = ({
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
       <DialogTitle>Safe Transaction Details</DialogTitle>
       <DialogContent>
+        {/* Highlighted Transaction Hash Section */}
+        <Paper
+          elevation={2}
+          sx={{
+            mt: 2,
+            mb: 3,
+            p: 3,
+            borderRadius: 2,
+          }}
+        >
+          <Typography
+            variant="h6"
+            sx={{
+              mb: 2,
+              color: theme.palette.primary.main,
+              fontWeight: 600,
+            }}
+          >
+            Safe Transaction Hash
+          </Typography>
+          <Box
+            sx={{
+              p: 2,
+              backgroundColor: theme.palette.background.default,
+              borderRadius: 1,
+              border: `1px solid ${theme.palette.primary.main}33`,
+            }}
+          >
+            <TransactionHash hash={safeTransactionHash} />
+          </Box>
+        </Paper>
+
+        <Divider sx={{ my: 2, borderColor: theme.palette.divider }} />
+
         {safeTransaction ? (
-          <>
-            <SafeTransactionForm transaction={safeTransaction} readOnly />
-            <Typography variant="body2" sx={{ marginTop: 2 }}>
-              Safe Transaction Hash: {safeTransactionHash}
+          <Box>
+            <Typography variant="h6" sx={{ mb: 2, color: theme.palette.text.primary }}>
+              Transaction Details
             </Typography>
-          </>
+            <SafeTransactionForm transaction={safeTransaction} readOnly />
+          </Box>
         ) : (
           <Typography>No transaction details available</Typography>
         )}

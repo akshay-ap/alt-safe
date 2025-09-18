@@ -1,6 +1,7 @@
-import { TextField, type TextFieldProps } from "@mui/material";
+import { Box, TextField, type TextFieldProps } from "@mui/material";
 import React from "react";
 import { isAddress } from "viem";
+import { useAddressBookSelector } from "./AddressBookSelector";
 
 interface AddressInputProps extends Omit<TextFieldProps, "error" | "helperText" | "onChange"> {
   value: string;
@@ -10,6 +11,7 @@ interface AddressInputProps extends Omit<TextFieldProps, "error" | "helperText" 
   errorText?: string;
   allowEmpty?: boolean;
   onValidationChange?: (isValid: boolean) => void;
+  showAddressBook?: boolean;
 }
 
 const AddressInput: React.FC<AddressInputProps> = ({
@@ -20,11 +22,20 @@ const AddressInput: React.FC<AddressInputProps> = ({
   errorText = "Invalid address format",
   allowEmpty = true,
   onValidationChange,
+  showAddressBook = true,
   ...textFieldProps
 }) => {
   const isEmpty = !value || value.trim() === "";
   const isValidAddress = isEmpty ? allowEmpty : isAddress(value);
   const showError = validateOnChange && !isEmpty && !isValidAddress;
+
+  // Use the address book selector hook
+  const { iconButton, menuComponent } = useAddressBookSelector({
+    showAddressBook,
+    onAddressSelect: onChange,
+    size: "small",
+    variant: "icon",
+  });
 
   // Call validation callback when validation state changes
   React.useEffect(() => {
@@ -38,16 +49,24 @@ const AddressInput: React.FC<AddressInputProps> = ({
   };
 
   return (
-    <TextField
-      {...textFieldProps}
-      value={value}
-      onChange={handleChange}
-      error={showError}
-      helperText={showError ? errorText : helperText}
-      placeholder="0x..."
-      fullWidth
-      variant="outlined"
-    />
+    <Box>
+      <TextField
+        {...textFieldProps}
+        value={value}
+        onChange={handleChange}
+        error={showError}
+        helperText={showError ? errorText : helperText}
+        placeholder="0x..."
+        fullWidth
+        variant="outlined"
+        slotProps={{
+          input: {
+            endAdornment: iconButton,
+          },
+        }}
+      />
+      {menuComponent}
+    </Box>
   );
 };
 

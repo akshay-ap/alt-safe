@@ -23,49 +23,13 @@ import {
 } from "@mui/material";
 import type React from "react";
 import { Fragment, useState } from "react";
-import type { Address } from "viem";
+import { useCreateSafeContext } from "../../context/CreateSafeContext";
 import FallbackHandlerPanel from "./panels/FallbackHandlerPanel";
 import ModulesPanel from "./panels/ModulesPanel";
 import NameLabelsPanel from "./panels/NameLabelsPanel";
 import OwnersPanel from "./panels/OwnersPanel";
 import SaltPanel from "./panels/SaltPanel";
 import SingletonPanel from "./panels/SingletonPanel";
-
-export interface ConfigurationPanelsProps {
-  // Name and Labels
-  safeName: string;
-  setSafeName: (name: string) => void;
-  safeLabels: string[];
-  setSafeLabels: (labels: string[]) => void;
-
-  // Singleton
-  singleton: string;
-  setSingleton: (singleton: string) => void;
-  singletonL2: string;
-  setSingletonL2: (singletonL2: string) => void;
-  useSingletonL2: boolean;
-  setUseSingletonL2: (useSingletonL2: boolean) => void;
-
-  // Owners
-  owners: Address[];
-  setOwners: (owners: Address[]) => void;
-  threshold: number;
-  setThreshold: (threshold: number) => void;
-
-  // Salt
-  salt: bigint;
-  setSalt: (salt: bigint) => void;
-
-  // Modules (placeholder for future implementation)
-  modules: Address[];
-  setModules: (modules: Address[]) => void;
-  setupModulesAddress: Address;
-  setSetupModulesAddress: (address: Address) => void;
-
-  // Fallback Handler
-  fallbackHandler: Address;
-  setFallbackHandler: (handler: Address) => void;
-}
 
 export enum ConfigurationSection {
   NAME_LABELS = "name-labels",
@@ -109,10 +73,36 @@ const NAVIGATION_ITEMS = [
   },
 ];
 
-const ConfigurationPanels: React.FC<ConfigurationPanelsProps> = (props) => {
+const ConfigurationPanels: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [activeSection, setActiveSection] = useState<ConfigurationSection>(ConfigurationSection.NAME_LABELS);
+
+  const {
+    // Name and Labels
+    safeName,
+    setSafeName,
+    safeLabels,
+    setSafeLabels,
+    // Singleton
+    singleton,
+    setSingleton,
+    singletonL2,
+    setSingletonL2,
+    useSingletonL2,
+    setUseSingletonL2,
+    // Owners
+    owners,
+    setOwners,
+    threshold,
+    setThreshold,
+    // Salt
+    salt,
+    setSalt,
+    // Fallback Handler
+    fallbackHandler,
+    setFallbackHandler,
+  } = useCreateSafeContext();
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: ConfigurationSection) => {
     setActiveSection(newValue);
@@ -123,47 +113,31 @@ const ConfigurationPanels: React.FC<ConfigurationPanelsProps> = (props) => {
       case ConfigurationSection.NAME_LABELS:
         return (
           <NameLabelsPanel
-            safeName={props.safeName}
-            setSafeName={props.setSafeName}
-            safeLabels={props.safeLabels}
-            setSafeLabels={props.setSafeLabels}
+            safeName={safeName}
+            setSafeName={setSafeName}
+            safeLabels={safeLabels}
+            setSafeLabels={setSafeLabels}
           />
         );
       case ConfigurationSection.SINGLETON:
         return (
           <SingletonPanel
-            singleton={props.singleton}
-            setSingleton={props.setSingleton}
-            singletonL2={props.singletonL2}
-            setSingletonL2={props.setSingletonL2}
-            useSingletonL2={props.useSingletonL2}
-            setUseSingletonL2={props.setUseSingletonL2}
+            singleton={singleton}
+            setSingleton={setSingleton}
+            singletonL2={singletonL2}
+            setSingletonL2={setSingletonL2}
+            useSingletonL2={useSingletonL2}
+            setUseSingletonL2={setUseSingletonL2}
           />
         );
       case ConfigurationSection.OWNERS:
-        return (
-          <OwnersPanel
-            owners={props.owners}
-            setOwners={props.setOwners}
-            threshold={props.threshold}
-            setThreshold={props.setThreshold}
-          />
-        );
+        return <OwnersPanel owners={owners} setOwners={setOwners} threshold={threshold} setThreshold={setThreshold} />;
       case ConfigurationSection.SALT:
-        return <SaltPanel salt={props.salt} setSalt={props.setSalt} />;
+        return <SaltPanel salt={salt} setSalt={setSalt} />;
       case ConfigurationSection.MODULES:
-        return (
-          <ModulesPanel
-            modules={props.modules}
-            setModules={props.setModules}
-            setupModulesAddress={props.setupModulesAddress}
-            setSetupModulesAddress={props.setSetupModulesAddress}
-          />
-        );
+        return <ModulesPanel />;
       case ConfigurationSection.FALLBACK_HANDLER:
-        return (
-          <FallbackHandlerPanel fallbackHandler={props.fallbackHandler} setFallbackHandler={props.setFallbackHandler} />
-        );
+        return <FallbackHandlerPanel fallbackHandler={fallbackHandler} setFallbackHandler={setFallbackHandler} />;
       default:
         return null;
     }
