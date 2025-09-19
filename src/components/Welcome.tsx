@@ -4,8 +4,8 @@ import { useNavigate } from "react-router-dom";
 import FeatureBox from "./common/Features";
 import "../index.css";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import ContactsIcon from "@mui/icons-material/Contacts";
 import FeaturedPlayListIcon from "@mui/icons-material/FeaturedPlayList";
-import IntegrationInstructionsIcon from "@mui/icons-material/IntegrationInstructions";
 import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
 import ShieldIcon from "@mui/icons-material/Shield";
 import { supportedChains } from "../wagmi";
@@ -170,9 +170,9 @@ const Welcome: React.FC = () => {
         <Grid container spacing={4} sx={{ marginBottom: 6 }}>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <FeatureBox
-              icon={<IntegrationInstructionsIcon sx={{ fontSize: 40, color: theme.palette.primary.main }} />}
-              title="Templates"
-              description="Easily extend functionality using JSON templates for common operations"
+              icon={<ContactsIcon sx={{ fontSize: 40, color: theme.palette.primary.main }} />}
+              title="Address book"
+              description="Easily manage your go-to addresses, fully Safe Wallet compatible"
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -186,7 +186,7 @@ const Welcome: React.FC = () => {
             <FeatureBox
               icon={<FeaturedPlayListIcon sx={{ fontSize: 40, color: theme.palette.primary.main }} />}
               title="All-inclusive"
-              description="Execute multi-signature and batched transactions seamlessly"
+              description="Execute multi-signature and batched transactions"
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
