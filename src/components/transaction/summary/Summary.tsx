@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import type React from "react";
 import type { Transaction } from "../../../context/types";
-import TransactionCard from "../create/TransactionCard";
+import TransactionCard from "./TransactionCard";
 
 interface SummaryProps {
   transactions: Transaction[];
