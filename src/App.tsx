@@ -14,7 +14,7 @@ import SafeInfo from "./components/dashboard/index.tsx";
 import AggregateSignaturesAndExecute from "./components/transaction/AggregateSignaturesAndExecute.tsx";
 import ApproveSafeTransactionForm from "./components/transaction/ApproveSafeTransaction.tsx";
 import ApproveTransactionHash from "./components/transaction/ApproveTransctionHash.tsx";
-import CreateTransaction from "./components/transaction/CreateTransaction.tsx";
+import CreateTransaction from "./components/transaction/create/CreateTransaction.tsx";
 import { AddressBookProvider } from "./context/AddressBookContext";
 import { WalletProvider } from "./context/WalletContext";
 import AppThemeProvider from "./theme/AppThemeProvider.tsx";
