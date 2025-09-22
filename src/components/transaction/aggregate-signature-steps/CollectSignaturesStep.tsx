@@ -4,7 +4,7 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 import { Alert, Box, Button, Card, CardContent, Chip, CircularProgress, TextField, Typography } from "@mui/material";
 import type { SignatureImportState, Transaction } from "../../../context/types";
 import AccountAddress from "../../common/AccountAddress";
-import Summary from "../Summary";
+import Summary from "../summary/Summary";
 
 const CollectSignaturesStep: React.FC<{
   signatureStates: SignatureImportState[];
