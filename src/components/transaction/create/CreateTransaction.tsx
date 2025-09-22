@@ -51,7 +51,7 @@ import { deleteDraftTransaction, getDraftTransactionById, updateDraftTransaction
 import AccountAddress from "../../common/AccountAddress";
 import LoadTransactionDialog from "../../dialogs/LoadTransactionDialog";
 import SaveTransactionDialog from "../../dialogs/SaveTransactionDialog";
-import TransactionSummaryPanel from "./TransactionSummaryPanel";
+import TransactionSummaryPanel from "../summary/TransactionSummaryPanel";
 
 const CreateTransaction: React.FC = () => {
   const theme = useTheme();
