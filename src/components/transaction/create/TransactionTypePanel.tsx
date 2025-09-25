@@ -87,14 +87,14 @@ const TransactionTypePanel: React.FC<TransactionTypePanelProps> = ({ onSelect })
   const [tabValue, setTabValue] = useState<number>(0);
   const theme = useTheme();
 
-	const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
-		setTabValue(newValue);
-		
-		// Notify parent when Transaction Defaults tab is selected
-		if (newValue === 1) {
-			onSelect("TransactionDefaults", "TransactionDefaults");
-		}
-	};  // Memoize the transaction types processing
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
+    setTabValue(newValue);
+
+    // Notify parent when Transaction Defaults tab is selected
+    if (newValue === 1) {
+      onSelect("TransactionDefaults", "TransactionDefaults");
+    }
+  }; // Memoize the transaction types processing
   const transactionGroups = useMemo(() => {
     let groups = txBuilderSpec.reduce<Record<string, TransactionGroup>>((acc, group) => {
       acc[group.groupName] = {

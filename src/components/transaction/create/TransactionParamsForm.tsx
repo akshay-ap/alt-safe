@@ -1,5 +1,6 @@
 import { Box, Button, TextField, Typography } from "@mui/material";
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 
 interface TransactionParamsFormProps {
   onSave?: (params: TransactionParams) => void;
@@ -28,7 +29,7 @@ const TransactionParamsForm: React.FC<TransactionParamsFormProps> = ({ onSave })
       refundTokenAmount: refundTokenAmount.trim() || undefined,
       refundToAddress: refundToAddress.trim() || undefined,
     };
-    
+
     onSave?.(params);
   };
 
@@ -45,11 +46,12 @@ const TransactionParamsForm: React.FC<TransactionParamsFormProps> = ({ onSave })
       <Typography variant="h6" gutterBottom id="transaction-params-title">
         Transaction Defaults
       </Typography>
-      
+
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }} id="transaction-params-description">
-        Configure default parameters that will be applied to all transactions. Leave fields empty to use automatic values.
+        Configure default parameters that will be applied to all transactions. Leave fields empty to use automatic
+        values.
       </Typography>
-      
+
       <TextField
         id="nonce-input"
         fullWidth
@@ -60,7 +62,7 @@ const TransactionParamsForm: React.FC<TransactionParamsFormProps> = ({ onSave })
         size="small"
         helperText="Override the transaction nonce. Leave empty for automatic calculation."
       />
-      
+
       <TextField
         id="gas-limit-input"
         fullWidth
@@ -71,7 +73,7 @@ const TransactionParamsForm: React.FC<TransactionParamsFormProps> = ({ onSave })
         size="small"
         helperText="Set a custom gas limit. Leave empty for automatic gas estimation."
       />
-      
+
       <TextField
         id="refund-token-address-input"
         fullWidth
@@ -82,7 +84,7 @@ const TransactionParamsForm: React.FC<TransactionParamsFormProps> = ({ onSave })
         size="small"
         helperText="Token address for transaction fee refunds. Default is ETH (0x0000000000000000000000000000000000000000)."
       />
-      
+
       <TextField
         id="refund-token-amount-input"
         fullWidth
@@ -93,7 +95,7 @@ const TransactionParamsForm: React.FC<TransactionParamsFormProps> = ({ onSave })
         size="small"
         helperText="Maximum amount of refund tokens to pay for transaction fees."
       />
-      
+
       <TextField
         id="refund-to-address-input"
         fullWidth
@@ -106,23 +108,11 @@ const TransactionParamsForm: React.FC<TransactionParamsFormProps> = ({ onSave })
       />
 
       <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
-        <Button
-          id="save-params-button"
-          variant="contained"
-          color="primary"
-          onClick={handleSave}
-          sx={{ flex: 1 }}
-        >
+        <Button id="save-params-button" variant="contained" color="primary" onClick={handleSave} sx={{ flex: 1 }}>
           Save Defaults
         </Button>
-        
-        <Button
-          id="reset-params-button"
-          variant="outlined"
-          color="secondary"
-          onClick={handleReset}
-          sx={{ flex: 1 }}
-        >
+
+        <Button id="reset-params-button" variant="outlined" color="secondary" onClick={handleReset} sx={{ flex: 1 }}>
           Reset
         </Button>
       </Box>
