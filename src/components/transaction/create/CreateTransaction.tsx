@@ -44,6 +44,7 @@ import { config } from "../../../wagmi";
 import ViewSafeTransactionDialog from "../../dialogs/ViewSafeTransactionDialog";
 import WaitForTransactionDialog from "../../dialogs/WaitForTransactionDialog";
 import TransactionBuilder from "./TransactionBuilder";
+import type { TransactionParams } from "./TransactionParamsForm";
 
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import SaveIcon from "@mui/icons-material/Save";
@@ -102,10 +103,17 @@ const CreateTransaction: React.FC = () => {
     setSnackbarMessage("Transaction added to batch");
     setSnackbarOpen(true);
 
-    // Collapse the builder if on mobile after adding
+        // Collapse the builder if on mobile after adding
     if (isMobile) {
       setIsSummaryExpanded(true);
     }
+  };
+
+  const handleTransactionParamsSave = (params: TransactionParams) => {
+    console.log("Transaction params saved:", params);
+    // TODO: Store these params in context or state to be used when creating transactions
+    setSnackbarMessage("Transaction defaults saved");
+    setSnackbarOpen(true);
   };
 
   const getExportHex = (txs: Transaction[], safeTx: SafeTransactionParams, safeTxHash: `0x${string}`): string => {
@@ -669,6 +677,7 @@ const CreateTransaction: React.FC = () => {
                     setImportHex={setImportHex}
                     handleAddTransaction={handleAddTransaction}
                     handleImportTransactions={handleImportTransactions}
+                    onTransactionParamsSave={handleTransactionParamsSave}
                   />
                 </Box>
               </Paper>
