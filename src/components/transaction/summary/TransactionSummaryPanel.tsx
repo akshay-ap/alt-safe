@@ -15,7 +15,6 @@ interface TransactionSummaryPanelProps {
   isSummaryExpanded?: boolean;
   toggleSummaryExpanded?: () => void;
   height?: string;
-  step?: number; // Add step prop to adjust height based on step
 }
 
 const TransactionSummaryPanel: React.FC<TransactionSummaryPanelProps> = ({
@@ -25,27 +24,14 @@ const TransactionSummaryPanel: React.FC<TransactionSummaryPanelProps> = ({
   isMobile,
   isSummaryExpanded,
   toggleSummaryExpanded,
-  height = "calc(100vh - 200px)",
-  step = 0,
 }) => {
-  // Adjust height based on step to ensure consistent heights
-  // Step 0: Build, Step 1: Review & Sign, Step 2: Execute
-  const stepHeight =
-    step === 0
-      ? "calc(100vh - 250px)" // Build step needs more space adjustment
-      : "calc(100vh - 200px)"; // Review and Execute steps
-
-  const finalHeight = height === "calc(100vh - 200px)" ? stepHeight : height;
-
   return (
     <Paper
       elevation={0}
       variant="outlined"
       sx={{
-        height: isMobile ? (viewOnly ? "auto" : finalHeight) : finalHeight,
         display: "flex",
         flexDirection: "column",
-        maxHeight: finalHeight, // Ensure it doesn't exceed the calculated height
       }}
     >
       <Box

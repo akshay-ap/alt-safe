@@ -16,6 +16,7 @@ import ApproveSafeTransactionForm from "./components/transaction/ApproveSafeTran
 import ApproveTransactionHash from "./components/transaction/ApproveTransctionHash.tsx";
 import CreateTransaction from "./components/transaction/create/CreateTransaction.tsx";
 import { AddressBookProvider } from "./context/AddressBookContext";
+import { CreateTransactionProvider } from "./context/CreateTransactionContext";
 import { WalletProvider } from "./context/WalletContext";
 import AppThemeProvider from "./theme/AppThemeProvider.tsx";
 
@@ -42,7 +43,14 @@ function App() {
                 <Route path="/" element={<Welcome />} />
                 <Route path="/welcome" element={<Welcome />} />
                 <Route element={<NavbarLayout />}>
-                  <Route path="/create-transaction/*" element={<CreateTransaction />} />
+                  <Route
+                    path="/create-transaction/*"
+                    element={
+                      <CreateTransactionProvider>
+                        <CreateTransaction />
+                      </CreateTransactionProvider>
+                    }
+                  />
                   <Route path="/home" element={<Home />} />
                   <Route path="/history" element={<SafeTransactionHistory />} />
                   <Route path="/import" element={<ImportSafe />} />
