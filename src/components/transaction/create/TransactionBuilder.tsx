@@ -7,6 +7,7 @@ import type { Transaction, TransactionSpec } from "../../../context/types";
 import ErrorBoundary from "../../common/ErrorBoundary";
 import EncodeFunctionCall from "./EncodeFunctionCall";
 import TransactionInputBuilder from "./TransactionInputBuilder";
+import TransactionParamsForm, { type TransactionParams } from "./TransactionParamsForm";
 import TransactionTypePanel from "./TransactionTypePanel";
 
 interface TransactionBuilderProps {
@@ -14,6 +15,7 @@ interface TransactionBuilderProps {
   setImportHex: (value: `0x${string}`) => void;
   handleAddTransaction: (newTransaction: Transaction) => void;
   handleImportTransactions: () => void;
+  onTransactionParamsSave?: (params: TransactionParams) => void;
 }
 
 const TransactionBuilder: React.FC<TransactionBuilderProps> = ({
@@ -21,11 +23,16 @@ const TransactionBuilder: React.FC<TransactionBuilderProps> = ({
   setImportHex,
   handleAddTransaction,
   handleImportTransactions,
+  onTransactionParamsSave,
 }) => {
   const navigate = useNavigate();
 
   const handleTransactionTypeSelect = (group: string, type: string) => {
-    navigate(`/create-transaction/${group}/${type}`);
+    if (group === "TransactionDefaults" && type === "TransactionDefaults") {
+      navigate("/create-transaction/transaction-defaults");
+    } else {
+      navigate(`/create-transaction/${group}/${type}`);
+    }
   };
 
   return (
@@ -44,6 +51,14 @@ const TransactionBuilder: React.FC<TransactionBuilderProps> = ({
         id="transaction-input-panel-container"
       >
         <Routes>
+          <Route
+            path="/transaction-defaults"
+            element={
+              <Grid id="tx-params-form" size={12}>
+                <TransactionParamsForm onSave={onTransactionParamsSave} />
+              </Grid>
+            }
+          />
           <Route
             path="/:group/:type"
             element={
