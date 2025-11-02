@@ -11,8 +11,8 @@ import {
   Typography,
 } from "@mui/material";
 import type React from "react";
-import type { Transaction } from "../../context/types";
-import TransactionCard from "./transactionBuilder/TransactionCard";
+import type { Transaction } from "../../../context/types";
+import TransactionCard from "./TransactionCard";
 
 interface SummaryProps {
   transactions: Transaction[];

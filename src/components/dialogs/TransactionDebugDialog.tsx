@@ -2,7 +2,7 @@ import { Close as CloseIcon, Code as CodeIcon } from "@mui/icons-material";
 import { Dialog, DialogContent, DialogTitle, IconButton, useMediaQuery, useTheme } from "@mui/material";
 import type React from "react";
 import type { TransactionSpec } from "../../context/types";
-import TransactionDebugView from "../transaction/transactionBuilder/TransactionDebugView";
+import TransactionDebugView from "../transaction/create/TransactionDebugView";
 
 interface TransactionDebugDialogProps {
   open: boolean;

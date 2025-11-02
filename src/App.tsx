@@ -9,13 +9,14 @@ import SignMessage from "./components/SignMessage.tsx";
 import Welcome from "./components/Welcome.tsx";
 import BottomBar from "./components/app/BottomBar.tsx";
 import NavigationBar from "./components/app/NavigationBar.tsx";
-import CreateSafe from "./components/createSafe/CreateSafe.tsx";
-import SafeInfo from "./components/safeInfo/SafeInfo.tsx";
+import CreateSafe from "./components/create-account/CreateSafe.tsx";
+import SafeInfo from "./components/dashboard/index.tsx";
 import AggregateSignaturesAndExecute from "./components/transaction/AggregateSignaturesAndExecute.tsx";
 import ApproveSafeTransactionForm from "./components/transaction/ApproveSafeTransaction.tsx";
 import ApproveTransactionHash from "./components/transaction/ApproveTransctionHash.tsx";
-import CreateTransaction from "./components/transaction/CreateTransaction.tsx";
+import CreateTransaction from "./components/transaction/create/CreateTransaction.tsx";
 import { AddressBookProvider } from "./context/AddressBookContext";
+import { CreateTransactionProvider } from "./context/CreateTransactionContext";
 import { WalletProvider } from "./context/WalletContext";
 import AppThemeProvider from "./theme/AppThemeProvider.tsx";
 
@@ -42,7 +43,14 @@ function App() {
                 <Route path="/" element={<Welcome />} />
                 <Route path="/welcome" element={<Welcome />} />
                 <Route element={<NavbarLayout />}>
-                  <Route path="/create-transaction/*" element={<CreateTransaction />} />
+                  <Route
+                    path="/create-transaction/*"
+                    element={
+                      <CreateTransactionProvider>
+                        <CreateTransaction />
+                      </CreateTransactionProvider>
+                    }
+                  />
                   <Route path="/home" element={<Home />} />
                   <Route path="/history" element={<SafeTransactionHistory />} />
                   <Route path="/import" element={<ImportSafe />} />

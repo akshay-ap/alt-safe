@@ -1,0 +1,250 @@
+{
+  "groupName": "WETH",
+  "logo": {
+    "type": "character",
+    "value": "W"
+  },
+  "tags": ["Token"],
+  "chainIds": [0],
+  "actions": [
+    {
+      "name": "Deposit",
+      "display": {
+        "description": "Wrap ETH into WETH tokens by depositing Ether"
+      },
+      "functionSignature": "function deposit() public payable",
+      "summaryView": "contractCall",
+      "context": {
+        "ethBalance": {
+          "type": "uint256",
+          "defaultValue": "0"
+        },
+        "wethBalance": {
+          "type": "uint256",
+          "defaultValue": "0"
+        }
+      },
+      "inputs": [
+        {
+          "name": "wethAddress",
+          "label": "WETH Contract Address",
+          "type": "address",
+          "options": [
+            {
+              "chainId": 1,
+              "options": [
+                {
+                  "name": "WETH (Ethereum)",
+                  "value": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+                }
+              ]
+            },
+            {
+              "chainId": 0,
+              "options": [
+                {
+                  "name": "WETH (Ethereum)",
+                  "value": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "payableAmount",
+          "label": "ETH Amount to Wrap",
+          "type": "text"
+        }
+      ],
+      "onInputUpdate": [
+        {
+          "variable": "context.ethBalance",
+          "value": {
+            "type": "eth_getBalance",
+            "id": "eth_call_eth_balance",
+            "data": {
+              "params": ["context.safeAddress"],
+              "errorMessage": "Unable to fetch ETH balance."
+            }
+          }
+        },
+        {
+          "variable": "context.wethBalance",
+          "value": {
+            "type": "eth_call",
+            "id": "eth_call_weth_balance",
+            "data": {
+              "method": "function balanceOf(address owner) public view returns (uint256 balance)",
+              "to": "inputs.wethAddress",
+              "args": ["context.safeAddress"],
+              "errorMessage": "Unable to fetch WETH balance."
+            }
+          }
+        }
+      ],
+      "detailsView": [
+        {
+          "label": "Current ETH Balance",
+          "value": "context.ethBalance",
+          "type": "Text"
+        },
+        {
+          "label": "Current WETH Balance",
+          "value": "context.wethBalance",
+          "type": "Text"
+        }
+      ],
+      "onUpdateValidations": [
+        {
+          "variable": "inputs.payableAmount",
+          "type": "regex",
+          "id": "validate_amount_format",
+          "value": "^\\d+(\\.\\d{1,18})?$",
+          "errorMessage": "Amount must be a valid number with up to 18 decimal places"
+        },
+        {
+          "variable": "inputs.payableAmount",
+          "type": "expression",
+          "id": "validate_positive_amount",
+          "value": "inputs.payableAmount > 0",
+          "errorMessage": "Amount must be greater than 0"
+        },
+        {
+          "variable": "inputs.payableAmount",
+          "type": "expression",
+          "id": "validate_sufficient_balance",
+          "value": "bigIntGte(context.ethBalance, inputs.payableAmount)",
+          "errorMessage": "Insufficient ETH balance"
+        }
+      ],
+      "onFinalize": {
+        "to": "inputs.wethAddress",
+        "value": "inputs.payableAmount",
+        "calldataArgs": []
+      }
+    },
+    {
+      "name": "Withdraw",
+      "display": {
+        "description": "Unwrap WETH tokens back to ETH by withdrawing"
+      },
+      "functionSignature": "function withdraw(uint wad) public",
+      "summaryView": "contractCall",
+      "context": {
+        "ethBalance": {
+          "type": "uint256",
+          "defaultValue": "0"
+        },
+        "wethBalance": {
+          "type": "uint256",
+          "defaultValue": "0"
+        }
+      },
+      "inputs": [
+        {
+          "name": "wethAddress",
+          "label": "WETH Contract Address",
+          "type": "address",
+          "options": [
+            {
+              "chainId": 1,
+              "options": [
+                {
+                  "name": "WETH (Ethereum)",
+                  "value": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+                }
+              ]
+            },
+            {
+              "chainId": 0,
+              "options": [
+                {
+                  "name": "WETH (Ethereum)",
+                  "value": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "withdrawAmount",
+          "label": "WETH Amount to Unwrap",
+          "type": "text"
+        }
+      ],
+      "onInputUpdate": [
+        {
+          "variable": "context.ethBalance",
+          "value": {
+            "type": "eth_getBalance",
+            "id": "eth_call_eth_balance",
+            "data": {
+              "params": ["context.safeAddress"],
+              "errorMessage": "Unable to fetch ETH balance."
+            }
+          }
+        },
+        {
+          "variable": "context.wethBalance",
+          "value": {
+            "type": "eth_call",
+            "id": "eth_call_weth_balance",
+            "data": {
+              "method": "function balanceOf(address owner) public view returns (uint256 balance)",
+              "to": "inputs.wethAddress",
+              "args": ["context.safeAddress"],
+              "errorMessage": "Unable to fetch WETH balance."
+            }
+          }
+        }
+      ],
+      "detailsView": [
+        {
+          "label": "Current ETH Balance",
+          "value": "context.ethBalance",
+          "type": "Text"
+        },
+        {
+          "label": "Current WETH Balance",
+          "value": "context.wethBalance",
+          "type": "Text"
+        }
+      ],
+      "onUpdateValidations": [
+        {
+          "variable": "inputs.wethAddress",
+          "type": "regex",
+          "id": "validate_weth_address",
+          "value": "^0x[a-fA-F0-9]{40}$",
+          "errorMessage": "Invalid WETH contract address"
+        },
+        {
+          "variable": "inputs.withdrawAmount",
+          "type": "regex",
+          "id": "validate_amount_format",
+          "value": "^\\d+(\\.\\d{1,18})?$",
+          "errorMessage": "Amount must be a valid number with up to 18 decimal places"
+        },
+        {
+          "variable": "inputs.withdrawAmount",
+          "type": "expression",
+          "id": "validate_positive_amount",
+          "value": "inputs.withdrawAmount > 0",
+          "errorMessage": "Amount must be greater than 0"
+        },
+        {
+          "variable": "inputs.withdrawAmount",
+          "type": "expression",
+          "id": "validate_sufficient_weth_balance",
+          "value": "bigIntGte(context.wethBalance, inputs.withdrawAmount)",
+          "errorMessage": "Insufficient WETH balance"
+        }
+      ],
+      "onFinalize": {
+        "to": "inputs.wethAddress",
+        "value": "0",
+        "calldataArgs": ["inputs.withdrawAmount"]
+      }
+    }
+  ]
+}

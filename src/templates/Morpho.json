@@ -1,0 +1,737 @@
+{
+  "groupName": "Morpho",
+  "logo": {
+    "type": "character",
+    "value": "M"
+  },
+  "tags": ["DeFi"],
+  "chainIds": [0],
+  "actions": [
+    {
+      "name": "Approve",
+      "display": {
+        "description": "Approve the underlying token for the vault address"
+      },
+      "functionSignature": "function approve(address _spender, uint256 _value) public returns (bool success)",
+      "summaryView": "contractCall",
+      "context": {
+        "balance": {
+          "type": "uint256",
+          "defaultValue": ""
+        },
+        "decimals": {
+          "type": "uint256",
+          "defaultValue": ""
+        },
+        "value": {
+          "type": "uint256",
+          "defaultValue": "0"
+        },
+        "allowance": {
+          "type": "uint256",
+          "defaultValue": "0"
+        }
+      },
+      "inputs": [
+        {
+          "name": "tokenAddress",
+          "type": "address",
+          "label": "Token Address (Asset)",
+          "options": [
+            {
+              "chainId": 1,
+              "options": [
+                {
+                  "name": "USDC",
+                  "value": "0xA0b86a33E6441E98Bd99A6c70B4df8b0BbE70fE7"
+                },
+                {
+                  "name": "WETH",
+                  "value": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+                }
+              ]
+            },
+            {
+              "chainId": 0,
+              "options": [
+                {
+                  "name": "USDC",
+                  "value": "0xA0b86a33E6441E98Bd99A6c70B4df8b0BbE70fE7"
+                },
+                {
+                  "name": "WETH",
+                  "value": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "spender",
+          "label": "Vault Address (Spender)",
+          "type": "address"
+        },
+        {
+          "name": "value",
+          "label": "Token Amount",
+          "type": "text"
+        }
+      ],
+      "onInputUpdate": [
+        {
+          "variable": "context.balance",
+          "value": {
+            "type": "eth_call",
+            "id": "eth_call_balance",
+            "data": {
+              "method": "function balanceOf(address _owner) public view returns (uint256 balance)",
+              "to": "inputs.tokenAddress",
+              "args": ["context.safeAddress"],
+              "errorMessage": "Unable to fetch balance. Check if the token address is correct."
+            }
+          }
+        },
+        {
+          "variable": "context.decimals",
+          "value": {
+            "type": "eth_call",
+            "id": "eth_call_decimals",
+            "data": {
+              "method": "function decimals() public view returns (uint8)",
+              "to": "inputs.tokenAddress",
+              "args": [],
+              "errorMessage": "Unable to fetch decimals. Check if the token address is correct."
+            }
+          }
+        },
+        {
+          "variable": "context.allowance",
+          "value": {
+            "type": "eth_call",
+            "id": "eth_call_allowance",
+            "data": {
+              "method": "function allowance(address _owner, address _spender) public view returns (uint256 remaining)",
+              "to": "inputs.tokenAddress",
+              "args": ["context.safeAddress", "inputs.spender"],
+              "errorMessage": "Unable to fetch allowance."
+            }
+          }
+        }
+      ],
+      "detailsView": [
+        {
+          "label": "Decimals",
+          "value": "context.decimals",
+          "type": "Text"
+        },
+        {
+          "label": "Current Allowance",
+          "value": "context.allowance",
+          "type": "Number"
+        },
+        {
+          "label": "Current Balance",
+          "value": "context.balance",
+          "type": "Number"
+        },
+        {
+          "label": "Value",
+          "value": "inputs.value",
+          "type": "Number"
+        }
+      ],
+      "onUpdateValidations": [
+        {
+          "variable": "inputs.spender",
+          "type": "regex",
+          "id": "validate_address",
+          "value": "^0x[a-fA-F0-9]{40}$",
+          "errorMessage": "Invalid vault address"
+        },
+        {
+          "variable": "inputs.value",
+          "type": "expression",
+          "id": "validate_balance",
+          "value": "context.balance>=inputs.value",
+          "errorMessage": "Insufficient balance"
+        },
+        {
+          "variable": "inputs.value",
+          "type": "regex",
+          "id": "validate_balance_number",
+          "value": "^\\d+(\\.\\d+)?$",
+          "errorMessage": "Token amount should be a number"
+        }
+      ],
+      "onFinalize": {
+        "to": "inputs.tokenAddress",
+        "value": "context.value",
+        "calldataArgs": ["inputs.spender", "inputs.value"]
+      }
+    },
+    {
+      "name": "Deposit",
+      "display": {
+        "description": "Deposit assets into the vault and receive shares"
+      },
+      "functionSignature": "function deposit(uint256 assets, address receiver) public returns (uint256 shares)",
+      "summaryView": "contractCall",
+      "context": {
+        "balance": {
+          "type": "uint256",
+          "defaultValue": ""
+        },
+        "decimals": {
+          "type": "uint256",
+          "defaultValue": ""
+        },
+        "allowance": {
+          "type": "uint256",
+          "defaultValue": "0"
+        },
+        "previewShares": {
+          "type": "uint256",
+          "defaultValue": "0"
+        },
+        "maxDeposit": {
+          "type": "uint256",
+          "defaultValue": "0"
+        }
+      },
+      "inputs": [
+        {
+          "name": "vaultAddress",
+          "label": "Vault Address",
+          "type": "address"
+        },
+        {
+          "name": "assets",
+          "label": "Asset Amount",
+          "type": "text"
+        },
+        {
+          "name": "receiver",
+          "label": "Receiver Address",
+          "type": "address"
+        }
+      ],
+      "onInputUpdate": [
+        {
+          "variable": "context.balance",
+          "value": {
+            "type": "eth_call",
+            "id": "eth_call_asset_balance",
+            "data": {
+              "method": "function asset() public view returns (address)",
+              "to": "inputs.vaultAddress",
+              "args": [],
+              "errorMessage": "Unable to fetch asset address from vault."
+            }
+          }
+        },
+        {
+          "variable": "context.decimals",
+          "value": {
+            "type": "eth_call",
+            "id": "eth_call_vault_decimals",
+            "data": {
+              "method": "function decimals() public view returns (uint8)",
+              "to": "inputs.vaultAddress",
+              "args": [],
+              "errorMessage": "Unable to fetch vault decimals."
+            }
+          }
+        },
+        {
+          "variable": "context.previewShares",
+          "value": {
+            "type": "eth_call",
+            "id": "eth_call_preview_deposit",
+            "data": {
+              "method": "function previewDeposit(uint256 assets) public view returns (uint256 shares)",
+              "to": "inputs.vaultAddress",
+              "args": ["inputs.assets"],
+              "errorMessage": "Unable to preview deposit."
+            }
+          }
+        },
+        {
+          "variable": "context.maxDeposit",
+          "value": {
+            "type": "eth_call",
+            "id": "eth_call_max_deposit",
+            "data": {
+              "method": "function maxDeposit(address receiver) public view returns (uint256 maxAssets)",
+              "to": "inputs.vaultAddress",
+              "args": ["inputs.receiver"],
+              "errorMessage": "Unable to fetch max deposit."
+            }
+          }
+        }
+      ],
+      "detailsView": [
+        {
+          "label": "Expected Shares",
+          "value": "context.previewShares",
+          "type": "Number"
+        },
+        {
+          "label": "Max Deposit",
+          "value": "context.maxDeposit",
+          "type": "Number"
+        }
+      ],
+      "onUpdateValidations": [
+        {
+          "variable": "inputs.vaultAddress",
+          "type": "regex",
+          "id": "validate_vault_address",
+          "value": "^0x[a-fA-F0-9]{40}$",
+          "errorMessage": "Invalid vault address"
+        },
+        {
+          "variable": "inputs.receiver",
+          "type": "regex",
+          "id": "validate_receiver_address",
+          "value": "^0x[a-fA-F0-9]{40}$",
+          "errorMessage": "Invalid receiver address"
+        },
+        {
+          "variable": "inputs.assets",
+          "type": "regex",
+          "id": "validate_assets_number",
+          "value": "^\\d+(\\.\\d+)?$",
+          "errorMessage": "Asset amount should be a number"
+        },
+        {
+          "variable": "inputs.assets",
+          "type": "expression",
+          "id": "validate_max_deposit",
+          "value": "inputs.assets <= context.maxDeposit",
+          "errorMessage": "Amount exceeds maximum deposit limit"
+        }
+      ],
+      "onFinalize": {
+        "to": "inputs.vaultAddress",
+        "value": "0",
+        "calldataArgs": ["inputs.assets", "inputs.receiver"]
+      }
+    },
+    {
+      "name": "Withdraw",
+      "display": {
+        "description": "Withdraw exact amount of underlying assets from the vault"
+      },
+      "functionSignature": "function withdraw(uint256 assets, address receiver, address owner) public returns (uint256 shares)",
+      "summaryView": "contractCall",
+      "context": {
+        "decimals": {
+          "type": "uint256",
+          "defaultValue": ""
+        },
+        "maxWithdraw": {
+          "type": "uint256",
+          "defaultValue": "0"
+        }
+      },
+      "inputs": [
+        {
+          "name": "vaultAddress",
+          "label": "Vault Address",
+          "type": "address"
+        },
+        {
+          "name": "assets",
+          "label": "Asset Amount to Withdraw",
+          "type": "text"
+        },
+        {
+          "name": "receiver",
+          "label": "Receiver Address",
+          "type": "address"
+        },
+        {
+          "name": "owner",
+          "label": "Owner Address",
+          "type": "address"
+        }
+      ],
+      "onInputUpdate": [
+        {
+          "variable": "context.decimals",
+          "value": {
+            "type": "eth_call",
+            "id": "eth_call_vault_decimals",
+            "data": {
+              "method": "function decimals() public view returns (uint8)",
+              "to": "inputs.vaultAddress",
+              "args": [],
+              "errorMessage": "Unable to fetch vault decimals."
+            }
+          }
+        },
+        {
+          "variable": "context.maxWithdraw",
+          "value": {
+            "type": "eth_call",
+            "id": "eth_call_max_withdraw",
+            "data": {
+              "method": "function maxWithdraw(address owner) public view returns (uint256 maxAssets)",
+              "to": "inputs.vaultAddress",
+              "args": ["inputs.owner"],
+              "errorMessage": "Unable to fetch max withdraw."
+            }
+          }
+        }
+      ],
+      "detailsView": [
+        {
+          "label": "Max Withdraw",
+          "value": "context.maxWithdraw",
+          "type": "Text"
+        }
+      ],
+      "onUpdateValidations": [
+        {
+          "variable": "inputs.vaultAddress",
+          "type": "regex",
+          "id": "validate_vault_address",
+          "value": "^0x[a-fA-F0-9]{40}$",
+          "errorMessage": "Invalid vault address"
+        },
+        {
+          "variable": "inputs.receiver",
+          "type": "regex",
+          "id": "validate_receiver_address",
+          "value": "^0x[a-fA-F0-9]{40}$",
+          "errorMessage": "Invalid receiver address"
+        },
+        {
+          "variable": "inputs.owner",
+          "type": "regex",
+          "id": "validate_owner_address",
+          "value": "^0x[a-fA-F0-9]{40}$",
+          "errorMessage": "Invalid owner address"
+        },
+        {
+          "variable": "inputs.assets",
+          "type": "regex",
+          "id": "validate_assets_number",
+          "value": "^\\d+(\\.\\d+)?$",
+          "errorMessage": "Asset amount should be a number"
+        },
+        {
+          "variable": "inputs.assets",
+          "type": "expression",
+          "id": "validate_sufficient_shares",
+          "value": "context.maxWithdraw >= inputs.assets",
+          "errorMessage": "Insufficient amount for withdrawal"
+        }
+      ],
+      "onFinalize": {
+        "to": "inputs.vaultAddress",
+        "value": "0",
+        "calldataArgs": ["inputs.assets", "inputs.receiver", "inputs.owner"]
+      }
+    },
+    {
+      "name": "Mint",
+      "display": {
+        "description": "Mint exact number of vault shares by depositing assets"
+      },
+      "functionSignature": "function mint(uint256 shares, address receiver) public returns (uint256 assets)",
+      "summaryView": "contractCall",
+      "context": {
+        "decimals": {
+          "type": "uint256",
+          "defaultValue": ""
+        },
+        "assetBalance": {
+          "type": "uint256",
+          "defaultValue": "0"
+        },
+        "previewAssets": {
+          "type": "uint256",
+          "defaultValue": "0"
+        },
+        "maxMint": {
+          "type": "uint256",
+          "defaultValue": "0"
+        }
+      },
+      "inputs": [
+        {
+          "name": "vaultAddress",
+          "label": "Vault Address",
+          "type": "address"
+        },
+        {
+          "name": "shares",
+          "label": "Shares to Mint",
+          "type": "text"
+        },
+        {
+          "name": "receiver",
+          "label": "Receiver Address",
+          "type": "address"
+        }
+      ],
+      "onInputUpdate": [
+        {
+          "variable": "context.decimals",
+          "value": {
+            "type": "eth_call",
+            "id": "eth_call_vault_decimals",
+            "data": {
+              "method": "function decimals() public view returns (uint8)",
+              "to": "inputs.vaultAddress",
+              "args": [],
+              "errorMessage": "Unable to fetch vault decimals."
+            }
+          }
+        },
+        {
+          "variable": "context.previewAssets",
+          "value": {
+            "type": "eth_call",
+            "id": "eth_call_preview_mint",
+            "data": {
+              "method": "function previewMint(uint256 shares) public view returns (uint256 assets)",
+              "to": "inputs.vaultAddress",
+              "args": ["inputs.shares"],
+              "errorMessage": "Unable to preview mint."
+            }
+          }
+        },
+        {
+          "variable": "context.maxMint",
+          "value": {
+            "type": "eth_call",
+            "id": "eth_call_max_mint",
+            "data": {
+              "method": "function maxMint(address receiver) public view returns (uint256 maxShares)",
+              "to": "inputs.vaultAddress",
+              "args": ["inputs.receiver"],
+              "errorMessage": "Unable to fetch max mint."
+            }
+          }
+        }
+      ],
+      "detailsView": [
+        {
+          "label": "Assets Required",
+          "value": "context.previewAssets",
+          "type": "Number"
+        },
+        {
+          "label": "Max Mint",
+          "value": "context.maxMint",
+          "type": "Number"
+        }
+      ],
+      "onUpdateValidations": [
+        {
+          "variable": "inputs.vaultAddress",
+          "type": "regex",
+          "id": "validate_vault_address",
+          "value": "^0x[a-fA-F0-9]{40}$",
+          "errorMessage": "Invalid vault address"
+        },
+        {
+          "variable": "inputs.receiver",
+          "type": "regex",
+          "id": "validate_receiver_address",
+          "value": "^0x[a-fA-F0-9]{40}$",
+          "errorMessage": "Invalid receiver address"
+        },
+        {
+          "variable": "inputs.shares",
+          "type": "regex",
+          "id": "validate_shares_number",
+          "value": "^\\d+(\\.\\d+)?$",
+          "errorMessage": "Shares amount should be a number"
+        },
+        {
+          "variable": "inputs.shares",
+          "type": "expression",
+          "id": "validate_max_mint",
+          "value": "bigIntLte(inputs.shares, context.maxMint)",
+          "errorMessage": "Amount exceeds maximum mint limit"
+        }
+      ],
+      "onFinalize": {
+        "to": "inputs.vaultAddress",
+        "value": "0",
+        "calldataArgs": ["inputs.shares", "inputs.receiver"]
+      }
+    },
+    {
+      "name": "Redeem",
+      "display": {
+        "description": "Redeem exact number of vault shares for underlying assets"
+      },
+      "functionSignature": "function redeem(uint256 shares, address receiver, address owner) public returns (uint256 assets)",
+      "summaryView": "contractCall",
+      "context": {
+        "decimals": {
+          "type": "uint256",
+          "defaultValue": ""
+        },
+        "shareBalance": {
+          "type": "uint256",
+          "defaultValue": "0"
+        },
+        "previewAssets": {
+          "type": "uint256",
+          "defaultValue": "0"
+        },
+        "maxRedeem": {
+          "type": "uint256",
+          "defaultValue": "0"
+        }
+      },
+      "inputs": [
+        {
+          "name": "vaultAddress",
+          "label": "Vault Address",
+          "type": "address"
+        },
+        {
+          "name": "shares",
+          "label": "Shares to Redeem",
+          "type": "text"
+        },
+        {
+          "name": "receiver",
+          "label": "Receiver Address",
+          "type": "address"
+        },
+        {
+          "name": "owner",
+          "label": "Owner Address",
+          "type": "address"
+        }
+      ],
+      "onInputUpdate": [
+        {
+          "variable": "context.decimals",
+          "value": {
+            "type": "eth_call",
+            "id": "eth_call_vault_decimals",
+            "data": {
+              "method": "function decimals() public view returns (uint8)",
+              "to": "inputs.vaultAddress",
+              "args": [],
+              "errorMessage": "Unable to fetch vault decimals."
+            }
+          }
+        },
+        {
+          "variable": "context.shareBalance",
+          "value": {
+            "type": "eth_call",
+            "id": "eth_call_share_balance",
+            "data": {
+              "method": "function balanceOf(address owner) public view returns (uint256 balance)",
+              "to": "inputs.vaultAddress",
+              "args": ["inputs.owner"],
+              "errorMessage": "Unable to fetch share balance."
+            }
+          }
+        },
+        {
+          "variable": "context.previewAssets",
+          "value": {
+            "type": "eth_call",
+            "id": "eth_call_preview_redeem",
+            "data": {
+              "method": "function previewRedeem(uint256 shares) public view returns (uint256 assets)",
+              "to": "inputs.vaultAddress",
+              "args": ["inputs.shares"],
+              "errorMessage": "Unable to preview redeem."
+            }
+          }
+        },
+        {
+          "variable": "context.maxRedeem",
+          "value": {
+            "type": "eth_call",
+            "id": "eth_call_max_redeem",
+            "data": {
+              "method": "function maxRedeem(address owner) public view returns (uint256 maxShares)",
+              "to": "inputs.vaultAddress",
+              "args": ["inputs.owner"],
+              "errorMessage": "Unable to fetch max redeem."
+            }
+          }
+        }
+      ],
+      "detailsView": [
+        {
+          "label": "Assets to Receive",
+          "value": "context.previewAssets",
+          "type": "BigInt"
+        },
+        {
+          "label": "Share Balance",
+          "value": "context.shareBalance",
+          "type": "BigInt"
+        },
+        {
+          "label": "Max Redeem",
+          "value": "context.maxRedeem",
+          "type": "BigInt"
+        }
+      ],
+      "onUpdateValidations": [
+        {
+          "variable": "inputs.vaultAddress",
+          "type": "regex",
+          "id": "validate_vault_address",
+          "value": "^0x[a-fA-F0-9]{40}$",
+          "errorMessage": "Invalid vault address"
+        },
+        {
+          "variable": "inputs.receiver",
+          "type": "regex",
+          "id": "validate_receiver_address",
+          "value": "^0x[a-fA-F0-9]{40}$",
+          "errorMessage": "Invalid receiver address"
+        },
+        {
+          "variable": "inputs.owner",
+          "type": "regex",
+          "id": "validate_owner_address",
+          "value": "^0x[a-fA-F0-9]{40}$",
+          "errorMessage": "Invalid owner address"
+        },
+        {
+          "variable": "inputs.shares",
+          "type": "regex",
+          "id": "validate_shares_number",
+          "value": "^\\d+(\\.\\d+)?$",
+          "errorMessage": "Shares amount should be a number"
+        },
+        {
+          "variable": "inputs.shares",
+          "type": "expression",
+          "id": "validate_max_redeem",
+          "value": "bigIntLte(inputs.shares, context.maxRedeem)",
+          "errorMessage": "Amount exceeds maximum redeem limit"
+        },
+        {
+          "variable": "inputs.shares",
+          "type": "expression",
+          "id": "validate_sufficient_shares",
+          "value": "inputs.shares <= context.shareBalance",
+          "errorMessage": "Insufficient shares to redeem"
+        }
+      ],
+      "onFinalize": {
+        "to": "inputs.vaultAddress",
+        "value": "0",
+        "calldataArgs": ["inputs.shares", "inputs.receiver", "inputs.owner"]
+      }
+    }
+  ]
+}
