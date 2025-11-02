@@ -20,7 +20,6 @@ import {
 } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import { readContract } from "@wagmi/core";
-import { Parser } from "expr-eval";
 import { useEffect, useState } from "react";
 import type React from "react";
 import { type AbiFunction, encodeFunctionData, parseAbi, parseAbiItem } from "viem";
@@ -33,6 +32,7 @@ import {
   ValidationType,
   ValueFetchType,
 } from "../../../context/types";
+import { createBigIntParser } from "../../../utils/parser";
 import { config } from "../../../wagmi";
 import AccountAddress from "../../common/AccountAddress";
 import AddressAutocomplete from "../../common/AddressAutocomplete";
@@ -47,13 +47,20 @@ interface TransactionInputBuilderProps {
   };
 }
 
+enum DetailValueType {
+  Text = "Text",
+  Number = "Number",
+  Address = "Address",
+  BigInt = "BigInt",
+}
+
 const TransactionInputBuilder: React.FC<TransactionInputBuilderProps> = ({ onAdd, spec, groupInfo }) => {
   const { chainId } = useAccount();
   const { safeAccount } = useSafeWalletContext();
   const publicClient = usePublicClient();
   const theme = useTheme();
 
-  const parser = new Parser();
+  const parser = createBigIntParser();
 
   // Initialize state dynamically
   const initialContext = {
@@ -83,25 +90,31 @@ const TransactionInputBuilder: React.FC<TransactionInputBuilderProps> = ({ onAdd
 
   const getDetailValue = (type: string, value: string) => {
     const val = parser.parse(value).evaluate({ context, inputs });
+
     if (val === undefined) {
       return;
     }
+
     const parsedValue = val.toString();
-    if (type === "Text") {
-      return <Typography variant="body2">{parsedValue}</Typography>;
-    }
+    switch (type) {
+      case DetailValueType.Text:
+        return <Typography variant="body2">{parsedValue}</Typography>;
+      case DetailValueType.Number:
+        return <Typography variant="body2">{val}</Typography>;
 
-    if (type === "Address") {
-      return (
-        <Tooltip title={parsedValue}>
-          <span>
-            <AccountAddress address={parsedValue} short />
-          </span>
-        </Tooltip>
-      );
+      case DetailValueType.Address:
+        return (
+          <Tooltip title={parsedValue}>
+            <span>
+              <AccountAddress address={parsedValue} short />
+            </span>
+          </Tooltip>
+        );
+      case DetailValueType.BigInt:
+        return <Typography variant="body2">{BigInt(val).toString()}</Typography>;
+      default:
+        return <Typography variant="body2">{value}</Typography>;
     }
-
-    return <Typography variant="body2">{value}</Typography>;
   };
 
   // Fetch context values from blockchain
@@ -235,11 +248,6 @@ const TransactionInputBuilder: React.FC<TransactionInputBuilderProps> = ({ onAdd
 
   // Generate transaction calldata
   const handleSubmit = () => {
-    if (Object.values(errors).some((err) => err.length > 0)) {
-      alert("Please fix errors before submitting.");
-      return;
-    }
-
     let calldata: `0x${string}` = "0x";
     if ("data" in spec.onFinalize) {
       calldata = parser.parse(spec.onFinalize.data).evaluate({ context, inputs });
@@ -505,7 +513,9 @@ const TransactionInputBuilder: React.FC<TransactionInputBuilderProps> = ({ onAdd
                     {input.type === "selectOneWithFreeSoloAddress" && (
                       <AddressAutocomplete
                         value={inputs[input.name]}
-                        onChange={(value) => handleInputChange(input.name, value)}
+                        onChange={(value) => {
+                          handleInputChange(input.name, value);
+                        }}
                         options={
                           input.options?.find((option) => option.chainId === chainId)?.options ||
                           input.options?.find((option) => option.chainId === 0)?.options ||
@@ -586,7 +596,7 @@ const TransactionInputBuilder: React.FC<TransactionInputBuilderProps> = ({ onAdd
                 sx={{
                   mb: 2,
                   fontWeight: 600,
-                  color: theme.palette.error.main,
+                  color: theme.palette.warning.main,
                 }}
               >
                 Issues
@@ -598,7 +608,7 @@ const TransactionInputBuilder: React.FC<TransactionInputBuilderProps> = ({ onAdd
                   .map((error, index) => (
                     <Alert
                       key={`${error.id}-${index}`}
-                      severity="error"
+                      severity="warning"
                       sx={{
                         borderRadius: 1,
                         "& .MuiAlert-message": {
@@ -627,7 +637,6 @@ const TransactionInputBuilder: React.FC<TransactionInputBuilderProps> = ({ onAdd
             color="primary"
             onClick={handleSubmit}
             fullWidth
-            disabled={Object.values(errors).some((err) => err.length > 0)}
             sx={{
               py: 1.5,
               fontSize: "1rem",

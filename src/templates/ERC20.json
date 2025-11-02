@@ -1,5 +1,5 @@
 {
-  "groupName": "ERC20",
+  "groupName": "ERC-20",
   "logo": {
     "type": "character",
     "value": "T"
@@ -10,7 +10,7 @@
     {
       "name": "Transfer",
       "display": {
-        "description": "ERC20 Transfer tokens"
+        "description": "ERC-20 Transfer tokens"
       },
       "functionSignature": "function transfer(address _to, uint256 _value) public returns (bool success)",
       "summaryView": "contractCall",
