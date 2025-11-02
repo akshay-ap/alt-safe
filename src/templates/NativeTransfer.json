@@ -28,14 +28,14 @@
         },
         {
           "name": "amount",
-          "label": "Amount to Send",
+          "label": "Amount to Send (in Wei)",
           "type": "text"
         }
       ],
       "detailsView": [
         {
           "label": "Current Balance",
-          "value": "context.balance / pow(10, 18)",
+          "value": "context.balance",
           "type": "Text"
         }
       ],
@@ -63,7 +63,7 @@
       ],
       "onFinalize": {
         "to": "inputs.to",
-        "value": "inputs.amount * pow(10, 18)",
+        "value": "inputs.amount",
         "data": "context.data"
       }
     }
