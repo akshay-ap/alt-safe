@@ -110,7 +110,7 @@
         },
         {
           "label": "Current Balance",
-          "value": "context.balance / pow(10, context.decimals)",
+          "value": "context.balance",
           "type": "Text"
         }
       ],
@@ -126,7 +126,7 @@
           "variable": "inputs.value",
           "type": "expression",
           "id": "validate_balance",
-          "value": "context.balance>=inputs.value * pow(10, context.decimals)",
+          "value": "context.balance>=inputs.value",
           "errorMessage": "Insufficient balance"
         },
         {
@@ -140,7 +140,7 @@
       "onFinalize": {
         "to": "inputs.tokenAddress",
         "value": "context.value",
-        "calldataArgs": ["inputs.to", "inputs.value * pow(10, context.decimals)"]
+        "calldataArgs": ["inputs.to", "inputs.value"]
       }
     },
     {
@@ -265,12 +265,12 @@
       "detailsView": [
         {
           "label": "Current Allowance",
-          "value": "context.allowance / pow(10, context.decimals)",
+          "value": "context.allowance",
           "type": "Text"
         },
         {
           "label": "Current Balance",
-          "value": "context.balance / pow(10, context.decimals)",
+          "value": "context.balance",
           "type": "Text"
         }
       ],
@@ -286,7 +286,7 @@
           "variable": "inputs.value",
           "type": "expression",
           "id": "validate_balance",
-          "value": "context.balance>=inputs.value * pow(10, context.decimals)",
+          "value": "context.balance>=inputs.value",
           "errorMessage": "Insufficient balance"
         },
         {
@@ -300,7 +300,7 @@
       "onFinalize": {
         "to": "inputs.tokenAddress",
         "value": "context.value",
-        "calldataArgs": ["inputs.spender", "inputs.value * pow(10, context.decimals)"]
+        "calldataArgs": ["inputs.spender", "inputs.value"]
       }
     },
     {
@@ -409,7 +409,7 @@
         },
         {
           "label": "Current Balance",
-          "value": "context.balance / pow(10, context.decimals)",
+          "value": "context.balance",
           "type": "Text"
         }
       ],
@@ -432,7 +432,7 @@
           "variable": "inputs.value",
           "type": "expression",
           "id": "validate_balance",
-          "value": "context.balance>=inputs.value * pow(10, context.decimals)",
+          "value": "context.balance>=inputs.value",
           "errorMessage": "Insufficient balance"
         },
         {
@@ -446,7 +446,7 @@
       "onFinalize": {
         "to": "inputs.tokenAddress",
         "value": "context.value",
-        "calldataArgs": ["inputs.from", "inputs.to", "inputs.value * pow(10, context.decimals)"]
+        "calldataArgs": ["inputs.from", "inputs.to", "inputs.value"]
       }
     }
   ]
