@@ -112,12 +112,7 @@
       "onFinalize": {
         "to": "inputs.pool",
         "value": "0",
-        "calldataArgs": [
-          "inputs.asset",
-          "inputs.amount * pow(10, context.decimals)",
-          "inputs.onBehalfOf",
-          "inputs.referralCode"
-        ]
+        "calldataArgs": ["inputs.asset", "inputs.amount", "inputs.onBehalfOf", "inputs.referralCode"]
       }
     },
     {
@@ -198,7 +193,7 @@
       "onFinalize": {
         "to": "inputs.pool",
         "value": "0",
-        "calldataArgs": ["inputs.asset", "inputs.amount * pow(10, context.decimals)", "inputs.to"]
+        "calldataArgs": ["inputs.asset", "inputs.amount", "inputs.to"]
       }
     },
     {
@@ -306,7 +301,7 @@
         "value": "0",
         "calldataArgs": [
           "inputs.asset",
-          "inputs.amount * pow(10, context.decimals)",
+          "inputs.amount",
           "inputs.interestRateMode",
           "inputs.referralCode",
           "inputs.onBehalfOf"
@@ -396,12 +391,7 @@
       "onFinalize": {
         "to": "inputs.pool",
         "value": "0",
-        "calldataArgs": [
-          "inputs.asset",
-          "inputs.amount * pow(10, context.decimals)",
-          "inputs.interestRateMode",
-          "inputs.onBehalfOf"
-        ]
+        "calldataArgs": ["inputs.asset", "inputs.amount", "inputs.interestRateMode", "inputs.onBehalfOf"]
       }
     }
   ]
