@@ -1,6 +1,11 @@
+import { readContract } from "@wagmi/core";
 import type React from "react";
-import { type ReactNode, createContext, useContext, useState } from "react";
+import { type ReactNode, createContext, useContext, useEffect, useState } from "react";
+import { type Address, zeroAddress } from "viem";
+import safe from "../abis/Safe.json";
 import type { SafeTransactionParams } from "../utils/utils";
+import { config } from "./../wagmi";
+import { useSafeWalletContext } from "./WalletContext";
 import type { Transaction } from "./types";
 
 interface CreateTransactionContextType {
@@ -10,11 +15,13 @@ interface CreateTransactionContextType {
   safeTransaction?: SafeTransactionParams;
   signature?: `0x${string}`;
   safeTransactionHash?: `0x${string}`;
-  nonce: string;
-  gasLimit: string;
-  refundTokenAddress: string;
+  nonce: bigint;
+  gasPrice: bigint;
+  safeTxGas: bigint;
+  baseGas: bigint;
+  refundTokenAddress: Address;
   refundTokenAmount: string;
-  refundToAddress: string;
+  refundToAddress: Address;
   error?: string;
 
   // Actions
@@ -23,11 +30,13 @@ interface CreateTransactionContextType {
   setSafeTransaction: (safeTransaction: SafeTransactionParams | undefined) => void;
   setSignature: (signature: `0x${string}` | undefined) => void;
   setSafeTransactionHash: (hash: `0x${string}` | undefined) => void;
-  setNonce: (nonce: string) => void;
-  setGasLimit: (gasLimit: string) => void;
-  setRefundTokenAddress: (address: string) => void;
+  setNonce: (nonce: bigint) => void;
+  setGasPrice: (gasPrice: bigint) => void;
+  setSafeTxGas: (gasPrice: bigint) => void;
+  setBaseGas: (gasPrice: bigint) => void;
+  setRefundTokenAddress: (address: Address) => void;
   setRefundTokenAmount: (amount: string) => void;
-  setRefundToAddress: (address: string) => void;
+  setRefundToAddress: (address: Address) => void;
   setError: (error: string | undefined) => void;
 
   // Utility actions
@@ -44,17 +53,35 @@ interface CreateTransactionProviderProps {
 }
 
 export const CreateTransactionProvider: React.FC<CreateTransactionProviderProps> = ({ children }) => {
+  const { safeAccount } = useSafeWalletContext();
+
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [transactionHash, setTransactionHash] = useState<`0x${string}` | undefined>();
   const [safeTransaction, setSafeTransaction] = useState<SafeTransactionParams | undefined>();
   const [signature, setSignature] = useState<`0x${string}` | undefined>();
   const [safeTransactionHash, setSafeTransactionHash] = useState<`0x${string}` | undefined>();
-  const [nonce, setNonce] = useState<string>("");
+  const [nonce, setNonce] = useState<bigint>(0n);
   const [error, setError] = useState<string | undefined>();
-  const [gasLimit, setGasLimit] = useState<string>("");
-  const [refundTokenAddress, setRefundTokenAddress] = useState<string>("");
+  const [gasPrice, setGasPrice] = useState<bigint>(0n);
+  const [safeTxGas, setSafeTxGas] = useState<bigint>(0n);
+  const [baseGas, setBaseGas] = useState<bigint>(0n);
+  const [refundTokenAddress, setRefundTokenAddress] = useState<Address>(zeroAddress);
   const [refundTokenAmount, setRefundTokenAmount] = useState<string>("");
-  const [refundToAddress, setRefundToAddress] = useState<string>("");
+  const [refundToAddress, setRefundToAddress] = useState<Address>(zeroAddress);
+
+  useEffect(() => {
+    (async () => {
+      if (safeAccount === undefined) return;
+
+      const fetchedNonce = (await readContract(config, {
+        abi: safe,
+        address: safeAccount,
+        functionName: "nonce",
+      })) as bigint;
+
+      setNonce(fetchedNonce);
+    })();
+  }, [safeAccount]);
 
   // Utility actions
   const addTransaction = (transaction: Transaction) => {
@@ -75,11 +102,13 @@ export const CreateTransactionProvider: React.FC<CreateTransactionProviderProps>
     setSafeTransaction(undefined);
     setSignature(undefined);
     setSafeTransactionHash(undefined);
-    setNonce("");
-    setGasLimit("");
-    setRefundTokenAddress("");
+    setNonce(0n);
+    setGasPrice(0n);
+    setSafeTxGas(0n);
+    setBaseGas(0n);
+    setRefundTokenAddress(zeroAddress);
     setRefundTokenAmount("");
-    setRefundToAddress("");
+    setRefundToAddress(zeroAddress);
     setError(undefined);
   };
 
@@ -91,7 +120,9 @@ export const CreateTransactionProvider: React.FC<CreateTransactionProviderProps>
     signature,
     safeTransactionHash,
     nonce,
-    gasLimit,
+    gasPrice,
+    safeTxGas,
+    baseGas,
     refundTokenAddress,
     refundTokenAmount,
     refundToAddress,
@@ -104,7 +135,9 @@ export const CreateTransactionProvider: React.FC<CreateTransactionProviderProps>
     setSignature,
     setSafeTransactionHash,
     setNonce,
-    setGasLimit,
+    setGasPrice,
+    setSafeTxGas,
+    setBaseGas,
     setRefundTokenAddress,
     setRefundTokenAmount,
     setRefundToAddress,
