@@ -91,7 +91,7 @@ Each transaction group consists of multiple actions, categorized by their functi
         "calldataArgs": [
           "inputs.<Arg1>",
           "inputs.<Arg2>",
-          "inputs.<Arg3> * pow(10, context.<Decimals Variable>)"
+          "inputs.<Arg3>"
         ]
       }
     }
@@ -173,7 +173,7 @@ Defines how to construct the final transaction:
   "value": "0",
   "calldataArgs": [
     "inputs.recipient",
-    "inputs.amount * pow(10, context.decimals)"
+    "inputs.amount"
   ]
 }
 ```
@@ -291,7 +291,7 @@ Groups can be tagged with the following categories:
         "value": "0",
         "calldataArgs": [
           "inputs.recipient",
-          "inputs.amount * pow(10, context.decimals)"
+          "inputs.amount"
         ]
       }
     }
@@ -311,7 +311,7 @@ Groups can be tagged with the following categories:
 - Uses `summaryView: "contractCall"` 
 - Requires token contract address input
 - Uses `eth_call` to fetch decimals and balances
-- Amounts are converted using decimals: `amount * pow(10, context.decimals)`
+- Amount: `amount`
 - Requires `functionSignature` for the ERC20 method
 
 ### Smart Contract Interactions
