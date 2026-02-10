@@ -40,6 +40,12 @@ const Review: React.FC<ReviewProps> = ({ setActiveStep }) => {
     transactionHash,
     safeTransactionHash,
     safeTransaction,
+    nonce,
+    gasPrice,
+    safeTxGas,
+    baseGas,
+    refundToAddress,
+    refundTokenAddress,
     setTransactionHash,
     setSafeTransactionHash,
     setSafeTransaction,
@@ -171,13 +177,7 @@ const Review: React.FC<ReviewProps> = ({ setActiveStep }) => {
     let value: bigint;
     let callData: `0x${string}`;
     let operation: SafeOperation;
-    const baseGas = 0n;
-    const safeTxGas = 0n;
-    const gasPrice = 0n;
-    const gasToken: Address = zeroAddress;
-    const refundReceiver: Address = zeroAddress;
 
-    const abi = safe;
     if (safeAccount === undefined) {
       throw new Error("Safe account is undefined");
     }
@@ -185,12 +185,6 @@ const Review: React.FC<ReviewProps> = ({ setActiveStep }) => {
     if (transactions.length < 1) {
       throw new Error("No transactions");
     }
-
-    const nonce = (await readContract(config, {
-      abi,
-      address: safeAccount,
-      functionName: "nonce",
-    })) as bigint;
 
     if (transactions.length === 1) {
       to = transactions[0].to;
@@ -219,10 +213,10 @@ const Review: React.FC<ReviewProps> = ({ setActiveStep }) => {
     }
 
     safeTransactionHashFromContractCall = (await readContract(config, {
-      abi,
+      abi: safe,
       address: safeAccount,
       functionName: "getTransactionHash",
-      args: [to, value, callData, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, nonce],
+      args: [to, value, callData, operation, safeTxGas, baseGas, gasPrice, refundTokenAddress, refundToAddress, nonce],
     })) as `0x${string}`;
 
     return {
@@ -234,8 +228,8 @@ const Review: React.FC<ReviewProps> = ({ setActiveStep }) => {
         safeTxGas: safeTxGas,
         baseGas: baseGas,
         gasPrice: gasPrice,
-        gasToken: gasToken,
-        refundReceiver: refundReceiver,
+        gasToken: refundTokenAddress,
+        refundReceiver: refundToAddress,
         nonce,
       },
       safeTxHash: safeTransactionHashFromContractCall,
