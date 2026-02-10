@@ -186,9 +186,6 @@ const TransactionTypePanel: React.FC<TransactionTypePanelProps> = ({ onSelect })
         <Typography variant="h5" gutterBottom id="transaction-type-title">
           Transaction Builder
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }} id="transaction-type-description">
-          Configure transaction actions and default parameters
-        </Typography>
       </Box>
 
       {/* Tabs */}

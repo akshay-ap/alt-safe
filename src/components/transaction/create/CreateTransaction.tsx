@@ -43,7 +43,6 @@ import { SafeOperation, type SafeTransactionParams } from "../../../utils/utils"
 import { config } from "../../../wagmi";
 import ViewSafeTransactionDialog from "../../dialogs/ViewSafeTransactionDialog";
 import TransactionBuilder from "./TransactionBuilder";
-import type { TransactionParams } from "./TransactionParamsForm";
 
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import SaveIcon from "@mui/icons-material/Save";
@@ -114,13 +113,6 @@ const CreateTransaction: React.FC = () => {
     if (isMobile) {
       setIsSummaryExpanded(true);
     }
-  };
-
-  const handleTransactionParamsSave = (params: TransactionParams) => {
-    console.log("Transaction params saved:", params);
-    // TODO: Store these params in context or state to be used when creating transactions
-    setSnackbarMessage("Transaction defaults saved");
-    setSnackbarOpen(true);
   };
 
   const getSafeTransactionInfo = async (): Promise<{
@@ -549,19 +541,12 @@ const CreateTransaction: React.FC = () => {
                   overflow: "hidden", // Hide overflow so inner scrollable content works properly
                 }}
               >
-                <Box sx={{ mb: 2 }}>
-                  <Typography variant="h5" gutterBottom>
-                    Add Transactions
-                  </Typography>
-                </Box>
-
                 <Box sx={{ flex: 1, overflow: "auto" }}>
                   <TransactionBuilder
                     importHex={importHex}
                     setImportHex={setImportHex}
                     handleAddTransaction={handleAddTransaction}
                     handleImportTransactions={handleImportTransactions}
-                    onTransactionParamsSave={handleTransactionParamsSave}
                   />
                 </Box>
               </Paper>

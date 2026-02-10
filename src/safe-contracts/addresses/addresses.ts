@@ -20,7 +20,7 @@ export enum SafeDeploymentType {
 export type SafeAddresses = {
   [chainId: number]: {
     [version in SafeVersion]: {
-      [dpeloymentType in SafeDeploymentType]: SafeDeployment;
+      [deploymentType in SafeDeploymentType]: SafeDeployment;
     };
   };
 };
