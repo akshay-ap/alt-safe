@@ -40,7 +40,7 @@ type CreateSafeState = {
   modules: Address[];
   defaultModules: DefaultModules;
   // Proxy Factory
-  proxyFactory: string;
+  proxyFactory: Address;
 };
 
 interface CreateSafeActions {
@@ -69,7 +69,7 @@ interface CreateSafeActions {
   setModules: (modules: Address[]) => void;
 
   // Proxy Factory setter
-  setProxyFactory: (proxyFactory: string) => void;
+  setProxyFactory: (proxyFactory: Address) => void;
 
   // Actions
   handleCreateSafe: () => Promise<void>;
@@ -106,6 +106,8 @@ export const CreateSafeProvider: React.FC<CreateSafeProviderProps> = ({ children
   const [error, setError] = useState<string>();
   const [safeCreationTxHash, setSafeCreationTxHash] = useState<string>();
   const [isCreating, setIsCreating] = useState<boolean>(false);
+  const [proxyCreationCode, setProxyCreationCode] = useState<`0x${string}`>();
+
   const [defaultModules] = useState<DefaultModules>((): DefaultModules => {
     const modulesEnv = import.meta.env.VITE_DEFAULT_MODULES;
     if (modulesEnv) {
@@ -148,19 +150,32 @@ export const CreateSafeProvider: React.FC<CreateSafeProviderProps> = ({ children
   const [modules, setModules] = useState<Address[]>([]);
 
   // Proxy Factory (not configurable in UI but read from env)
-  const [proxyFactory, setProxyFactory] = useState<string>(
-    import.meta.env.VITE_PROXY_FACTORY_ADDRESS || safeDeployment?.proxyFactory || "",
+  const [proxyFactory, setProxyFactory] = useState<Address>(
+    safeDeployment?.proxyFactory || import.meta.env.VITE_PROXY_FACTORY_ADDRESS || "",
   );
 
   // Update state when safeDeployment changes
   useEffect(() => {
     if (safeDeployment) {
-      setProxyFactory(import.meta.env.VITE_PROXY_FACTORY_ADDRESS || safeDeployment.proxyFactory);
-      setFallbackHandler(import.meta.env.VITE_FALLBACK_HANDLER_ADDRESS || safeDeployment.fallbackHandler);
-      setSingletonL2(import.meta.env.VITE_SINGLETON_L2_ADDRESS || safeDeployment.singletonL2);
-      setSingleton(import.meta.env.VITE_SINGLETON_ADDRESS || safeDeployment.singleton);
+      setProxyFactory(safeDeployment.proxyFactory || import.meta.env.VITE_PROXY_FACTORY_ADDRESS);
+      setFallbackHandler(safeDeployment.fallbackHandler || import.meta.env.VITE_FALLBACK_HANDLER_ADDRESS);
+      setSingletonL2(safeDeployment.singletonL2 || import.meta.env.VITE_SINGLETON_L2_ADDRESS);
+      setSingleton(safeDeployment.singleton || import.meta.env.VITE_SINGLETON_ADDRESS );
     }
   }, [safeDeployment]);
+
+  useEffect(() => {
+    (async () => {
+      if (publicClient && proxyFactory) {
+        const data = await publicClient.readContract({
+          address: proxyFactory,
+          abi: safeProxyFactoryABI,
+          functionName: "proxyCreationCode",
+        });
+        setProxyCreationCode(data as `0x${string}`);
+      }
+    })();
+  }, [publicClient, proxyFactory]);
 
   // Update initData when owners, threshold, or fallbackHandler change
   useEffect(() => {
@@ -198,10 +213,10 @@ export const CreateSafeProvider: React.FC<CreateSafeProviderProps> = ({ children
     if (proxyFactory && initData !== "0x") {
       const safeSingleton = (useSingletonL2 ? singletonL2 : singleton) as `0x${string}`;
       if (safeSingleton) {
-        setProxyAddress(getProxyAddress(proxyFactory as `0x${string}`, safeSingleton, initData, salt));
+        setProxyAddress(getProxyAddress(proxyFactory as `0x${string}`, safeSingleton, initData, salt, proxyCreationCode));
       }
     }
-  }, [initData, proxyFactory, singleton, singletonL2, salt, useSingletonL2]);
+  }, [initData, proxyFactory, singleton, singletonL2, salt, useSingletonL2, proxyCreationCode]);
 
   // Check if the Safe is already deployed
   useEffect(() => {
