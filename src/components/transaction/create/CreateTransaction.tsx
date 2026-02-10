@@ -541,12 +541,6 @@ const CreateTransaction: React.FC = () => {
                   overflow: "hidden", // Hide overflow so inner scrollable content works properly
                 }}
               >
-                <Box sx={{ mb: 2 }}>
-                  <Typography variant="h5" gutterBottom>
-                    Add Transactions
-                  </Typography>
-                </Box>
-
                 <Box sx={{ flex: 1, overflow: "auto" }}>
                   <TransactionBuilder
                     importHex={importHex}

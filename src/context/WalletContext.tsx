@@ -73,9 +73,19 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   // Set safeDeployment when account changes
   useEffect(() => {
     (async () => {
-      if (account.address !== zeroAddress && account.chainId !== undefined) {
-        const safeDeployment = getSafeAddresses(account.chainId || 0, SafeVersion.V1_4_1, SafeDeploymentType.CANONICAL);
-        setSafeDeployment(safeDeployment);
+      if (account.address === zeroAddress || account.chainId === undefined) {
+        return;
+      }
+
+      const customDeployments = (await storage.getItem(STORAGE_KEY.CUSTOM_DEPLOYMENTS)) as CustomDeployment[] | undefined;
+      const chainSpecificDeployment = customDeployments?.find(
+        (deployment) => deployment.chainId === account.chainId,
+      )?.deployment;
+
+      if (chainSpecificDeployment) {
+        setSafeDeployment(chainSpecificDeployment);
+      } else {
+        setSafeDeployment(getSafeAddresses(account.chainId, SafeVersion.V1_4_1, SafeDeploymentType.CANONICAL));
       }
     })();
   }, [account]);
