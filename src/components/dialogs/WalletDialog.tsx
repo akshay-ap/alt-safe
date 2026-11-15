@@ -15,6 +15,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import { useEffect, useRef } from "react";
 import { type Connector, useAccount, useConnect, useDisconnect } from "wagmi";
 import AccountAddress from "../common/AccountAddress";
 
@@ -119,6 +120,13 @@ const ConnectedView: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
 const WalletDialog: React.FC<WalletDialogProps> = ({ open, onClose }) => {
   const { isConnected } = useAccount();
+  const wasConnected = useRef(isConnected);
+
+  // Close once a connection made from this dialog succeeds; reopening shows the connected view.
+  useEffect(() => {
+    if (open && isConnected && !wasConnected.current) onClose();
+    wasConnected.current = isConnected;
+  }, [open, isConnected, onClose]);
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth aria-labelledby="wallet-dialog-title">
