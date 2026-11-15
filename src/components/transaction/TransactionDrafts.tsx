@@ -19,8 +19,8 @@ import { format, formatDistanceToNow } from "date-fns";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { deleteDraftTransaction, getDraftTransactions } from "../../api/api";
-import { useSafeWalletContext } from "../../context/WalletContext";
 import type { SafeTransactionDraft } from "../../context/types";
+import { useSafeWalletContext } from "../../context/WalletContext";
 
 const TransactionDrafts: React.FC = () => {
   const { storage, safeAccount } = useSafeWalletContext();

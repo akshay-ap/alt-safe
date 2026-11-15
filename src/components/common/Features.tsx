@@ -1,6 +1,6 @@
-import type { JSX } from "react";
 import { Box, Card, CardContent, Typography, useTheme } from "@mui/material";
 import type React from "react";
+import type { JSX } from "react";
 
 interface FeatureBoxProps {
   icon: JSX.Element;

@@ -1,4 +1,3 @@
-import type { JSX } from "react";
 import CodeIcon from "@mui/icons-material/Code";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
@@ -6,6 +5,7 @@ import FilterListIcon from "@mui/icons-material/FilterList";
 import SearchIcon from "@mui/icons-material/Search";
 import UploadIcon from "@mui/icons-material/Upload";
 import {
+  alpha,
   Box,
   Chip,
   Collapse,
@@ -23,15 +23,14 @@ import {
   TextField,
   Tooltip,
   Typography,
-  alpha,
   useTheme,
 } from "@mui/material";
 import InputAdornment from "@mui/material/InputAdornment";
-import React from "react";
-import { useMemo, useState } from "react";
+import type { JSX } from "react";
+import React, { useMemo, useState } from "react";
 import { useAccount } from "wagmi";
-import { useSafeWalletContext } from "../../../context/WalletContext";
 import { GroupTagType, LogoType } from "../../../context/types";
+import { useSafeWalletContext } from "../../../context/WalletContext";
 
 // Define GroupTagType as a value (array of strings) and add "All" as an option
 const groupTagValues: string[] = ["All", ...Object.values(GroupTagType)];

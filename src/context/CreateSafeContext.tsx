@@ -160,7 +160,7 @@ export const CreateSafeProvider: React.FC<CreateSafeProviderProps> = ({ children
       setProxyFactory(safeDeployment.proxyFactory || import.meta.env.VITE_PROXY_FACTORY_ADDRESS);
       setFallbackHandler(safeDeployment.fallbackHandler || import.meta.env.VITE_FALLBACK_HANDLER_ADDRESS);
       setSingletonL2(safeDeployment.singletonL2 || import.meta.env.VITE_SINGLETON_L2_ADDRESS);
-      setSingleton(safeDeployment.singleton || import.meta.env.VITE_SINGLETON_ADDRESS );
+      setSingleton(safeDeployment.singleton || import.meta.env.VITE_SINGLETON_ADDRESS);
     }
   }, [safeDeployment]);
 
@@ -213,7 +213,9 @@ export const CreateSafeProvider: React.FC<CreateSafeProviderProps> = ({ children
     if (proxyFactory && initData !== "0x") {
       const safeSingleton = (useSingletonL2 ? singletonL2 : singleton) as `0x${string}`;
       if (safeSingleton) {
-        setProxyAddress(getProxyAddress(proxyFactory as `0x${string}`, safeSingleton, initData, salt, proxyCreationCode));
+        setProxyAddress(
+          getProxyAddress(proxyFactory as `0x${string}`, safeSingleton, initData, salt, proxyCreationCode),
+        );
       }
     }
   }, [initData, proxyFactory, singleton, singletonL2, salt, useSingletonL2, proxyCreationCode]);

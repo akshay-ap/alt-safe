@@ -12,10 +12,10 @@ import safeABI from "../abis/Safe.json";
 import safe from "../abis/Safe.json";
 import safeModuleSetupABI from "../abis/SafeModuleSetup.json";
 import {
+  canonicalAddresses_141,
   type SafeDeployment,
   SafeDeploymentType,
   SafeVersion,
-  canonicalAddresses_141,
 } from "../safe-contracts/addresses/addresses";
 import safeProxy from "../safe-contracts/artifacts/SafeProxy.json";
 import { config } from "../wagmi";

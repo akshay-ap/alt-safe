@@ -1,10 +1,12 @@
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DoneIcon from "@mui/icons-material/Done";
+import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import SaveIcon from "@mui/icons-material/Save";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import {
   Alert,
@@ -29,30 +31,34 @@ import {
 import Grid from "@mui/material/Grid";
 import { readContract, simulateContract } from "@wagmi/core";
 import { useEffect, useState } from "react";
-import { type Address, bytesToHex, encodeFunctionData, hexToBytes, stringToBytes, zeroAddress } from "viem";
-import { BaseError, ContractFunctionRevertedError } from "viem";
+import {
+  type Address,
+  BaseError,
+  bytesToHex,
+  ContractFunctionRevertedError,
+  encodeFunctionData,
+  hexToBytes,
+  stringToBytes,
+  zeroAddress,
+} from "viem";
 import { useAccount, usePublicClient, useWriteContract } from "wagmi";
-
 import multisendCallOnly from "../../../abis/MultiSendCallOnly.json";
 import safe from "../../../abis/Safe.json";
+import { deleteDraftTransaction, getDraftTransactionById, updateDraftTransaction } from "../../../api/api";
 import { STORAGE_KEY } from "../../../constants";
-import { type SafeTransactionInfo, useSafeWalletContext } from "../../../context/WalletContext";
+import { useCreateTransactionContext } from "../../../context/CreateTransactionContext";
 import type { ImportData, ImportSignedData, SafeTransactionDraft, Transaction } from "../../../context/types";
+import { type SafeTransactionInfo, useSafeWalletContext } from "../../../context/WalletContext";
 import { encodeMultiSend } from "../../../utils/multisend";
 import { SafeOperation, type SafeTransactionParams } from "../../../utils/utils";
 import { config } from "../../../wagmi";
-import ViewSafeTransactionDialog from "../../dialogs/ViewSafeTransactionDialog";
-import TransactionBuilder from "./TransactionBuilder";
-
-import FolderOpenIcon from "@mui/icons-material/FolderOpen";
-import SaveIcon from "@mui/icons-material/Save";
-import { deleteDraftTransaction, getDraftTransactionById, updateDraftTransaction } from "../../../api/api";
-import { useCreateTransactionContext } from "../../../context/CreateTransactionContext";
 import AccountAddress from "../../common/AccountAddress";
 import LoadTransactionDialog from "../../dialogs/LoadTransactionDialog";
 import SaveTransactionDialog from "../../dialogs/SaveTransactionDialog";
+import ViewSafeTransactionDialog from "../../dialogs/ViewSafeTransactionDialog";
 import TransactionSummaryPanel from "../summary/TransactionSummaryPanel";
 import Review from "./Review";
+import TransactionBuilder from "./TransactionBuilder";
 
 const CreateTransaction: React.FC = () => {
   const theme = useTheme();

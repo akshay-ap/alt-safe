@@ -29,8 +29,8 @@ import { formatUnits } from "viem";
 import { useAccount, useBalance } from "wagmi";
 import { STORAGE_KEY } from "../constants";
 import { type AddressBookEntry, useAddressBook } from "../context/AddressBookContext";
-import { useSafeWalletContext } from "../context/WalletContext";
 import type { SafeAccount } from "../context/types";
+import { useSafeWalletContext } from "../context/WalletContext";
 import { config } from "../wagmi";
 import AccountAddress from "./common/AccountAddress";
 

@@ -1,12 +1,3 @@
-import { Box, Button, Card, CardActionArea, CardContent, Chip, Paper, Typography, useTheme } from "@mui/material";
-import Grid from "@mui/material/Grid";
-import type React from "react";
-import { useNavigate } from "react-router-dom";
-import { formatEther } from "viem";
-import { useBalance } from "wagmi";
-import { useSafeWalletContext } from "../../context/WalletContext";
-import AccountAddress from "../common/AccountAddress";
-
 // Import icons
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import AddIcon from "@mui/icons-material/Add";
@@ -15,6 +6,14 @@ import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import HistoryIcon from "@mui/icons-material/History";
 import HowToRegIcon from "@mui/icons-material/HowToReg";
 import SettingsIcon from "@mui/icons-material/Settings";
+import { Box, Button, Card, CardActionArea, CardContent, Chip, Paper, Typography, useTheme } from "@mui/material";
+import Grid from "@mui/material/Grid";
+import type React from "react";
+import { useNavigate } from "react-router-dom";
+import { formatEther } from "viem";
+import { useBalance } from "wagmi";
+import { useSafeWalletContext } from "../../context/WalletContext";
+import AccountAddress from "../common/AccountAddress";
 
 const SafeInfo: React.FC = () => {
   const { safeAccount, safeStorage } = useSafeWalletContext();
