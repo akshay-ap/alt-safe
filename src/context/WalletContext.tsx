@@ -28,6 +28,8 @@ interface WalletContextType {
   accountCode: string | undefined;
   loadStorage: (account: Address) => Promise<void>;
   safeDeployment: SafeDeployment | undefined;
+  /** The user-entered deployment for the connected chain, if any. */
+  customDeployment: SafeDeployment | undefined;
   tokenList: TokenList[];
   setTokenList: (list: TokenList[]) => void;
   storage: any;
@@ -60,6 +62,7 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   // Stable across renders so effects that depend on it do not re-run every time.
   const [storage] = useState(() => createStorage({ key: WALLET_STORAGE_KEY, storage: localStorage }));
   const [safeDeployment, setSafeDeployment] = useState<SafeDeployment>();
+  const [customDeployment, setCustomDeployment] = useState<SafeDeployment>();
   const [tokenList, setTokenList] = useState<TokenList[]>([]);
   const [txBuilderSpec, _setTxBuilderSpec] = useState<TransactionGroupSpec[]>(trnasctionBuilderSpec);
 
@@ -77,6 +80,7 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         (deployment) => deployment.chainId === account.chainId,
       )?.deployment;
 
+      setCustomDeployment(chainSpecificDeployment);
       if (chainSpecificDeployment) {
         setSafeDeployment(chainSpecificDeployment);
       } else {
@@ -148,6 +152,7 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         safeAccount,
         setSafeAccount: selectSafeAccount,
         safeDeployment,
+        customDeployment,
         tokenList,
         setTokenList: saveTokenList,
         storage,

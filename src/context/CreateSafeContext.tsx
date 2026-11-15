@@ -1,15 +1,24 @@
 import { simulateContract, writeContract } from "@wagmi/core";
 import type React from "react";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { type Address, isAddress, zeroAddress } from "viem";
-import { useAccount, usePublicClient } from "wagmi";
+import { useAccount, useChainId, usePublicClient } from "wagmi";
 import safeProxyFactoryABI from "../abis/SafeProxyFactory.json";
 import { STORAGE_KEY } from "../constants";
 import {
+  DEFAULT_SAFE_VERSION,
+  getSafeDeployment,
   RECOMMENDED_MODULES,
   SAFE_MODULE_SETUP_ADDRESS,
   type SafeDeployment,
 } from "../safe-contracts/addresses/addresses";
+import {
+  CUSTOM_DEPLOYMENT_ID,
+  type DeploymentOption,
+  type DeploymentOptionId,
+  findDeploymentOption,
+  getDeploymentOptions,
+} from "../safe-contracts/deploymentOptions";
 import { calculateInitData, getProxyAddress } from "../utils/utils";
 import { config } from "../wagmi";
 import { useSafeWalletContext } from "./WalletContext";
@@ -17,8 +26,11 @@ import { useSafeWalletContext } from "./WalletContext";
 type DefaultModules = Array<{ name: string; address: Address }>;
 
 type CreateSafeState = {
-  /** Contract addresses the configuration defaults to. */
-  deployment: SafeDeployment | undefined;
+  /** Safe versions (and the user's custom deployment) that can be deployed on this chain. */
+  deploymentOptions: DeploymentOption[];
+  deploymentId: DeploymentOptionId;
+  /** Contract addresses of the selected option; the configuration resets to these on change. */
+  deployment: SafeDeployment;
   // Basic Safe configuration
   owners: Address[];
   threshold: number;
@@ -51,6 +63,7 @@ type CreateSafeState = {
 };
 
 interface CreateSafeActions {
+  setDeploymentId: (id: DeploymentOptionId) => void;
   // Basic Safe configuration setters
   setOwners: (owners: Address[]) => void;
   setThreshold: (threshold: number) => void;
@@ -101,7 +114,18 @@ interface CreateSafeProviderProps {
 export const CreateSafeProvider: React.FC<CreateSafeProviderProps> = ({ children }) => {
   const account = useAccount();
   const publicClient = usePublicClient();
-  const { safeDeployment, storage } = useSafeWalletContext();
+  const chainId = useChainId();
+  const { customDeployment, storage } = useSafeWalletContext();
+  const deploymentOptions = useMemo(() => getDeploymentOptions(chainId, customDeployment), [chainId, customDeployment]);
+  const [deploymentId, setDeploymentId] = useState<DeploymentOptionId>(DEFAULT_SAFE_VERSION);
+  const deployment =
+    findDeploymentOption(deploymentOptions, deploymentId)?.deployment ??
+    getSafeDeployment(DEFAULT_SAFE_VERSION, chainId);
+
+  // A custom deployment exists because the canonical one is unusable here, so prefer it like before.
+  useEffect(() => {
+    if (customDeployment) setDeploymentId(CUSTOM_DEPLOYMENT_ID);
+  }, [customDeployment]);
 
   // Basic Safe configuration
   const [owners, setOwners] = useState<Address[]>([account.address || zeroAddress]);
@@ -122,27 +146,25 @@ export const CreateSafeProvider: React.FC<CreateSafeProviderProps> = ({ children
   const [safeLabels, setSafeLabels] = useState<string[]>([]);
 
   // Singleton configuration
-  const [singleton, setSingleton] = useState<string>(safeDeployment?.singleton ?? "");
-  const [singletonL2, setSingletonL2] = useState<string>(safeDeployment?.singletonL2 ?? "");
+  const [singleton, setSingleton] = useState<string>(deployment.singleton);
+  const [singletonL2, setSingletonL2] = useState<string>(deployment.singletonL2);
   const [useSingletonL2, setUseSingletonL2] = useState<boolean>(publicClient?.chain.sourceId !== undefined);
 
-  const [fallbackHandler, setFallbackHandler] = useState<Address>(safeDeployment?.fallbackHandler ?? zeroAddress);
+  const [fallbackHandler, setFallbackHandler] = useState<Address>(deployment.fallbackHandler);
 
   // Modules configuration
   const [setupModulesAddress, setSetupModulesAddress] = useState<Address>(SAFE_MODULE_SETUP_ADDRESS);
   const [modules, setModules] = useState<Address[]>([]);
 
-  const [proxyFactory, setProxyFactory] = useState<Address>(safeDeployment?.proxyFactory ?? zeroAddress);
+  const [proxyFactory, setProxyFactory] = useState<Address>(deployment.proxyFactory);
 
-  // Update state when safeDeployment changes
+  // Switching version or chain replaces any edited addresses with that deployment's own.
   useEffect(() => {
-    if (safeDeployment) {
-      setProxyFactory(safeDeployment.proxyFactory);
-      setFallbackHandler(safeDeployment.fallbackHandler);
-      setSingletonL2(safeDeployment.singletonL2);
-      setSingleton(safeDeployment.singleton);
-    }
-  }, [safeDeployment]);
+    setProxyFactory(deployment.proxyFactory);
+    setFallbackHandler(deployment.fallbackHandler);
+    setSingletonL2(deployment.singletonL2);
+    setSingleton(deployment.singleton);
+  }, [deployment]);
 
   useEffect(() => {
     (async () => {
@@ -159,7 +181,7 @@ export const CreateSafeProvider: React.FC<CreateSafeProviderProps> = ({ children
 
   // Update initData when owners, threshold, or fallbackHandler change
   useEffect(() => {
-    if (safeDeployment && fallbackHandler && isAddress(fallbackHandler)) {
+    if (fallbackHandler && isAddress(fallbackHandler)) {
       // Validate that all owners are valid addresses and there are no duplicates or zero addresses
       const validOwners = owners.filter((owner) => isAddress(owner) && owner !== zeroAddress);
       const uniqueOwners = validOwners.filter(
@@ -186,7 +208,7 @@ export const CreateSafeProvider: React.FC<CreateSafeProviderProps> = ({ children
     } else {
       setInitData("0x");
     }
-  }, [owners, threshold, fallbackHandler, safeDeployment, setupModulesAddress, modules]);
+  }, [owners, threshold, fallbackHandler, setupModulesAddress, modules]);
 
   // Update proxyAddress when configuration changes
   useEffect(() => {
@@ -284,7 +306,9 @@ export const CreateSafeProvider: React.FC<CreateSafeProviderProps> = ({ children
 
   const contextValue: CreateSafeContextValue = {
     // State
-    deployment: safeDeployment,
+    deploymentOptions,
+    deploymentId,
+    deployment,
     owners,
     threshold,
     salt,
@@ -306,6 +330,7 @@ export const CreateSafeProvider: React.FC<CreateSafeProviderProps> = ({ children
     defaultModules,
 
     // Actions
+    setDeploymentId,
     setOwners,
     setThreshold,
     setSalt,
