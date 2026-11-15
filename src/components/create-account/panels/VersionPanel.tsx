@@ -1,4 +1,4 @@
-import { Box, Chip, CircularProgress, FormControlLabel, Radio, RadioGroup, Stack, Typography } from "@mui/material";
+import { Box, Chip, FormControlLabel, Radio, RadioGroup, Stack, Typography } from "@mui/material";
 import type React from "react";
 import { useChainId, useChains } from "wagmi";
 import { useCreateSafeContext } from "../../../context/CreateSafeContext";
@@ -6,28 +6,13 @@ import { DEFAULT_SAFE_VERSION } from "../../../safe-contracts/addresses/addresse
 import type { DeploymentOption, DeploymentOptionId } from "../../../safe-contracts/deploymentOptions";
 import { useDeploymentAvailability } from "../../../safe-contracts/useDeploymentAvailability";
 
-const AvailabilityChip: React.FC<{ available: boolean | undefined; chainName: string }> = ({
-  available,
-  chainName,
-}) => {
-  if (available === undefined) return <CircularProgress size={14} aria-label="Checking deployment" />;
-  return available ? (
-    <Chip size="small" color="success" variant="outlined" label="Deployed" />
-  ) : (
-    <Chip size="small" color="warning" variant="outlined" label={`Not on ${chainName}`} />
-  );
-};
-
 const OptionLabel: React.FC<{ option: DeploymentOption; available: boolean | undefined; chainName: string }> = ({
-  option,
-  available,
-  chainName,
+  option
 }) => (
   <Box sx={{ py: 1 }}>
     <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap", rowGap: 0.5 }}>
       <Typography variant="subtitle2">{option.label}</Typography>
       {option.id === DEFAULT_SAFE_VERSION && <Chip size="small" label="Default" />}
-      <AvailabilityChip available={available} chainName={chainName} />
     </Stack>
   </Box>
 );
