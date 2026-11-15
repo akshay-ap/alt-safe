@@ -28,10 +28,15 @@ const useExplorerUrl = (override: string | undefined) => {
 };
 
 // Gaps come from margins, not spaces, so selecting and copying yields the exact address.
+// Inline-blocks let lines wrap only between groups, never inside one.
 const ChunkedHex: React.FC<{ value: string }> = ({ value }) => (
   <>
     {chunkHex(value).map((group, index) => (
-      <Box component="span" key={`${index}-${group}`} sx={{ mr: "0.4em", "&:last-of-type": { mr: 0 } }}>
+      <Box
+        component="span"
+        key={`${index}-${group}`}
+        sx={{ display: "inline-block", whiteSpace: "nowrap", mr: "0.4em", "&:last-of-type": { mr: 0 } }}
+      >
         {group}
       </Box>
     ))}
@@ -70,10 +75,7 @@ const AccountAddress: React.FC<AccountAddressProps> = ({
       sx={{ display: "inline-flex", alignItems: "center", gap: 0.5, minWidth: 0, maxWidth: "100%" }}
     >
       <Tooltip title={short ? address : ""} placement="top">
-        <Typography
-          component="span"
-          sx={{ fontFamily: font.mono, fontSize, overflowWrap: "anywhere", fontVariantLigatures: "none" }}
-        >
+        <Typography component="span" sx={{ fontFamily: font.mono, fontSize, fontVariantLigatures: "none" }}>
           {short ? `${address.slice(0, 6)}…${address.slice(-4)}` : <ChunkedHex value={address} />}
         </Typography>
       </Tooltip>
