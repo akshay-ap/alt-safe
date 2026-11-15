@@ -3,9 +3,9 @@ import { createContext, type ReactNode, useCallback, useContext, useEffect, useS
 import { type Address, isAddress, isAddressEqual, zeroAddress } from "viem"; // Import viem library for validation
 import { createStorage, useAccount, usePublicClient } from "wagmi";
 import { type FEATURES, STORAGE_KEY, WALLET_STORAGE_KEY } from "../constants";
-import { type SafeDeployment, SafeDeploymentType, SafeVersion } from "../safe-contracts/addresses/addresses";
+import { DEFAULT_SAFE_VERSION, getSafeDeployment, type SafeDeployment } from "../safe-contracts/addresses/addresses";
 import { fetchStorageData, type SafeStorage } from "../utils/storageReader";
-import { getSafeAddresses, type SafeTransactionParams } from "../utils/utils";
+import type { SafeTransactionParams } from "../utils/utils";
 import trnasctionBuilderSpec from "./TransactionSpecs";
 import type { TransactionGroupSpec } from "./types";
 
@@ -80,7 +80,7 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       if (chainSpecificDeployment) {
         setSafeDeployment(chainSpecificDeployment);
       } else {
-        setSafeDeployment(getSafeAddresses(account.chainId, SafeVersion.V1_4_1, SafeDeploymentType.CANONICAL));
+        setSafeDeployment(getSafeDeployment(DEFAULT_SAFE_VERSION, account.chainId));
       }
     })();
   }, [account]);

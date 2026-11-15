@@ -5,6 +5,11 @@ import { type Address, isAddress, zeroAddress } from "viem";
 import { useAccount, usePublicClient } from "wagmi";
 import safeProxyFactoryABI from "../abis/SafeProxyFactory.json";
 import { STORAGE_KEY } from "../constants";
+import {
+  RECOMMENDED_MODULES,
+  SAFE_MODULE_SETUP_ADDRESS,
+  type SafeDeployment,
+} from "../safe-contracts/addresses/addresses";
 import { calculateInitData, getProxyAddress } from "../utils/utils";
 import { config } from "../wagmi";
 import { useSafeWalletContext } from "./WalletContext";
@@ -12,6 +17,8 @@ import { useSafeWalletContext } from "./WalletContext";
 type DefaultModules = Array<{ name: string; address: Address }>;
 
 type CreateSafeState = {
+  /** Contract addresses the configuration defaults to. */
+  deployment: SafeDeployment | undefined;
   // Basic Safe configuration
   owners: Address[];
   threshold: number;
@@ -108,59 +115,32 @@ export const CreateSafeProvider: React.FC<CreateSafeProviderProps> = ({ children
   const [isCreating, setIsCreating] = useState<boolean>(false);
   const [proxyCreationCode, setProxyCreationCode] = useState<`0x${string}`>();
 
-  const [defaultModules] = useState<DefaultModules>((): DefaultModules => {
-    const modulesEnv = import.meta.env.VITE_DEFAULT_MODULES;
-    if (modulesEnv) {
-      try {
-        const parsedModules: DefaultModules = JSON.parse(modulesEnv);
-        const validModules = parsedModules.filter(
-          (module) => module.name && module.address && isAddress(module.address),
-        );
-        return validModules;
-      } catch (err) {
-        console.error("Error parsing VITE_DEFAULT_MODULES:", err);
-        return [];
-      }
-    }
-    return [];
-  });
+  const defaultModules: DefaultModules = RECOMMENDED_MODULES;
 
   // Name and Labels
   const [safeName, setSafeName] = useState<string>("");
   const [safeLabels, setSafeLabels] = useState<string[]>([]);
 
-  // Singleton configuration - read from env variables
-  const [singleton, setSingleton] = useState<string>(
-    import.meta.env.VITE_SINGLETON_ADDRESS || safeDeployment?.singleton || "",
-  );
-  const [singletonL2, setSingletonL2] = useState<string>(
-    import.meta.env.VITE_SINGLETON_L2_ADDRESS || safeDeployment?.singletonL2 || "",
-  );
+  // Singleton configuration
+  const [singleton, setSingleton] = useState<string>(safeDeployment?.singleton ?? "");
+  const [singletonL2, setSingletonL2] = useState<string>(safeDeployment?.singletonL2 ?? "");
   const [useSingletonL2, setUseSingletonL2] = useState<boolean>(publicClient?.chain.sourceId !== undefined);
 
-  // Fallback Handler configuration - read from env variables
-  const [fallbackHandler, setFallbackHandler] = useState<Address>(
-    import.meta.env.VITE_FALLBACK_HANDLER_ADDRESS || safeDeployment?.fallbackHandler,
-  );
+  const [fallbackHandler, setFallbackHandler] = useState<Address>(safeDeployment?.fallbackHandler ?? zeroAddress);
 
   // Modules configuration
-  const [setupModulesAddress, setSetupModulesAddress] = useState<Address>(
-    import.meta.env.VITE_SETUP_MODULES_ADDRESS || zeroAddress,
-  );
+  const [setupModulesAddress, setSetupModulesAddress] = useState<Address>(SAFE_MODULE_SETUP_ADDRESS);
   const [modules, setModules] = useState<Address[]>([]);
 
-  // Proxy Factory (not configurable in UI but read from env)
-  const [proxyFactory, setProxyFactory] = useState<Address>(
-    safeDeployment?.proxyFactory || import.meta.env.VITE_PROXY_FACTORY_ADDRESS || "",
-  );
+  const [proxyFactory, setProxyFactory] = useState<Address>(safeDeployment?.proxyFactory ?? zeroAddress);
 
   // Update state when safeDeployment changes
   useEffect(() => {
     if (safeDeployment) {
-      setProxyFactory(safeDeployment.proxyFactory || import.meta.env.VITE_PROXY_FACTORY_ADDRESS);
-      setFallbackHandler(safeDeployment.fallbackHandler || import.meta.env.VITE_FALLBACK_HANDLER_ADDRESS);
-      setSingletonL2(safeDeployment.singletonL2 || import.meta.env.VITE_SINGLETON_L2_ADDRESS);
-      setSingleton(safeDeployment.singleton || import.meta.env.VITE_SINGLETON_ADDRESS);
+      setProxyFactory(safeDeployment.proxyFactory);
+      setFallbackHandler(safeDeployment.fallbackHandler);
+      setSingletonL2(safeDeployment.singletonL2);
+      setSingleton(safeDeployment.singleton);
     }
   }, [safeDeployment]);
 
@@ -304,6 +284,7 @@ export const CreateSafeProvider: React.FC<CreateSafeProviderProps> = ({ children
 
   const contextValue: CreateSafeContextValue = {
     // State
+    deployment: safeDeployment,
     owners,
     threshold,
     salt,

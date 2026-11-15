@@ -19,18 +19,24 @@ import { useEffect, useState } from "react";
 import type { Address } from "viem";
 import { STORAGE_KEY } from "../constants";
 import { type CustomDeployment, useSafeWalletContext } from "../context/WalletContext";
-import { canonicalAddresses_141, type SafeDeployment } from "../safe-contracts/addresses/addresses";
+import {
+  CANONICAL_DEPLOYMENTS,
+  DEFAULT_SAFE_VERSION,
+  type SafeDeployment,
+} from "../safe-contracts/addresses/addresses";
 import { config } from "../wagmi";
 import Title from "./common/Title";
 
+const defaults = CANONICAL_DEPLOYMENTS[DEFAULT_SAFE_VERSION];
+
 const AddCustomDeployment: React.FC = () => {
   const [chainId, setChainId] = useState<number | "">("");
-  const [singleton, setSingleton] = useState<Address>(canonicalAddresses_141.singleton);
-  const [singletonL2, setSingletonL2] = useState<Address>(canonicalAddresses_141.singletonL2);
-  const [proxyFactory, setProxyFactory] = useState<Address>(canonicalAddresses_141.proxyFactory);
-  const [multisend, setMultisend] = useState<Address>(canonicalAddresses_141.multiSend);
-  const [multisendCallOnly, setMultisendCallOnly] = useState<Address>(canonicalAddresses_141.multiSendCallOnly);
-  const [fallbackHandler, setFallbackHandler] = useState<Address>(canonicalAddresses_141.fallbackHandler);
+  const [singleton, setSingleton] = useState<Address>(defaults.singleton);
+  const [singletonL2, setSingletonL2] = useState<Address>(defaults.singletonL2);
+  const [proxyFactory, setProxyFactory] = useState<Address>(defaults.proxyFactory);
+  const [multisend, setMultisend] = useState<Address>(defaults.multiSend);
+  const [multisendCallOnly, setMultisendCallOnly] = useState<Address>(defaults.multiSendCallOnly);
+  const [fallbackHandler, setFallbackHandler] = useState<Address>(defaults.fallbackHandler);
   const [customDeployments, setCustomDeployments] = useState<CustomDeployment[]>([]);
   const [error, setError] = useState<string | null>(null);
   const { storage } = useSafeWalletContext();
