@@ -92,22 +92,8 @@ const Settings: React.FC = () => {
   };
 
   return (
-    <Box sx={{ p: 2 }}>
-      <Box
-        sx={{
-          mb: 4,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          flexWrap: "wrap",
-          gap: 2,
-        }}
-      >
-        <Title
-          text="Settings"
-          description="This Safe's local name and labels, and the configuration read from chain."
-        />
-      </Box>
+    <Box>
+      <Title text="Settings" description="This Safe's local name and labels, and the configuration read from chain." />
 
       {!safeAccount || isAddressEqual(safeAccount, zeroAddress) ? (
         <Alert severity="info" sx={{ mb: 2 }}>
@@ -117,7 +103,7 @@ const Settings: React.FC = () => {
         <Box>
           <Grid container spacing={3}>
             {/* Safe Account Info Section */}
-            <Grid size={{ xs: 12, md: 12 }}>
+            <Grid size={{ xs: 12, md: 4 }}>
               <Paper elevation={0} variant="outlined" sx={{ p: 3 }}>
                 <Box
                   sx={{
@@ -206,18 +192,16 @@ const Settings: React.FC = () => {
                 </Box>
               </Paper>
             </Grid>
+            <Grid size={{ xs: 12, md: 8 }}>
+              <Paper elevation={0} variant="outlined" sx={{ p: 3 }}>
+                <Typography variant="h6" component="h2" gutterBottom>
+                  On-chain configuration
+                </Typography>
+                <Divider sx={{ mb: 2 }} />
+                {safeStorage && <ViewSafeStorage safeStorage={safeStorage} />}
+              </Paper>
+            </Grid>
           </Grid>
-
-          {/* Safe Storage Section */}
-          <Paper elevation={0} variant="outlined" sx={{ p: 3, mt: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Safe Storage
-            </Typography>
-
-            <Divider sx={{ mb: 2 }} />
-
-            {safeStorage && <ViewSafeStorage safeStorage={safeStorage} />}
-          </Paper>
         </Box>
       )}
 
