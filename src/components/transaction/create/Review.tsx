@@ -48,18 +48,14 @@ const SigningOption: React.FC<{ title: string; description: string; action: Reac
   description,
   action,
 }) => (
-  <Stack
-    direction={{ xs: "column", sm: "row" }}
-    spacing={2}
-    sx={{ alignItems: { sm: "center" }, justifyContent: "space-between" }}
-  >
+  <Stack spacing={1.5} sx={{ p: 2, border: 1, borderColor: "divider", borderRadius: 1.5, alignItems: "flex-start" }}>
     <Box>
       <Typography variant="subtitle2">{title}</Typography>
       <Typography variant="body2" color="text.secondary">
         {description}
       </Typography>
     </Box>
-    <Box sx={{ flexShrink: 0 }}>{action}</Box>
+    {action}
   </Stack>
 );
 
@@ -341,7 +337,7 @@ const Review: React.FC<ReviewProps> = ({ setActiveStep }) => {
         gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 1fr) 320px" },
       }}
     >
-      <Stack spacing={3} sx={{ minWidth: 0 }}>
+      <Stack spacing={2} sx={{ minWidth: 0 }}>
         <Paper variant="outlined">
           <Box sx={{ px: 2.5, pt: 2.5, pb: 1 }}>
             <Typography variant="h5" component="h2">
@@ -358,9 +354,9 @@ const Review: React.FC<ReviewProps> = ({ setActiveStep }) => {
             <ReviewRow label="Safe">
               <AccountAddress address={safeAccount} />
             </ReviewRow>
-            <ReviewRow label="Nonce">{safeTransaction?.nonce.toString() ?? "—"}</ReviewRow>
-            <ReviewRow label="Actions">
-              {transactions.length === 1 ? "1 action" : `${transactions.length} actions, batched with MultiSend`}
+            <ReviewRow label="Nonce">
+              {safeTransaction?.nonce.toString() ?? "—"} (
+              {transactions.length === 1 ? "1 action" : `${transactions.length} actions, batched with MultiSend`})
             </ReviewRow>
           </Box>
           <Stack
@@ -382,13 +378,13 @@ const Review: React.FC<ReviewProps> = ({ setActiveStep }) => {
         </Paper>
 
         <Paper variant="outlined" sx={{ p: 2.5 }}>
-          <Typography variant="h5" component="h2" sx={{ mb: 2 }}>
+          <Typography variant="h5" component="h2" sx={{ mb: 1.5 }}>
             Sign
           </Typography>
-          <Stack spacing={2}>
+          <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" } }}>
             <SigningOption
               title="Sign with your wallet"
-              description="Free and off-chain. Execute right away if your signature is enough, or share it with the other owners."
+              description="Free and off-chain. Share it with the other owners if more signatures are needed."
               action={
                 <Button variant="contained" startIcon={<FingerprintIcon />} onClick={handleSignTransaction}>
                   Sign
@@ -397,15 +393,16 @@ const Review: React.FC<ReviewProps> = ({ setActiveStep }) => {
             />
             <SigningOption
               title="Approve on chain"
-              description="Sends an approveHash transaction and costs gas. Useful when your wallet cannot sign typed data."
+              description="Sends approveHash and costs gas. For wallets that cannot sign typed data."
               action={
                 <Button variant="outlined" startIcon={<CheckCircleIcon />} onClick={handleApproveTransactionHash}>
                   Approve
                 </Button>
               }
             />
-          </Stack>
+          </Box>
         </Paper>
+
         {transactionHash && (
           <WaitForTransactionDialog
             open={waitForTransactionDialogOpen}
