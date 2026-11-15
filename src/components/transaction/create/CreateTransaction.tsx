@@ -1,5 +1,5 @@
-import DoneIcon from "@mui/icons-material/Done";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
+import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import SaveIcon from "@mui/icons-material/Save";
@@ -670,7 +670,7 @@ const CreateTransaction: React.FC = () => {
         }
       />
 
-      <Stepper activeStep={activeStep} orientation={isMobile ? "vertical" : "horizontal"} sx={{ mb: 4 }}>
+      <Stepper activeStep={activeStep} alternativeLabel={isMobile} sx={{ mb: 4 }}>
         {steps.map((label) => (
           <Step key={label}>
             <StepLabel>{label}</StepLabel>
@@ -731,9 +731,14 @@ const CreateTransaction: React.FC = () => {
 
       {/* Floating action button on mobile for step 0 */}
       {isMobile && activeStep === 0 && !isSummaryExpanded && (
-        <Fab color="primary" sx={{ position: "fixed", bottom: 16, right: 16 }} onClick={toggleSummaryExpanded}>
+        <Fab
+          color="primary"
+          sx={{ position: "fixed", bottom: 16, right: 16 }}
+          onClick={toggleSummaryExpanded}
+          aria-label={`View batch (${transactions.length})`}
+        >
           <Badge badgeContent={transactions.length} color="error" invisible={transactions.length === 0}>
-            <DoneIcon />
+            <FormatListBulletedIcon />
           </Badge>
         </Fab>
       )}

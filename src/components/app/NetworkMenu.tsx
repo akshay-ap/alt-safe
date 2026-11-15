@@ -50,6 +50,7 @@ const NetworkMenu: React.FC = () => {
         onClick={(event) => setAnchor(event.currentTarget)}
         startIcon={<StatusDot status={status} />}
         endIcon={<ExpandMoreIcon />}
+        sx={{ whiteSpace: "nowrap", minWidth: 0, "& .MuiButton-endIcon": { display: { xs: "none", sm: "inherit" } } }}
         aria-haspopup="menu"
         aria-label={`Network: ${chain?.name ?? "Unsupported"}. ${RPC_STATUS_LABEL[status]}`}
       >
