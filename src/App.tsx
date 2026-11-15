@@ -10,6 +10,7 @@ import ImportSafe from "./components/ImportSafe.tsx";
 import SafeTransactionHistory from "./components/SafeTransactionHistory.tsx";
 import Settings from "./components/Settings";
 import SignMessage from "./components/SignMessage.tsx";
+import RpcSetupDialog from "./components/settings/RpcSetupDialog.tsx";
 import AggregateSignaturesAndExecute from "./components/transaction/AggregateSignaturesAndExecute.tsx";
 import ApproveSafeTransactionForm from "./components/transaction/ApproveSafeTransaction.tsx";
 import ApproveTransactionHash from "./components/transaction/ApproveTransctionHash.tsx";
@@ -36,6 +37,7 @@ function App() {
   return (
     <>
       <AppThemeProvider>
+        <RpcSetupDialog />
         <WalletProvider>
           <AddressBookProvider>
             <Router>
