@@ -113,28 +113,6 @@ export const calculateInitData = (
   return setupCalldata;
 };
 
-export type MultiSendTransaction = {
-  to: `0x${string}`;
-  value: bigint;
-  data: `0x${string}`;
-  operation: number;
-};
-
-export type MultiSendTransactions = MultiSendTransaction[];
-
-export const getMultiSendCallData = (transactions: MultiSendTransactions): `0x${string}` => {
-  // Encode the transactions into the format required by MultiSend contract
-  let packedTransactions = "0x"; // Start with empty hex string
-  for (const tx of transactions) {
-    const encodedTx = encodePacked(
-      ["uint8", "address", "uint256", "uint256", "bytes"],
-      [tx.operation, tx.to, tx.value, BigInt(tx.data.length), tx.data],
-    );
-    packedTransactions += encodedTx.slice(2); // Append the packed transaction data
-  }
-  return packedTransactions as `0x${string}`;
-};
-
 export const getShortAddress = (address: Address): string => {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
 };
