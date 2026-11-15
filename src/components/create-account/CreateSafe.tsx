@@ -14,7 +14,7 @@ const CreateSafe: React.FC = () => {
     <CreateSafeProvider>
       <PageHeader
         title="Create a Safe"
-        description={`Deploys a new Safe on ${chainName} from your connected wallet. Pick the owners and how many of them must sign each transaction.`}
+        description={`Deploys a new Safe on ${chainName} from your connected wallet.`}
       />
       <Grid container spacing={3} sx={{ alignItems: "flex-start" }}>
         <Grid size={{ xs: 12, lg: 8 }}>

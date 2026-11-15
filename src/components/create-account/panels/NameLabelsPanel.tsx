@@ -11,14 +11,14 @@ interface NameLabelsPanelProps {
 const uniqueTrimmed = (labels: string[]) => [...new Set(labels.map((label) => label.trim()).filter(Boolean))];
 
 const NameLabelsPanel: React.FC<NameLabelsPanelProps> = ({ safeName, setSafeName, safeLabels, setSafeLabels }) => (
-  <Box sx={{ p: 2.5 }}>
+  <Box sx={{ p: 2 }}>
     <Typography variant="h6" component="h2">
       Name
     </Typography>
-    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+    <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
       Saved only in this browser. You can change it later.
     </Typography>
-    <Stack spacing={2}>
+    <Stack spacing={1.5}>
       <TextField
         label="Safe name"
         placeholder="e.g. Treasury"

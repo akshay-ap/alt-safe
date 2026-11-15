@@ -1,4 +1,4 @@
-import { Box, Divider, Paper, Typography } from "@mui/material";
+import { Box, Divider, Paper, Stack, Typography } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import type React from "react";
 import type { SafeStorage as SafeStorageType } from "../../utils/storageReader";
@@ -59,7 +59,6 @@ const ItemList: React.FC<ItemListProps> = ({ title, items = [], emptyMessage = "
       sx={{
         p: 2,
         borderRadius: 1,
-        height: "100%",
       }}
     >
       <Typography
@@ -160,32 +159,29 @@ const ViewSafeStorage: React.FC<{
           </Paper>
         </Grid>
 
-        {/* Owners Section */}
         <Grid size={{ xs: 12, md: 6 }}>
-          <ItemList title="Owners" items={owners} emptyMessage="No owners found" />
-        </Grid>
-
-        {/* Modules Section */}
-        <Grid size={{ xs: 12 }}>
-          <ItemList
-            title="Modules"
-            items={modules}
-            emptyMessage="No modules enabled"
-            renderItem={(module, index) => (
-              <Box sx={{ display: "flex", alignItems: "center" }}>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: "text.secondary",
-                    mr: 1,
-                  }}
-                >
-                  Module #{index + 1}:
-                </Typography>
-                <AccountAddress address={module} />
-              </Box>
-            )}
-          />
+          <Stack spacing={3}>
+            <ItemList title="Owners" items={owners} emptyMessage="No owners found" />
+            <ItemList
+              title="Modules"
+              items={modules}
+              emptyMessage="No modules enabled"
+              renderItem={(module, index) => (
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: "text.secondary",
+                      mr: 1,
+                    }}
+                  >
+                    Module #{index + 1}:
+                  </Typography>
+                  <AccountAddress address={module} />
+                </Box>
+              )}
+            />
+          </Stack>
         </Grid>
       </Grid>
     </Box>
