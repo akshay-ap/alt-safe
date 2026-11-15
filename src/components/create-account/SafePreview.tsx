@@ -1,270 +1,131 @@
-import OpenInFullIcon from "@mui/icons-material/OpenInFull";
-import { Alert, Box, Button, Card, CardContent, Chip, IconButton, Link, Paper, Typography } from "@mui/material";
-import Grid from "@mui/material/Grid";
+import { Alert, Box, Button, CircularProgress, Divider, Paper, Stack, Typography } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { zeroAddress } from "viem";
+import { useChainId, useChains, useWaitForTransactionReceipt } from "wagmi";
 import { useCreateSafeContext } from "../../context/CreateSafeContext";
+import { useSafeWalletContext } from "../../context/WalletContext";
 import AccountAddress from "../common/AccountAddress";
+import TransactionHash from "../common/TransactionHash";
 import InitDataDialog from "./InitDataDialog";
 
-const SafePreview: React.FC = () => {
+const Row: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
+  <Stack direction="row" spacing={2} sx={{ justifyContent: "space-between", py: 0.5 }}>
+    <Typography variant="body2" color="text.secondary">
+      {label}
+    </Typography>
+    <Typography variant="body2" sx={{ textAlign: "right", minWidth: 0, overflowWrap: "anywhere" }}>
+      {children}
+    </Typography>
+  </Stack>
+);
+
+const Summary: React.FC = () => {
+  const { safeName, owners, threshold, salt, modules, deploymentOptions, deploymentId, useSingletonL2 } =
+    useCreateSafeContext();
+  const chainId = useChainId();
+  const chainName = useChains().find((chain) => chain.id === chainId)?.name;
+  const version = deploymentOptions.find((option) => option.id === deploymentId)?.label;
+
+  return (
+    <Box>
+      <Row label="Network">{chainName}</Row>
+      <Row label="Version">{`${version}${useSingletonL2 ? " (L2)" : ""}`}</Row>
+      <Row label="Name">{safeName || "Unnamed Safe"}</Row>
+      <Row label="Required signatures">
+        {threshold} of {owners.length}
+      </Row>
+      <Row label="Modules">{modules.length || "None"}</Row>
+      <Row label="Salt nonce">{salt.toString()}</Row>
+    </Box>
+  );
+};
+
+const describeReceipt = (isSuccess: boolean, isError: boolean) => {
+  if (isError) return { severity: "error" as const, text: "The deployment transaction failed." };
+  if (isSuccess) return { severity: "success" as const, text: "Your Safe is deployed." };
+  return { severity: "info" as const, text: "Waiting for confirmation…" };
+};
+
+const Submitted: React.FC<{ hash: `0x${string}` }> = ({ hash }) => {
+  const { proxyAddress } = useCreateSafeContext();
+  const { setSafeAccount } = useSafeWalletContext();
   const navigate = useNavigate();
-  const [initDataDialogOpen, setInitDataDialogOpen] = useState(false);
+  const { isLoading, isSuccess, isError } = useWaitForTransactionReceipt({ hash });
+  const status = describeReceipt(isSuccess, isError);
 
-  const {
-    safeName,
-    safeLabels,
-    owners,
-    threshold,
-    salt,
-    modules,
-    initData,
-    setupModulesAddress,
-    proxyAddress,
-    isAlreadyDeployed,
-    error,
-    safeCreationTxHash,
-    handleCreateSafe,
-    isCreating,
-    deploymentOptions,
-    deploymentId,
-  } = useCreateSafeContext();
+  return (
+    <Stack spacing={1.5}>
+      <Alert severity={status.severity} icon={isLoading ? <CircularProgress size={18} /> : undefined}>
+        {status.text}
+      </Alert>
+      <TransactionHash hash={hash} short showExplorer />
+      {isSuccess && proxyAddress && (
+        <Button
+          variant="contained"
+          onClick={() => {
+            setSafeAccount(proxyAddress);
+            navigate("/safe-info");
+          }}
+        >
+          Open Safe
+        </Button>
+      )}
+    </Stack>
+  );
+};
 
-  // Check if initData is valid and there are no errors to show the expand icon
+const SafePreview: React.FC = () => {
+  const [initDataOpen, setInitDataOpen] = useState(false);
+  const { initData, proxyAddress, isAlreadyDeployed, error, safeCreationTxHash, handleCreateSafe, isCreating } =
+    useCreateSafeContext();
   const hasValidInitData = initData !== "0x" && error === undefined;
 
   return (
-    <Paper sx={{ p: { xs: 2, md: 3 }, mb: { xs: 2, md: 3 } }}>
-      <Typography variant="h6" gutterBottom>
-        Safe Preview
+    <Paper variant="outlined" sx={{ p: 2.5, position: { lg: "sticky" }, top: { lg: 80 } }}>
+      <Typography variant="h5" component="h2" sx={{ mb: 1.5 }}>
+        Review
       </Typography>
+      <Summary />
+      <Divider sx={{ my: 2 }} />
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+        Your Safe will be deployed at
+      </Typography>
+      {proxyAddress && hasValidInitData ? (
+        <AccountAddress address={proxyAddress} />
+      ) : (
+        <Typography variant="body2" color="warning.main">
+          Fix the owners and settings to see the address.
+        </Typography>
+      )}
+      {hasValidInitData && (
+        <Button size="small" onClick={() => setInitDataOpen(true)} sx={{ mt: 1, ml: -1 }}>
+          View setup calldata
+        </Button>
+      )}
 
-      <Card variant="outlined" sx={{ mb: 3 }}>
-        <CardContent>
-          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <Typography variant="subtitle1" gutterBottom>
-              Configuration Summary
-            </Typography>
-            {hasValidInitData && (
-              <IconButton
-                onClick={() => setInitDataDialogOpen(true)}
-                size="small"
-                sx={{ color: "primary.main" }}
-                title="View InitData Details"
-              >
-                <OpenInFullIcon />
-              </IconButton>
-            )}
-          </Box>
-
-          <Grid container spacing={2}>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                Version
-              </Typography>
-              <Typography variant="body1">
-                {deploymentOptions.find((option) => option.id === deploymentId)?.label}
-              </Typography>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <Typography
-                variant="body2"
-                sx={{
-                  color: "text.secondary",
-                }}
-              >
-                Name
-              </Typography>
-              <Typography variant="body1">{safeName || "Unnamed Safe"}</Typography>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <Typography
-                variant="body2"
-                sx={{
-                  color: "text.secondary",
-                }}
-              >
-                Owners
-              </Typography>
-              <Typography variant="body1">{owners.length}</Typography>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <Typography
-                variant="body2"
-                sx={{
-                  color: "text.secondary",
-                }}
-              >
-                Threshold
-              </Typography>
-              <Typography variant="body1">
-                {threshold} out of {owners.length}
-              </Typography>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <Typography
-                variant="body2"
-                sx={{
-                  color: "text.secondary",
-                }}
-              >
-                Salt
-              </Typography>
-              <Typography variant="body1">{salt.toString()}</Typography>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <Typography
-                variant="body2"
-                sx={{
-                  color: "text.secondary",
-                }}
-              >
-                Modules
-              </Typography>
-              <Typography variant="body1">{modules.length > 0 ? `${modules.length} enabled` : "None"}</Typography>
-            </Grid>
-          </Grid>
-
-          {safeLabels.length > 0 && (
-            <Box sx={{ mt: 2 }}>
-              <Typography
-                variant="body2"
-                sx={{
-                  color: "text.secondary",
-                }}
-              >
-                Labels
-              </Typography>
-              <Typography variant="body1">{safeLabels.join(", ")}</Typography>
-            </Box>
-          )}
-
-          {modules.length > 0 && (
-            <Box sx={{ mt: 2 }}>
-              <Typography
-                variant="body2"
-                gutterBottom
-                sx={{
-                  color: "text.secondary",
-                }}
-              >
-                Enabled Modules
-              </Typography>
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-                {setupModulesAddress && setupModulesAddress !== zeroAddress && (
-                  <Box sx={{ mb: 1 }}>
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        color: "text.secondary",
-                      }}
-                    >
-                      Setup Contract:
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        fontFamily: "monospace",
-                        wordBreak: "break-all",
-                      }}
-                    >
-                      {setupModulesAddress}
-                    </Typography>
-                  </Box>
-                )}
-                {modules.map((moduleAddress, index) => (
-                  <Box key={moduleAddress} sx={{ mb: 1 }}>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
-                      <Chip label={`Module ${index + 1}`} size="small" variant="outlined" />
-                    </Box>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        fontFamily: "monospace",
-                        wordBreak: "break-all",
-                        pl: 1,
-                      }}
-                    >
-                      {moduleAddress}
-                    </Typography>
-                  </Box>
-                ))}
-              </Box>
-            </Box>
-          )}
-        </CardContent>
-      </Card>
-
-      {proxyAddress && (
-        <Box
-          sx={{
-            mb: 3,
-            p: 2,
-            bgcolor: "background.paper",
-            borderRadius: 1,
-            border: 1,
-            borderColor: "divider",
-          }}
-        >
-          <Typography variant="subtitle2" gutterBottom>
-            Deployment Address
-          </Typography>
-          <Typography
-            variant="body2"
-            sx={{
-              color: "text.secondary",
-              mb: 1,
-            }}
+      <Stack spacing={1.5} sx={{ mt: 2 }}>
+        {isAlreadyDeployed && !safeCreationTxHash && (
+          <Alert severity="warning">
+            A Safe with exactly this configuration already exists. Change the salt nonce.
+          </Alert>
+        )}
+        {error && <Alert severity="error">{error}</Alert>}
+        {safeCreationTxHash ? (
+          <Submitted hash={safeCreationTxHash as `0x${string}`} />
+        ) : (
+          <Button
+            variant="contained"
+            size="large"
+            onClick={handleCreateSafe}
+            disabled={!hasValidInitData || isAlreadyDeployed || isCreating}
+            startIcon={isCreating ? <CircularProgress size={18} color="inherit" /> : undefined}
           >
-            Your Safe will be deployed at:
-          </Typography>
-          <Typography variant="body1">
-            <AccountAddress address={proxyAddress} />
-          </Typography>
-        </Box>
-      )}
+            {isCreating ? "Confirm in your wallet…" : "Create Safe"}
+          </Button>
+        )}
+      </Stack>
 
-      {isAlreadyDeployed && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          Safe already deployed with given configuration at address {proxyAddress}
-        </Alert>
-      )}
-
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {error}
-        </Alert>
-      )}
-
-      {safeCreationTxHash && (
-        <Alert severity="success" sx={{ mb: 3 }}>
-          <Typography variant="body2">Safe creation transaction submitted: {safeCreationTxHash}</Typography>
-          <Box sx={{ mt: 1 }}>
-            <Link component="button" onClick={() => navigate("/home")} sx={{ fontWeight: 500 }}>
-              Go to home to start using Safe
-            </Link>
-          </Box>
-        </Alert>
-      )}
-
-      <Button
-        variant="contained"
-        onClick={handleCreateSafe}
-        disabled={isAlreadyDeployed || safeCreationTxHash !== undefined || isCreating}
-        fullWidth
-        size="large"
-        sx={{ mt: 2 }}
-      >
-        {isCreating ? "Creating Safe..." : "Create Safe"}
-      </Button>
-
-      <InitDataDialog
-        open={initDataDialogOpen}
-        onClose={() => setInitDataDialogOpen(false)}
-        initData={initData}
-        error={error}
-      />
+      <InitDataDialog open={initDataOpen} onClose={() => setInitDataOpen(false)} initData={initData} error={error} />
     </Paper>
   );
 };
