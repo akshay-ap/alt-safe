@@ -2,10 +2,11 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import { Box, Button, Chip, IconButton, Stack, Tooltip, Typography } from "@mui/material";
-import { type Address, formatUnits } from "viem";
+import type { Address } from "viem";
 import { useBalance, useChainId, useChains, useSwitchChain } from "wagmi";
 import type { SafeAccount } from "../../context/types";
 import { color } from "../../theme/tokens";
+import { formatTokenAmount } from "../../utils/format";
 import AccountAddress from "../common/AccountAddress";
 
 interface SafeRowProps {
@@ -15,20 +16,12 @@ interface SafeRowProps {
   onRemove: (safe: SafeAccount) => void;
 }
 
-const MAX_BALANCE_DECIMALS = 5;
-
-const formatBalance = (value: bigint, decimals: number) => {
-  const [whole, fraction = ""] = formatUnits(value, decimals).split(".");
-  const trimmed = fraction.slice(0, MAX_BALANCE_DECIMALS).replace(/0+$/, "");
-  return trimmed ? `${whole}.${trimmed}` : whole;
-};
-
 const Balance: React.FC<{ address: Address }> = ({ address }) => {
   const { data } = useBalance({ address });
   if (!data) return null;
   return (
     <Typography variant="body2" color="text.secondary" sx={{ fontVariantNumeric: "tabular-nums" }}>
-      {formatBalance(data.value, data.decimals)} {data.symbol}
+      {formatTokenAmount(data.value, data.decimals)} {data.symbol}
     </Typography>
   );
 };
