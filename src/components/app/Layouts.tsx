@@ -9,9 +9,16 @@ const SIDEBAR_WIDTH = 248;
 const Main: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <Box
     component="main"
-    sx={{ flex: 1, minWidth: 0, pt: `${TOP_BAR_HEIGHT}px`, px: { xs: 2, md: 4 }, pb: 6, minHeight: "100vh" }}
+    sx={{
+      flex: 1,
+      minWidth: 0,
+      pt: `${TOP_BAR_HEIGHT}px`,
+      px: { xs: 2, md: 4 },
+      pb: { xs: 6, md: 3 },
+      minHeight: "100vh",
+    }}
   >
-    <Box sx={{ maxWidth: 1200, mx: "auto", pt: { xs: 2, md: 4 } }}>{children}</Box>
+    <Box sx={{ maxWidth: 1200, mx: "auto", pt: { xs: 2, md: 3 } }}>{children}</Box>
   </Box>
 );
 

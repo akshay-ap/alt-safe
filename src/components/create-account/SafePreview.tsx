@@ -20,8 +20,7 @@ const Row: React.FC<{ label: string; children: React.ReactNode }> = ({ label, ch
 );
 
 const Summary: React.FC = () => {
-  const { safeName, owners, threshold, salt, modules, deploymentOptions, deploymentId, useSingletonL2 } =
-    useCreateSafeContext();
+  const { owners, threshold, salt, modules, deploymentOptions, deploymentId, useSingletonL2 } = useCreateSafeContext();
   const chainId = useChainId();
   const chainName = useChains().find((chain) => chain.id === chainId)?.name;
   const version = deploymentOptions.find((option) => option.id === deploymentId)?.label;
@@ -30,7 +29,6 @@ const Summary: React.FC = () => {
     <Box>
       <Row label="Network">{chainName}</Row>
       <Row label="Version">{`${version}${useSingletonL2 ? " (L2)" : ""}`}</Row>
-      <Row label="Name">{safeName || "Unnamed Safe"}</Row>
       <Row label="Required signatures">
         {threshold} of {owners.length}
       </Row>
@@ -81,7 +79,7 @@ const SafePreview: React.FC = () => {
   const hasValidInitData = initData !== "0x" && error === undefined;
 
   return (
-    <Paper variant="outlined" sx={{ p: 2.5, position: { lg: "sticky" }, top: { lg: 80 } }}>
+    <Paper variant="outlined" sx={{ p: 2.5 }}>
       <Typography variant="h5" component="h2" sx={{ mb: 1.5 }}>
         Review
       </Typography>

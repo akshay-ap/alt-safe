@@ -11,7 +11,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, description, actions }) 
   <Stack
     direction={{ xs: "column", sm: "row" }}
     spacing={2}
-    sx={{ mb: 4, alignItems: { sm: "flex-end" }, justifyContent: "space-between" }}
+    sx={{ mb: 3, alignItems: { sm: "flex-end" }, justifyContent: "space-between" }}
   >
     <Box sx={{ maxWidth: 720 }}>
       <Typography variant="h2" component="h1">
