@@ -7,7 +7,7 @@ import { useState } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import { useAccount } from "wagmi";
 import AccountAddress from "../common/AccountAddress";
-import ChangeAccountDialog from "../dialogs/ChangeAccountDialog";
+import WalletDialog from "../dialogs/WalletDialog";
 import AppSettingsDialog from "./AppSettingsDialog";
 import Logo from "./Logo";
 import NetworkMenu from "./NetworkMenu";
@@ -57,11 +57,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ onMenuClick }) => {
           </Button>
         )}
       </Toolbar>
-      <ChangeAccountDialog
-        open={accountDialogOpen}
-        onClose={() => setAccountDialogOpen(false)}
-        onConfirm={() => setAccountDialogOpen(false)}
-      />
+      <WalletDialog open={accountDialogOpen} onClose={() => setAccountDialogOpen(false)} />
       <AppSettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </AppBar>
   );
