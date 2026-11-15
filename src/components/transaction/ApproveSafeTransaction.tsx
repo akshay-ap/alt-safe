@@ -1,4 +1,4 @@
-import { Alert, Button, CircularProgress, Typography } from "@mui/material";
+import { Alert, Button, CircularProgress } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import { readContract, simulateContract } from "@wagmi/core";
 import type React from "react";
@@ -11,6 +11,7 @@ import type { SafeTransactionParams } from "../../utils/utils";
 import { calculateSafeTransactionHash } from "../../utils/utils";
 import { config } from "../../wagmi";
 import SafeTransactionForm from "../common/SafeTransactionForm";
+import Title from "../common/Title";
 
 const ApproveSafeTransactionForm: React.FC = () => {
   const { safeAccount, safeStorage } = useSafeWalletContext();
@@ -113,7 +114,10 @@ const ApproveSafeTransactionForm: React.FC = () => {
   return (
     <Grid container spacing={2}>
       <Grid size={12}>
-        <Typography variant="h6">Approve Safe Transaction</Typography>
+        <Title
+          text="Approve a transaction"
+          description="Enter the Safe transaction's parameters. ALT Safe computes its hash and approves it on chain from your wallet, which costs gas."
+        />
       </Grid>
       <SafeTransactionForm
         transaction={transaction}

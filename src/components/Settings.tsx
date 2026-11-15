@@ -103,7 +103,10 @@ const Settings: React.FC = () => {
           gap: 2,
         }}
       >
-        <Title text="Safe Settings" />
+        <Title
+          text="Settings"
+          description="This Safe's local name and labels, and the configuration read from chain."
+        />
       </Box>
 
       {!safeAccount || isAddressEqual(safeAccount, zeroAddress) ? (

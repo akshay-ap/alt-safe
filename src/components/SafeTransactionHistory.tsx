@@ -41,7 +41,10 @@ const SafeTransactionHistory: React.FC = () => {
   return (
     <Grid container spacing={2}>
       <Grid size={12}>
-        <Title text="Transaction History" />
+        <Title
+          text="History"
+          description="Transactions executed from this browser. ALT Safe has no indexer, so executions made elsewhere are not listed."
+        />
       </Grid>
       <Grid size={12}>
         <TextField

@@ -1,4 +1,4 @@
-import { Box, Paper, Step, StepLabel, Stepper, Typography } from "@mui/material";
+import { Box, Paper, Step, StepLabel, Stepper } from "@mui/material";
 import { simulateContract, writeContract } from "@wagmi/core";
 import type React from "react";
 import { useEffect, useState } from "react";
@@ -8,6 +8,7 @@ import type { ImportedTransactionData, ImportSignedData, SignatureImportState } 
 import { useSafeWalletContext } from "../../context/WalletContext";
 import { buildSignatureBytes, fetchApprovals } from "../../utils/utils";
 import { config } from "../../wagmi";
+import Title from "../common/Title";
 import CollectSignaturesStep from "./aggregate-signature-steps/CollectSignaturesStep";
 import ExecutionCompleteStep from "./aggregate-signature-steps/ExecutionCompleteStep";
 import ImportTransactionStep from "./aggregate-signature-steps/ImportTransactionStep";
@@ -184,10 +185,11 @@ const AggregateSignaturesAndExecute: React.FC = () => {
   };
 
   return (
-    <Box sx={{ mx: "auto", p: 3 }}>
-      <Typography variant="h4" gutterBottom>
-        Execute Multi-Signature Transaction
-      </Typography>
+    <Box>
+      <Title
+        text="Collect signatures and execute"
+        description="Paste a transaction another owner shared, add each owner's signature, then execute it once enough owners have signed."
+      />
 
       <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
         {steps.map((label) => (
