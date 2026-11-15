@@ -57,7 +57,8 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const [loading, setLoading] = useState<boolean>(false);
   const [safeStorage, setSafeStorage] = useState<SafeStorage>();
   const [accountCode, setAccountCode] = useState<string>();
-  const storage = createStorage({ key: WALLET_STORAGE_KEY, storage: localStorage });
+  // Stable across renders so effects that depend on it do not re-run every time.
+  const [storage] = useState(() => createStorage({ key: WALLET_STORAGE_KEY, storage: localStorage }));
   const [safeDeployment, setSafeDeployment] = useState<SafeDeployment>();
   const [tokenList, setTokenList] = useState<TokenList[]>([]);
   const [txBuilderSpec, _setTxBuilderSpec] = useState<TransactionGroupSpec[]>(trnasctionBuilderSpec);
@@ -121,7 +122,15 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         setSafeAccount(lastSelectedSafeAccount);
       }
     })();
-  });
+  }, [storage]);
+
+  const selectSafeAccount = useCallback(
+    (address: Address) => {
+      setSafeAccount(address);
+      storage.setItem(STORAGE_KEY.LAST_SELECTED_SAFE_ACCOUNT, address);
+    },
+    [storage],
+  );
 
   const saveTokenList = async (list: TokenList[]) => {
     setTokenList(list);
@@ -137,7 +146,7 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         loading,
         features,
         safeAccount,
-        setSafeAccount,
+        setSafeAccount: selectSafeAccount,
         safeDeployment,
         tokenList,
         setTokenList: saveTokenList,

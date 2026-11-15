@@ -62,15 +62,13 @@ const ExistingSafeAccounts: React.FC = () => {
     await storage.setItem(STORAGE_KEY.SAFE_ACCOUNTS, updatedAccounts);
   };
 
-  const handleAddressClick = async (address: Address) => {
+  const handleAddressClick = (address: Address) => {
     setSafeAccount(address);
-    await storage.setItem(STORAGE_KEY.LAST_SELECTED_SAFE_ACCOUNT, address);
     navigate("/safe-info");
   };
 
-  const handleSettingsClick = async (address: Address) => {
+  const handleSettingsClick = (address: Address) => {
     setSafeAccount(address);
-    await storage.setItem(STORAGE_KEY.LAST_SELECTED_SAFE_ACCOUNT, address);
     navigate("/settings");
   };
 
