@@ -1,5 +1,5 @@
 import { Button, TextField, Typography } from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import type React from "react";
 import { Route, Routes, useNavigate, useParams } from "react-router-dom";
 import { useSafeWalletContext } from "../../../context/WalletContext";

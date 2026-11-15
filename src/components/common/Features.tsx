@@ -1,3 +1,4 @@
+import type { JSX } from "react";
 import { Box, Card, CardContent, Typography, useTheme } from "@mui/material";
 import type React from "react";
 
@@ -42,10 +43,11 @@ const FeatureBox: React.FC<FeatureBoxProps> = ({ icon, title, description }) => 
         </Box>
         <Typography
           variant="h5"
-          fontWeight={600}
           sx={{
+            fontWeight: 600,
             marginBottom: 1.5,
             position: "relative",
+
             "&::after": {
               content: '""',
               position: "absolute",

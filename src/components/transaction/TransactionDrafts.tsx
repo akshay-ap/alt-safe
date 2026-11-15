@@ -1,4 +1,4 @@
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import {
@@ -14,7 +14,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import { format, formatDistanceToNow } from "date-fns";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -103,7 +103,13 @@ const TransactionDrafts: React.FC = () => {
           Transaction Drafts
         </Typography>
         <Card sx={{ p: 4, textAlign: "center" }}>
-          <Typography variant="body1" color="text.secondary" gutterBottom>
+          <Typography
+            variant="body1"
+            gutterBottom
+            sx={{
+              color: "text.secondary",
+            }}
+          >
             You don't have any saved transaction drafts
           </Typography>
           <Button variant="contained" startIcon={<AddCircleOutlineIcon />} onClick={handleCreateNew} sx={{ mt: 2 }}>
@@ -236,7 +242,12 @@ const DraftCard: React.FC<DraftCardProps> = ({ draft, onDelete, onEdit, isCurren
         </Box>
 
         <Tooltip title={exactDate} arrow>
-          <Typography variant="body2" color="text.secondary">
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+            }}
+          >
             Last updated: {formattedDate}
           </Typography>
         </Tooltip>

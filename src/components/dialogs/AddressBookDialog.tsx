@@ -21,7 +21,7 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import type React from "react";
 import { useState } from "react";
 import type { Address } from "viem";
@@ -135,11 +135,13 @@ const AddressBookDialog: React.FC<AddressBookDialogProps> = ({ open, onClose }) 
       fullScreen={isSmallScreen}
       open={open}
       onClose={onClose}
-      PaperProps={{
-        style: {
-          width: isSmallScreen ? "100vw" : "60vw",
-          minHeight: isSmallScreen ? "100vh" : "60vh",
-          maxWidth: "none",
+      slotProps={{
+        paper: {
+          style: {
+            width: isSmallScreen ? "100vw" : "60vw",
+            minHeight: isSmallScreen ? "100vh" : "60vh",
+            maxWidth: "none",
+          },
         },
       }}
     >
@@ -216,7 +218,12 @@ const AddressBookDialog: React.FC<AddressBookDialogProps> = ({ open, onClose }) 
                 <Typography variant="subtitle1">Edit Entry</Typography>
               </Grid>
               <Grid size={12}>
-                <Typography variant="body2" color="text.secondary">
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: "text.secondary",
+                  }}
+                >
                   Address: {editingEntry.address}
                 </Typography>
               </Grid>
@@ -288,7 +295,12 @@ const AddressBookDialog: React.FC<AddressBookDialogProps> = ({ open, onClose }) 
               All Saved Addresses ({addressBook.length})
             </Typography>
             {addressBook.length === 0 ? (
-              <Typography variant="body2" color="text.secondary">
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                }}
+              >
                 No addresses saved
               </Typography>
             ) : (

@@ -1,5 +1,5 @@
-import { Autocomplete, Box, Chip, ListItem, TextField, type TextFieldProps, Typography } from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import { Autocomplete, Box, ListItem, TextField, type TextFieldProps, Typography } from "@mui/material";
+import Grid from "@mui/material/Grid";
 import React from "react";
 import { isAddress } from "viem";
 import { useAddressBookSelector } from "./AddressBookSelector";
@@ -89,12 +89,24 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
           const typedOption = option as Option;
           return (
             <ListItem {...props} key={`${typedOption.name}-${typedOption.value}`}>
-              <Grid container justifyContent="space-between" width="100%">
+              <Grid
+                container
+                sx={{
+                  justifyContent: "space-between",
+                  width: "100%",
+                }}
+              >
                 <Grid>
                   <Typography>{typedOption.name}</Typography>
                 </Grid>
                 <Grid>
-                  <Typography variant="body2" color="text.secondary" fontFamily="monospace">
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: "text.secondary",
+                      fontFamily: "monospace",
+                    }}
+                  >
                     {isAddress(typedOption.value)
                       ? `${typedOption.value.slice(0, 6)}...${typedOption.value.slice(-4)}`
                       : typedOption.value}
@@ -104,18 +116,6 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
             </ListItem>
           );
         }}
-        renderTags={(tagValue, getTagProps) =>
-          tagValue.map((option, index) => {
-            const typedOption = option as Option | string;
-            return (
-              <Chip
-                label={typeof typedOption === "string" ? typedOption : typedOption.name}
-                {...getTagProps({ index })}
-                key={typeof typedOption === "string" ? typedOption : typedOption.value}
-              />
-            );
-          })
-        }
         renderInput={(params) => (
           <TextField
             {...params}
@@ -125,11 +125,13 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
             error={showError}
             helperText={showError ? errorText || "Invalid address format" : helperText}
             slotProps={{
+              ...params.slotProps,
+
               input: {
-                ...params.InputProps,
+                ...params.slotProps.input,
                 endAdornment: (
                   <>
-                    {params.InputProps.endAdornment}
+                    {params.slotProps.input.endAdornment}
                     {endAdornment}
                   </>
                 ),

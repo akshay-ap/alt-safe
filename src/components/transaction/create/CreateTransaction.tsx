@@ -26,7 +26,7 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import { readContract, simulateContract } from "@wagmi/core";
 import { useEffect, useState } from "react";
 import { type Address, bytesToHex, encodeFunctionData, hexToBytes, stringToBytes, zeroAddress } from "viem";
@@ -598,17 +598,22 @@ const CreateTransaction: React.FC = () => {
 
                       <Box
                         sx={{
+                          mb: 2,
                           p: 2,
                           bgcolor: "background.paper",
                           borderRadius: 1,
                           border: 1,
                           borderColor: "divider",
                         }}
-                        mb={2}
                       >
                         <Grid container spacing={2}>
                           <Grid size={{ xs: 12 }}>
-                            <Typography variant="body2" color="text.secondary">
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                color: "text.secondary",
+                              }}
+                            >
                               Safe Transaction Hash
                             </Typography>
                             <Typography variant="body1" sx={{ wordBreak: "break-all" }}>
@@ -629,7 +634,12 @@ const CreateTransaction: React.FC = () => {
                       >
                         <Grid container spacing={2}>
                           <Grid size={{ xs: 12 }}>
-                            <Typography variant="body2" color="text.secondary">
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                color: "text.secondary",
+                              }}
+                            >
                               Signature
                             </Typography>
                             <Typography variant="body1" sx={{ wordBreak: "break-all" }}>

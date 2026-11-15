@@ -1,5 +1,5 @@
 import { Box, Button, Chip, Container, Divider, Link, Paper, Typography, useTheme } from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import { useNavigate } from "react-router-dom";
 import FeatureBox from "./common/Features";
 import "../index.css";
@@ -64,9 +64,9 @@ const Welcome: React.FC = () => {
         >
           <Typography
             variant="h1"
-            fontWeight="bold"
             color="primary"
             sx={{
+              fontWeight: "bold",
               background: `linear-gradient(45deg, ${theme.palette.primary.main} 30%, ${theme.palette.secondary.main} 90%)`,
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
@@ -76,6 +76,7 @@ const Welcome: React.FC = () => {
               letterSpacing: "-0.02em",
               textShadow: "0 0 40px rgba(95, 221, 255, 0.3)",
               position: "relative",
+
               "&::after": {
                 content: '""',
                 position: "absolute",

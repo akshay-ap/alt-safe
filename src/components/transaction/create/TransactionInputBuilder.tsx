@@ -18,7 +18,7 @@ import {
   alpha,
   useTheme,
 } from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import { readContract } from "@wagmi/core";
 import { useEffect, useState } from "react";
 import type React from "react";
@@ -454,7 +454,13 @@ const TransactionInputBuilder: React.FC<TransactionInputBuilderProps> = ({ onAdd
                         getOptionLabel={(option) => (typeof option === "string" ? option : option.name)}
                         renderOption={(props, option) => (
                           <ListItem {...props} key={`${option.name}-${option.value}`}>
-                            <Grid container justifyContent="space-between" width="100%">
+                            <Grid
+                              container
+                              sx={{
+                                justifyContent: "space-between",
+                                width: "100%",
+                              }}
+                            >
                               <Grid>
                                 <Typography>{option.name}</Typography>
                               </Grid>
@@ -488,7 +494,13 @@ const TransactionInputBuilder: React.FC<TransactionInputBuilderProps> = ({ onAdd
                         getOptionLabel={(option) => (typeof option === "string" ? option : option.name)}
                         renderOption={(props, option) => (
                           <ListItem {...props} key={`${option.name}-${option.value}`}>
-                            <Grid container justifyContent="space-between" width="100%">
+                            <Grid
+                              container
+                              sx={{
+                                justifyContent: "space-between",
+                                width: "100%",
+                              }}
+                            >
                               <Grid>
                                 <Typography>{option.name}</Typography>
                               </Grid>

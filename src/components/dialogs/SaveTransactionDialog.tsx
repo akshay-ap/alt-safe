@@ -66,7 +66,13 @@ const SaveTransactionDialog: React.FC<SaveTransactionDialogProps> = ({
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
       <DialogTitle>Save Transaction Draft</DialogTitle>
       <DialogContent>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+            mb: 3,
+          }}
+        >
           Save your transaction for later. You can continue editing or execute it when you return.
         </Typography>
 
@@ -82,7 +88,12 @@ const SaveTransactionDialog: React.FC<SaveTransactionDialogProps> = ({
           sx={{ mb: 2 }}
         />
 
-        <Typography variant="body2" color="text.secondary">
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+          }}
+        >
           This draft will save {transactions.length} transaction{transactions.length !== 1 ? "s" : ""}
           for Safe account {safeAccount ? `${safeAccount.slice(0, 6)}...${safeAccount.slice(-4)}` : "–"}.
         </Typography>

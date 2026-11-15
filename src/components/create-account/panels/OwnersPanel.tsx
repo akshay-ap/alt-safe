@@ -1,4 +1,4 @@
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import { Alert, Box, Button, Card, CardContent, Typography } from "@mui/material";
 import type React from "react";
 import { useCallback, useEffect, useState } from "react";
@@ -72,7 +72,13 @@ const OwnersPanel: React.FC<OwnersPanelProps> = ({ owners, setOwners, threshold,
       <Typography variant="h6" gutterBottom>
         Owners & Threshold Configuration
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+      <Typography
+        variant="body2"
+        sx={{
+          color: "text.secondary",
+          mb: 3,
+        }}
+      >
         Add the owners who will manage this Safe and set the number of confirmations required
       </Typography>
 
@@ -81,7 +87,13 @@ const OwnersPanel: React.FC<OwnersPanelProps> = ({ owners, setOwners, threshold,
           <Typography variant="subtitle1" sx={{ mb: 1 }}>
             Owners
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+              mb: 2,
+            }}
+          >
             Each owner can propose and confirm transactions
           </Typography>
 
@@ -98,7 +110,13 @@ const OwnersPanel: React.FC<OwnersPanelProps> = ({ owners, setOwners, threshold,
           <Typography variant="subtitle1" sx={{ mb: 1 }}>
             Threshold
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+              mb: 2,
+            }}
+          >
             Set how many owner confirmations are required for transactions
           </Typography>
 

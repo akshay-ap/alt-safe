@@ -15,7 +15,13 @@ const NameLabelsPanel: React.FC<NameLabelsPanelProps> = ({ safeName, setSafeName
       <Typography variant="h6" gutterBottom>
         Name & Labels
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+      <Typography
+        variant="body2"
+        sx={{
+          color: "text.secondary",
+          mb: 3,
+        }}
+      >
         Give your Safe a recognizable name and optional labels for easy identification. This is stroed locally and not
         on-chain. You can change it later.
       </Typography>

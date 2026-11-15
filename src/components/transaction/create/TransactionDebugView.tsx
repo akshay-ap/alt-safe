@@ -130,7 +130,14 @@ const TransactionDebugView: React.FC<TransactionDebugViewProps> = ({ spec, conte
         <Box sx={{ mb: 4 }}>
           {/* Final Generated Calldata - Promoted to the top */}
           <Box sx={{ mb: 3 }}>
-            <Typography variant="subtitle2" color="text.primary" gutterBottom fontWeight="medium">
+            <Typography
+              variant="subtitle2"
+              gutterBottom
+              sx={{
+                color: "text.primary",
+                fontWeight: "medium",
+              }}
+            >
               Generated Calldata
             </Typography>
             <Paper
@@ -147,7 +154,14 @@ const TransactionDebugView: React.FC<TransactionDebugViewProps> = ({ spec, conte
               }}
             >
               <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
-                <Typography variant="caption" color="text.secondary" gutterBottom fontWeight="medium">
+                <Typography
+                  variant="caption"
+                  gutterBottom
+                  sx={{
+                    color: "text.secondary",
+                    fontWeight: "medium",
+                  }}
+                >
                   Final Transaction Calldata:
                 </Typography>
                 <Tooltip title={showHexValues.calldata ? "Show Raw" : "Show Decoded"}>
@@ -190,22 +204,43 @@ const TransactionDebugView: React.FC<TransactionDebugViewProps> = ({ spec, conte
               >
                 <Typography
                   variant="body2"
-                  fontFamily="monospace"
                   color={transactionError ? "error.contrastText" : "success.contrastText"}
-                  sx={{ wordBreak: "break-all" }}
+                  sx={{
+                    fontFamily: "monospace",
+                    wordBreak: "break-all",
+                  }}
                 >
                   {transactionError || calldata || "0x"}
                 </Typography>
                 {showHexValues.calldata && !transactionError && calldata && (
                   <Box sx={{ mt: 1, pt: 1, borderTop: 1, borderColor: "divider" }}>
-                    <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 0.5 }}>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: "text.secondary",
+                        display: "block",
+                        mb: 0.5,
+                      }}
+                    >
                       Calldata breakdown (for debugging):
                     </Typography>
-                    <Typography variant="caption" fontFamily="monospace" sx={{ display: "block" }}>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        fontFamily: "monospace",
+                        display: "block",
+                      }}
+                    >
                       Function selector: {calldata.slice(0, 10)}
                     </Typography>
                     {calldata.length > 10 && (
-                      <Typography variant="caption" fontFamily="monospace" sx={{ display: "block" }}>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          fontFamily: "monospace",
+                          display: "block",
+                        }}
+                      >
                         Arguments: {calldata.slice(10)}
                       </Typography>
                     )}
@@ -217,7 +252,14 @@ const TransactionDebugView: React.FC<TransactionDebugViewProps> = ({ spec, conte
 
           {/* To Address */}
           <Box sx={{ mb: 3 }}>
-            <Typography variant="subtitle2" color="text.primary" gutterBottom fontWeight="medium">
+            <Typography
+              variant="subtitle2"
+              gutterBottom
+              sx={{
+                color: "text.primary",
+                fontWeight: "medium",
+              }}
+            >
               To Address
             </Typography>
             <Paper
@@ -234,7 +276,14 @@ const TransactionDebugView: React.FC<TransactionDebugViewProps> = ({ spec, conte
               }}
             >
               <Box sx={{ mb: 2 }}>
-                <Typography variant="caption" color="text.secondary" gutterBottom fontWeight="medium">
+                <Typography
+                  variant="caption"
+                  gutterBottom
+                  sx={{
+                    color: "text.secondary",
+                    fontWeight: "medium",
+                  }}
+                >
                   Expression:
                 </Typography>
                 <Box
@@ -252,14 +301,26 @@ const TransactionDebugView: React.FC<TransactionDebugViewProps> = ({ spec, conte
                     },
                   }}
                 >
-                  <Typography variant="body2" fontFamily="monospace">
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontFamily: "monospace",
+                    }}
+                  >
                     {spec.onFinalize.to}
                   </Typography>
                 </Box>
               </Box>
               <Box>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
-                  <Typography variant="caption" color="text.secondary" gutterBottom fontWeight="medium">
+                  <Typography
+                    variant="caption"
+                    gutterBottom
+                    sx={{
+                      color: "text.secondary",
+                      fontWeight: "medium",
+                    }}
+                  >
                     Evaluated Result:
                   </Typography>
                   <Tooltip title={showHexValues["to-address"] ? "Show Address" : "Show Hex"}>
@@ -302,14 +363,23 @@ const TransactionDebugView: React.FC<TransactionDebugViewProps> = ({ spec, conte
                 >
                   <Typography
                     variant="body2"
-                    fontFamily="monospace"
                     color={transactionError ? "error.contrastText" : "success.contrastText"}
-                    sx={{ wordBreak: "break-all" }}
+                    sx={{
+                      fontFamily: "monospace",
+                      wordBreak: "break-all",
+                    }}
                   >
                     {transactionError || (showHexValues["to-address"] ? getHexValue(to) : to)}
                   </Typography>
                   {showHexValues["to-address"] && !transactionError && (
-                    <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: "block" }}>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: "text.secondary",
+                        mt: 0.5,
+                        display: "block",
+                      }}
+                    >
                       Hex representation
                     </Typography>
                   )}
@@ -320,7 +390,14 @@ const TransactionDebugView: React.FC<TransactionDebugViewProps> = ({ spec, conte
 
           {/* Value */}
           <Box sx={{ mb: 3 }}>
-            <Typography variant="subtitle2" color="text.primary" gutterBottom fontWeight="medium">
+            <Typography
+              variant="subtitle2"
+              gutterBottom
+              sx={{
+                color: "text.primary",
+                fontWeight: "medium",
+              }}
+            >
               Value (wei)
             </Typography>
             <Paper
@@ -337,7 +414,14 @@ const TransactionDebugView: React.FC<TransactionDebugViewProps> = ({ spec, conte
               }}
             >
               <Box sx={{ mb: 2 }}>
-                <Typography variant="caption" color="text.secondary" gutterBottom fontWeight="medium">
+                <Typography
+                  variant="caption"
+                  gutterBottom
+                  sx={{
+                    color: "text.secondary",
+                    fontWeight: "medium",
+                  }}
+                >
                   Expression:
                 </Typography>
                 <Box
@@ -355,14 +439,26 @@ const TransactionDebugView: React.FC<TransactionDebugViewProps> = ({ spec, conte
                     },
                   }}
                 >
-                  <Typography variant="body2" fontFamily="monospace">
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontFamily: "monospace",
+                    }}
+                  >
                     {spec.onFinalize.value}
                   </Typography>
                 </Box>
               </Box>
               <Box>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
-                  <Typography variant="caption" color="text.secondary" gutterBottom fontWeight="medium">
+                  <Typography
+                    variant="caption"
+                    gutterBottom
+                    sx={{
+                      color: "text.secondary",
+                      fontWeight: "medium",
+                    }}
+                  >
                     Evaluated Result:
                   </Typography>
                   <Tooltip title={showHexValues.value ? "Show Decimal" : "Show Hex"}>
@@ -405,8 +501,10 @@ const TransactionDebugView: React.FC<TransactionDebugViewProps> = ({ spec, conte
                 >
                   <Typography
                     variant="body2"
-                    fontFamily="monospace"
                     color={transactionError ? "error.contrastText" : "success.contrastText"}
+                    sx={{
+                      fontFamily: "monospace",
+                    }}
                   >
                     {transactionError
                       ? "Error in calculation"
@@ -415,7 +513,14 @@ const TransactionDebugView: React.FC<TransactionDebugViewProps> = ({ spec, conte
                         : `${value} wei`}
                   </Typography>
                   {showHexValues.value && !transactionError && (
-                    <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: "block" }}>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: "text.secondary",
+                        mt: 0.5,
+                        display: "block",
+                      }}
+                    >
                       Hex representation
                     </Typography>
                   )}
@@ -443,14 +548,28 @@ const TransactionDebugView: React.FC<TransactionDebugViewProps> = ({ spec, conte
               },
             }}
           >
-            <Typography variant="subtitle2" color="text.primary" gutterBottom fontWeight="medium">
+            <Typography
+              variant="subtitle2"
+              gutterBottom
+              sx={{
+                color: "text.primary",
+                fontWeight: "medium",
+              }}
+            >
               Calldata Generation Details
             </Typography>
 
             {/* Function Signature */}
             {spec.functionSignature && (
               <Box sx={{ mb: 2 }}>
-                <Typography variant="caption" color="text.secondary" gutterBottom fontWeight="medium">
+                <Typography
+                  variant="caption"
+                  gutterBottom
+                  sx={{
+                    color: "text.secondary",
+                    fontWeight: "medium",
+                  }}
+                >
                   Function Signature:
                 </Typography>
                 <Box
@@ -463,7 +582,12 @@ const TransactionDebugView: React.FC<TransactionDebugViewProps> = ({ spec, conte
                     mt: 0.5,
                   }}
                 >
-                  <Typography variant="body2" fontFamily="monospace">
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontFamily: "monospace",
+                    }}
+                  >
                     {spec.functionSignature}
                   </Typography>
                 </Box>
@@ -473,7 +597,14 @@ const TransactionDebugView: React.FC<TransactionDebugViewProps> = ({ spec, conte
             {/* Calldata Arguments */}
             {"calldataArgs" in spec.onFinalize && spec.onFinalize.calldataArgs && (
               <Box sx={{ mb: 2 }}>
-                <Typography variant="caption" color="text.secondary" gutterBottom fontWeight="medium">
+                <Typography
+                  variant="caption"
+                  gutterBottom
+                  sx={{
+                    color: "text.secondary",
+                    fontWeight: "medium",
+                  }}
+                >
                   Calldata Arguments:
                 </Typography>
                 <Box sx={{ mt: 1 }}>
@@ -493,10 +624,23 @@ const TransactionDebugView: React.FC<TransactionDebugViewProps> = ({ spec, conte
                         },
                       }}
                     >
-                      <Typography variant="caption" color="primary.main" fontWeight="bold" gutterBottom>
+                      <Typography
+                        variant="caption"
+                        gutterBottom
+                        sx={{
+                          color: "primary.main",
+                          fontWeight: "bold",
+                        }}
+                      >
                         Argument {index}:
                       </Typography>
-                      <Typography variant="body2" fontFamily="monospace" sx={{ mt: 0.5 }}>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontFamily: "monospace",
+                          mt: 0.5,
+                        }}
+                      >
                         {arg}
                       </Typography>
                       <Box sx={{ mt: 1 }}>
@@ -522,7 +666,14 @@ const TransactionDebugView: React.FC<TransactionDebugViewProps> = ({ spec, conte
             {/* Data Expression */}
             {"data" in spec.onFinalize && (
               <Box>
-                <Typography variant="caption" color="text.secondary" gutterBottom fontWeight="medium">
+                <Typography
+                  variant="caption"
+                  gutterBottom
+                  sx={{
+                    color: "text.secondary",
+                    fontWeight: "medium",
+                  }}
+                >
                   Data Expression:
                 </Typography>
                 <Box
@@ -535,7 +686,12 @@ const TransactionDebugView: React.FC<TransactionDebugViewProps> = ({ spec, conte
                     mt: 0.5,
                   }}
                 >
-                  <Typography variant="body2" fontFamily="monospace">
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontFamily: "monospace",
+                    }}
+                  >
                     {spec.onFinalize.data}
                   </Typography>
                 </Box>
@@ -547,7 +703,13 @@ const TransactionDebugView: React.FC<TransactionDebugViewProps> = ({ spec, conte
         {/* Context Values Section */}
         <Box sx={{ mb: 4 }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
-            <Typography variant="subtitle1" fontWeight="bold" color="primary.main">
+            <Typography
+              variant="subtitle1"
+              sx={{
+                fontWeight: "bold",
+                color: "primary.main",
+              }}
+            >
               🌐 Context Values
             </Typography>
           </Box>
@@ -566,7 +728,13 @@ const TransactionDebugView: React.FC<TransactionDebugViewProps> = ({ spec, conte
             }}
           >
             {Object.keys(context).length === 0 ? (
-              <Typography variant="body2" color="text.secondary" sx={{ fontStyle: "italic" }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                  fontStyle: "italic",
+                }}
+              >
                 No context values available for this transaction
               </Typography>
             ) : (
@@ -599,7 +767,12 @@ const TransactionDebugView: React.FC<TransactionDebugViewProps> = ({ spec, conte
                           },
                         }}
                       />
-                      <Typography variant="caption" color="text.secondary">
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: "text.secondary",
+                        }}
+                      >
                         (context value)
                       </Typography>
                     </Box>
@@ -619,7 +792,13 @@ const TransactionDebugView: React.FC<TransactionDebugViewProps> = ({ spec, conte
                         },
                       }}
                     >
-                      <Typography variant="body2" fontFamily="monospace" sx={{ wordBreak: "break-all" }}>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontFamily: "monospace",
+                          wordBreak: "break-all",
+                        }}
+                      >
                         {value !== null && value !== undefined ? JSON.stringify(value) : "(empty)"}
                       </Typography>
                     </Box>
@@ -633,7 +812,13 @@ const TransactionDebugView: React.FC<TransactionDebugViewProps> = ({ spec, conte
         {/* Input Values & Variable Transformations Section */}
         <Box sx={{ mb: 4 }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
-            <Typography variant="subtitle1" fontWeight="bold" color="primary.main">
+            <Typography
+              variant="subtitle1"
+              sx={{
+                fontWeight: "bold",
+                color: "primary.main",
+              }}
+            >
               Input Values & Variable Transformations
             </Typography>
           </Box>
@@ -652,7 +837,13 @@ const TransactionDebugView: React.FC<TransactionDebugViewProps> = ({ spec, conte
             }}
           >
             {spec.inputs.length === 0 ? (
-              <Typography variant="body2" color="text.secondary" sx={{ fontStyle: "italic" }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                  fontStyle: "italic",
+                }}
+              >
                 No inputs defined for this transaction
               </Typography>
             ) : (
@@ -685,7 +876,12 @@ const TransactionDebugView: React.FC<TransactionDebugViewProps> = ({ spec, conte
                           },
                         }}
                       />
-                      <Typography variant="caption" color="text.secondary">
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: "text.secondary",
+                        }}
+                      >
                         ({input.type})
                       </Typography>
                     </Box>
@@ -705,7 +901,13 @@ const TransactionDebugView: React.FC<TransactionDebugViewProps> = ({ spec, conte
                         },
                       }}
                     >
-                      <Typography variant="body2" fontFamily="monospace" sx={{ wordBreak: "break-all" }}>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontFamily: "monospace",
+                          wordBreak: "break-all",
+                        }}
+                      >
                         "{inputs[input.name] || "(empty)"}"
                       </Typography>
                     </Box>
@@ -721,7 +923,13 @@ const TransactionDebugView: React.FC<TransactionDebugViewProps> = ({ spec, conte
           <Box sx={{ mt: 4 }}>
             <Divider sx={{ mb: 2 }} />
             <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
-              <Typography variant="subtitle1" fontWeight="bold" color="error.main">
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  fontWeight: "bold",
+                  color: "error.main",
+                }}
+              >
                 Validation Errors
               </Typography>
             </Box>
@@ -768,7 +976,12 @@ const TransactionDebugView: React.FC<TransactionDebugViewProps> = ({ spec, conte
                         },
                       }}
                     />
-                    <Typography variant="body2" color="error.contrastText">
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: "error.contrastText",
+                      }}
+                    >
                       {error.errorMessage}
                     </Typography>
                   </Box>

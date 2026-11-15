@@ -46,7 +46,13 @@ const NameAndLabels: React.FC<NameAndLabelsProps> = ({
   return (
     <Box>
       <Box sx={{ mb: 3 }}>
-        <Typography variant="subtitle1" fontWeight={500} gutterBottom>
+        <Typography
+          variant="subtitle1"
+          gutterBottom
+          sx={{
+            fontWeight: 500,
+          }}
+        >
           {nameLabel}
         </Typography>
         <TextField
@@ -59,10 +65,22 @@ const NameAndLabels: React.FC<NameAndLabelsProps> = ({
       </Box>
 
       <Box>
-        <Typography variant="subtitle1" fontWeight={500} gutterBottom>
+        <Typography
+          variant="subtitle1"
+          gutterBottom
+          sx={{
+            fontWeight: 500,
+          }}
+        >
           {labelsLabel}
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+            mb: 2,
+          }}
+        >
           Add labels to categorize and easily find this account later
         </Typography>
 
@@ -96,7 +114,13 @@ const NameAndLabels: React.FC<NameAndLabelsProps> = ({
             <Chip key={label} label={label} onDelete={() => handleDeleteLabel(label)} sx={{ m: 0.5 }} />
           ))}
           {labels.length === 0 && (
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+                mt: 1,
+              }}
+            >
               No labels added yet
             </Typography>
           )}

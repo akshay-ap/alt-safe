@@ -31,8 +31,8 @@ const Summary: React.FC<SummaryProps> = ({
   if (transactions.length === 0) {
     return (
       <Typography
-        color="text.secondary"
         sx={{
+          color: "text.secondary",
           p: 2,
           textAlign: "center",
           fontStyle: "italic",
@@ -73,7 +73,12 @@ const Summary: React.FC<SummaryProps> = ({
             <ListItemText
               primary={transaction.actionName}
               secondary={
-                <Typography variant="caption" color="text.secondary">
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: "text.secondary",
+                  }}
+                >
                   {transaction.groupName}
                 </Typography>
               }

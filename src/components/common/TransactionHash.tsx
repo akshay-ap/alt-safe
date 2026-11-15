@@ -56,7 +56,14 @@ const TransactionHash: React.FC<TransactionHashProps> = ({
 
   if (!hash) {
     return (
-      <Typography color="text.secondary" sx={getFontSize()}>
+      <Typography
+        sx={[
+          {
+            color: "text.secondary",
+          },
+          getFontSize(),
+        ]}
+      >
         No transaction hash
       </Typography>
     );

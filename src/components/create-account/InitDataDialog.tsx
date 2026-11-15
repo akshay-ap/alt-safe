@@ -62,7 +62,13 @@ const InitDataDialog: React.FC<InitDataDialogProps> = ({ open, onClose, initData
               Raw InitData:
             </Typography>
             <Paper sx={{ p: 2, mb: 2 }}>
-              <Typography variant="body2" fontFamily="monospace" sx={{ wordBreak: "break-all" }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  fontFamily: "monospace",
+                  wordBreak: "break-all",
+                }}
+              >
                 {initData}
               </Typography>
             </Paper>
@@ -74,23 +80,45 @@ const InitDataDialog: React.FC<InitDataDialogProps> = ({ open, onClose, initData
               <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                 {decodedInitData.args.map((arg: any, index: number) => (
                   <Paper key={index} sx={{ p: 2 }}>
-                    <Typography variant="caption" color="text.secondary">
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: "text.secondary",
+                      }}
+                    >
                       Argument {index + 1}:
                     </Typography>
-                    <Typography variant="body2" fontFamily="monospace" sx={{ wordBreak: "break-all", mt: 0.5 }}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontFamily: "monospace",
+                        wordBreak: "break-all",
+                        mt: 0.5,
+                      }}
+                    >
                       {formatArgValue(arg)}
                     </Typography>
                   </Paper>
                 ))}
               </Box>
             ) : (
-              <Typography variant="body2" color="text.secondary">
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                }}
+              >
                 No arguments found
               </Typography>
             )}
           </Box>
         ) : (
-          <Typography variant="body2" color="text.secondary">
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+            }}
+          >
             Unable to decode initData
           </Typography>
         )}

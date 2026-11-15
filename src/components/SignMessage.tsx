@@ -165,7 +165,12 @@ const SignMessage: React.FC = () => {
 
     // Display your own signature first
     fields.push(
-      <Box key="your-sig" mb={2}>
+      <Box
+        key="your-sig"
+        sx={{
+          mb: 2,
+        }}
+      >
         <Typography variant="subtitle2" gutterBottom>
           Your signature
         </Typography>
@@ -188,7 +193,12 @@ const SignMessage: React.FC = () => {
     // For other signatures
     if (requiredSignatures > 1) {
       fields.push(
-        <Box key="other-sigs" mt={2}>
+        <Box
+          key="other-sigs"
+          sx={{
+            mt: 2,
+          }}
+        >
           <Typography variant="subtitle2" gutterBottom>
             Additional signatures required:{" "}
             {requiredSignatures - (account.address && signatures[account.address] ? 1 : 0)} of {requiredSignatures}
@@ -230,7 +240,11 @@ const SignMessage: React.FC = () => {
           Sign Message for Safe Account
         </Typography>
         {errors.length > 0 && (
-          <Box mb={3}>
+          <Box
+            sx={{
+              mb: 3,
+            }}
+          >
             <Alert severity="error" onClose={clearErrors} sx={{ mb: 1 }}>
               <Typography variant="subtitle2">There were some issues:</Typography>
               <ul style={{ margin: 0, paddingLeft: "1rem" }}>
@@ -253,7 +267,11 @@ const SignMessage: React.FC = () => {
             placeholder="Enter your message here"
             variant="outlined"
           />
-          <Box mt={2}>
+          <Box
+            sx={{
+              mt: 2,
+            }}
+          >
             <Button variant="contained" onClick={handleSignMessage} disabled={!message || !account.address}>
               Sign with your wallet
             </Button>
@@ -264,7 +282,11 @@ const SignMessage: React.FC = () => {
 
         <Box sx={{ mb: 4 }}>
           {renderSignatureFields()}
-          <Box mt={2}>
+          <Box
+            sx={{
+              mt: 2,
+            }}
+          >
             <Button
               variant="contained"
               onClick={handleEncodeSignatures}
@@ -279,7 +301,13 @@ const SignMessage: React.FC = () => {
         <Divider sx={{ my: 3 }} />
 
         <Box>
-          <Stack direction="row" spacing={1} alignItems="center">
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{
+              alignItems: "center",
+            }}
+          >
             <TextField
               fullWidth
               placeholder="Encoded signature will appear here"
@@ -294,7 +322,13 @@ const SignMessage: React.FC = () => {
               </IconButton>
             </Tooltip>
           </Stack>
-          <Typography variant="body2" color="text.secondary" mt={1}>
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+              mt: 1,
+            }}
+          >
             This encoded signature can be verified by calling ERC-1271 isValidSignature function on the Safe account.
           </Typography>
           <Button variant="contained" onClick={handleCheckSignature}>

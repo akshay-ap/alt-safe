@@ -7,7 +7,12 @@ const CreateSafeHeader: React.FC = () => {
       <Typography variant="h4" gutterBottom>
         Create Safe
       </Typography>
-      <Typography variant="body1" color="text.secondary">
+      <Typography
+        variant="body1"
+        sx={{
+          color: "text.secondary",
+        }}
+      >
         Configure Safe account
       </Typography>
     </Box>

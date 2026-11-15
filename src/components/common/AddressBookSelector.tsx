@@ -53,10 +53,12 @@ export const useAddressBookSelector = ({
       anchorEl={anchorEl}
       open={isMenuOpen}
       onClose={handleMenuClose}
-      PaperProps={{
-        style: {
-          maxHeight: 300,
-          width: "350px",
+      slotProps={{
+        paper: {
+          style: {
+            maxHeight: 300,
+            width: "350px",
+          },
         },
       }}
     >
@@ -100,7 +102,13 @@ const AddressBookMenuContent: React.FC<AddressBookMenuContentProps> = ({ address
   return (
     <>
       <MenuItem disabled>
-        <Typography variant="overline" color="primary" fontWeight="bold">
+        <Typography
+          variant="overline"
+          color="primary"
+          sx={{
+            fontWeight: "bold",
+          }}
+        >
           Address Book
         </Typography>
       </MenuItem>
@@ -117,15 +125,23 @@ const AddressBookMenuContent: React.FC<AddressBookMenuContentProps> = ({ address
           }}
         >
           <Box sx={{ width: "100%" }}>
-            <Typography variant="body2" fontWeight="medium" sx={{ mb: 0.5 }}>
+            <Typography
+              variant="body2"
+              sx={{
+                fontWeight: "medium",
+                mb: 0.5,
+              }}
+            >
               {entry.name}
             </Typography>
             <Typography
               variant="caption"
               color="textSecondary"
-              fontFamily="monospace"
-              display="block"
-              sx={{ mb: 0.25 }}
+              sx={{
+                fontFamily: "monospace",
+                display: "block",
+                mb: 0.25,
+              }}
             >
               {entry.address}
             </Typography>

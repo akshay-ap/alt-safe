@@ -12,7 +12,12 @@ const ImportTransactionStep: React.FC<{
         <Typography variant="h6" gutterBottom>
           Import Transaction
         </Typography>
-        <Typography variant="body2" color="text.secondary">
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+          }}
+        >
           Paste the unsigned transaction data to begin the execution process.
         </Typography>
       </Box>

@@ -17,7 +17,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { getChains } from "@wagmi/core";
@@ -186,7 +186,12 @@ const ExistingSafeAccounts: React.FC = () => {
         <Typography variant="h4" component="h1">
           Safe Accounts
         </Typography>
-        <Typography variant="body2" color="text.secondary">
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+          }}
+        >
           {safeAccounts.length} {safeAccounts.length === 1 ? "Account" : "Accounts"}
         </Typography>
       </Box>
@@ -229,7 +234,14 @@ const ExistingSafeAccounts: React.FC = () => {
             <Typography variant="h6" gutterBottom>
               No Safe Accounts
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 450, mb: 2 }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+                maxWidth: 450,
+                mb: 2,
+              }}
+            >
               You don't have any Safe accounts yet. Create a new Safe account or import an existing one to get started.
             </Typography>
             <Box sx={{ "& > img": { maxHeight: 120, opacity: 0.7, mb: 2 } }}>
@@ -355,7 +367,12 @@ const AccountCard: React.FC<{
               </Box>
 
               {/* Balance */}
-              <Typography variant="body2" color="text.secondary">
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                }}
+              >
                 {formatUnits(balance?.value || 0n, 18)} {balance?.symbol}
               </Typography>
             </Box>

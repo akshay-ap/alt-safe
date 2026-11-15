@@ -1,3 +1,4 @@
+import type { JSX } from "react";
 import CodeIcon from "@mui/icons-material/Code";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
@@ -253,10 +254,12 @@ const TransactionTypePanel: React.FC<TransactionTypePanelProps> = ({ onSelect })
             anchorEl={filterMenuAnchor}
             open={Boolean(filterMenuAnchor)}
             onClose={handleFilterMenuClose}
-            PaperProps={{
-              sx: {
-                mt: 1,
-                minWidth: 200,
+            slotProps={{
+              paper: {
+                sx: {
+                  mt: 1,
+                  minWidth: 200,
+                },
               },
             }}
           >
@@ -326,7 +329,12 @@ const TransactionTypePanel: React.FC<TransactionTypePanelProps> = ({ onSelect })
                     <ListItemText
                       primary={
                         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                          <Typography variant="body1" fontWeight={500}>
+                          <Typography
+                            variant="body1"
+                            sx={{
+                              fontWeight: 500,
+                            }}
+                          >
                             {group.name}
                           </Typography>
                           {group.disabled && <Chip label="Unavailable" size="small" color="error" variant="outlined" />}
@@ -369,10 +377,14 @@ const TransactionTypePanel: React.FC<TransactionTypePanelProps> = ({ onSelect })
                           >
                             <ListItemText
                               primary={action}
-                              primaryTypographyProps={{
-                                variant: "body2",
-                                fontWeight: isSelected ? 500 : 400,
-                                color: isSelected ? "primary.main" : "inherit",
+                              slotProps={{
+                                primary: {
+                                  variant: "body2",
+                                  sx: {
+                                    fontWeight: isSelected ? 500 : 400,
+                                    color: isSelected ? "primary.main" : "inherit",
+                                  },
+                                },
                               }}
                             />
                           </ListItemButton>
@@ -389,10 +401,21 @@ const TransactionTypePanel: React.FC<TransactionTypePanelProps> = ({ onSelect })
             {/* Empty state */}
             {filteredGroups.length === 0 && (
               <Box id="empty-state-message" sx={{ textAlign: "center", py: 6 }}>
-                <Typography variant="h6" color="text.secondary" gutterBottom>
+                <Typography
+                  variant="h6"
+                  gutterBottom
+                  sx={{
+                    color: "text.secondary",
+                  }}
+                >
                   No transaction types found
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: "text.secondary",
+                  }}
+                >
                   Try adjusting your search or filter criteria
                 </Typography>
               </Box>
@@ -406,7 +429,12 @@ const TransactionTypePanel: React.FC<TransactionTypePanelProps> = ({ onSelect })
             <Typography variant="h6" gutterBottom>
               Transaction Defaults
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+              }}
+            >
               Configure default transaction parameters in the form panel on the right.
             </Typography>
           </Box>

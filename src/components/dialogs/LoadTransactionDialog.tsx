@@ -97,7 +97,12 @@ const LoadTransactionDialog: React.FC<LoadTransactionDialogProps> = ({
           </Box>
         ) : drafts.length === 0 ? (
           <Box sx={{ py: 4, textAlign: "center" }}>
-            <Typography variant="body1" color="text.secondary">
+            <Typography
+              variant="body1"
+              sx={{
+                color: "text.secondary",
+              }}
+            >
               No saved transaction drafts found
             </Typography>
           </Box>
@@ -189,7 +194,12 @@ const TransactionDraftItem: React.FC<TransactionDraftItemProps> = ({ draft, onLo
         <ListItemText
           primary={
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <Typography variant="body1" fontWeight={500}>
+              <Typography
+                variant="body1"
+                sx={{
+                  fontWeight: 500,
+                }}
+              >
                 {draft.name}
               </Typography>
               <Chip size="small" label={`${draft.transactions.length} TX`} color="primary" variant="outlined" />
@@ -197,12 +207,23 @@ const TransactionDraftItem: React.FC<TransactionDraftItemProps> = ({ draft, onLo
           }
           secondary={
             <>
-              <Typography variant="body2" color="text.secondary" sx={{ display: "block" }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                  display: "block",
+                }}
+              >
                 {draft.safeAccount.substring(0, 6)}...
                 {draft.safeAccount.substring(38)}
                 {draft.chainId && ` (Chain ID: ${draft.chainId})`}
               </Typography>
-              <Typography variant="caption" color="text.secondary">
+              <Typography
+                variant="caption"
+                sx={{
+                  color: "text.secondary",
+                }}
+              >
                 Last modified: {formattedDate}
               </Typography>
             </>

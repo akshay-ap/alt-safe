@@ -152,18 +152,19 @@ const gradientTheme = createTheme({
             transform: "none",
             boxShadow: "none",
           },
-        },
-        containedSecondary: {
-          background: "linear-gradient(135deg, #12FF80 0%, #5FDDFF 100%)",
-          color: "#000000",
-          "&:hover": {
-            background: "linear-gradient(135deg, #42FF9A 0%, #7FE5FF 100%)",
-          },
-          "&.Mui-disabled": {
-            background: "rgba(60, 60, 70, 0.6)",
-            color: "rgba(255, 255, 255, 0.4)",
-            border: "1px solid rgba(255, 255, 255, 0.1)",
-            cursor: "not-allowed",
+          // MUI 7+ removed the `containedSecondary` override key; target the color class instead.
+          "&.MuiButton-colorSecondary": {
+            background: "linear-gradient(135deg, #12FF80 0%, #5FDDFF 100%)",
+            color: "#000000",
+            "&:hover": {
+              background: "linear-gradient(135deg, #42FF9A 0%, #7FE5FF 100%)",
+            },
+            "&.Mui-disabled": {
+              background: "rgba(60, 60, 70, 0.6)",
+              color: "rgba(255, 255, 255, 0.4)",
+              border: "1px solid rgba(255, 255, 255, 0.1)",
+              cursor: "not-allowed",
+            },
           },
         },
         outlined: {

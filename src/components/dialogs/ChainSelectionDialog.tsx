@@ -19,7 +19,7 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import type React from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -71,11 +71,13 @@ const ChainSelectionDialog: React.FC<ChainSelectionDialogProps> = ({ open, onClo
         fullScreen={isSmallScreen}
         open={open}
         onClose={onClose}
-        PaperProps={{
-          style: {
-            width: isSmallScreen ? "100vw" : "50vw", // 100% width on small screens, 50% on larger screens
-            minHeight: isSmallScreen ? "100vh" : "50vh", // 100% height on small screens, 50% on larger screens
-            maxWidth: "none",
+        slotProps={{
+          paper: {
+            style: {
+              width: isSmallScreen ? "100vw" : "50vw", // 100% width on small screens, 50% on larger screens
+              minHeight: isSmallScreen ? "100vh" : "50vh", // 100% height on small screens, 50% on larger screens
+              maxWidth: "none",
+            },
           },
         }}
       >

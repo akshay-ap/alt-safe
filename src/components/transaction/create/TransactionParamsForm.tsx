@@ -107,7 +107,14 @@ const TransactionParamsForm: React.FC = () => {
         Transaction Defaults
       </Typography>
 
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }} id="transaction-params-description">
+      <Typography
+        variant="body2"
+        id="transaction-params-description"
+        sx={{
+          color: "text.secondary",
+          mb: 2,
+        }}
+      >
         Configure default parameters that will be applied to all transactions. Leave fields empty to use automatic
         values.
       </Typography>

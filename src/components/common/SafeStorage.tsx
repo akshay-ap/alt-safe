@@ -1,5 +1,5 @@
 import { Box, Divider, Paper, Typography } from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import type React from "react";
 import type { SafeStorage as SafeStorageType } from "../../utils/storageReader";
 import AccountAddress from "./AccountAddress";
@@ -13,7 +13,13 @@ interface StorageFieldProps {
 const StorageField: React.FC<StorageFieldProps> = ({ label, value, isLast = false }) => {
   return (
     <Box sx={{ mb: isLast ? 0 : 2 }}>
-      <Typography variant="body2" color="text.secondary" gutterBottom>
+      <Typography
+        variant="body2"
+        gutterBottom
+        sx={{
+          color: "text.secondary",
+        }}
+      >
         {label}
       </Typography>
       <Box sx={{ pl: 0.5 }}>{value}</Box>
@@ -31,7 +37,13 @@ interface ItemListProps {
 const ItemList: React.FC<ItemListProps> = ({ title, items = [], emptyMessage = "No items found", renderItem }) => {
   const defaultRenderItem = (item: `0x${string}`, index: number) => (
     <Box sx={{ display: "flex", alignItems: "center", mb: 0.5 }}>
-      <Typography variant="body2" color="text.secondary" sx={{ mr: 1 }}>
+      <Typography
+        variant="body2"
+        sx={{
+          color: "text.secondary",
+          mr: 1,
+        }}
+      >
         #{index + 1}
       </Typography>
       <AccountAddress address={item} />
@@ -50,7 +62,13 @@ const ItemList: React.FC<ItemListProps> = ({ title, items = [], emptyMessage = "
         height: "100%",
       }}
     >
-      <Typography variant="subtitle1" fontWeight={500} gutterBottom>
+      <Typography
+        variant="subtitle1"
+        gutterBottom
+        sx={{
+          fontWeight: 500,
+        }}
+      >
         {title} {items.length > 0 && `(${items.length})`}
       </Typography>
       <Divider sx={{ mb: 2 }} />
@@ -65,7 +83,12 @@ const ItemList: React.FC<ItemListProps> = ({ title, items = [], emptyMessage = "
           ))}
         </Box>
       ) : (
-        <Typography variant="body1" color="text.secondary">
+        <Typography
+          variant="body1"
+          sx={{
+            color: "text.secondary",
+          }}
+        >
           {emptyMessage}
         </Typography>
       )}
@@ -80,7 +103,13 @@ const ViewSafeStorage: React.FC<{
   if (!safeStorage) {
     return (
       <Box sx={{ p: 2 }}>
-        <Typography color="text.secondary">No Safe storage data available</Typography>
+        <Typography
+          sx={{
+            color: "text.secondary",
+          }}
+        >
+          No Safe storage data available
+        </Typography>
       </Box>
     );
   }
@@ -144,7 +173,13 @@ const ViewSafeStorage: React.FC<{
             emptyMessage="No modules enabled"
             renderItem={(module, index) => (
               <Box sx={{ display: "flex", alignItems: "center" }}>
-                <Typography variant="body2" color="text.secondary" sx={{ mr: 1 }}>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: "text.secondary",
+                    mr: 1,
+                  }}
+                >
                   Module #{index + 1}:
                 </Typography>
                 <AccountAddress address={module} />

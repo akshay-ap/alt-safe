@@ -1,4 +1,4 @@
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
 import ErrorIcon from "@mui/icons-material/Error";
 import { AppBar, Box, Button, IconButton, Toolbar, Tooltip, Typography } from "@mui/material";
 import type React from "react";
@@ -73,11 +73,14 @@ const NavigationBar: React.FC = () => {
         {/* Left Section: App Name and Buttons */}
         <Box sx={{ display: "flex", alignItems: "center" }}>
           <Typography
-            fontWeight="bold"
             color="primary"
             variant="h6"
-            sx={{ marginRight: 4, cursor: "pointer" }}
             onClick={() => navigate("/")}
+            sx={{
+              fontWeight: "bold",
+              marginRight: 4,
+              cursor: "pointer",
+            }}
           >
             &lt;ALT&gt; Safe
           </Typography>

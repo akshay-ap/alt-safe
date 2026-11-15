@@ -1,6 +1,6 @@
 import OpenInFullIcon from "@mui/icons-material/OpenInFull";
 import { Alert, Box, Button, Card, CardContent, Chip, IconButton, Link, Paper, Typography } from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { zeroAddress } from "viem";
@@ -58,19 +58,34 @@ const SafePreview: React.FC = () => {
 
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, sm: 6 }}>
-              <Typography variant="body2" color="text.secondary">
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                }}
+              >
                 Name
               </Typography>
               <Typography variant="body1">{safeName || "Unnamed Safe"}</Typography>
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
-              <Typography variant="body2" color="text.secondary">
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                }}
+              >
                 Owners
               </Typography>
               <Typography variant="body1">{owners.length}</Typography>
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
-              <Typography variant="body2" color="text.secondary">
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                }}
+              >
                 Threshold
               </Typography>
               <Typography variant="body1">
@@ -78,13 +93,23 @@ const SafePreview: React.FC = () => {
               </Typography>
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
-              <Typography variant="body2" color="text.secondary">
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                }}
+              >
                 Salt
               </Typography>
               <Typography variant="body1">{salt.toString()}</Typography>
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
-              <Typography variant="body2" color="text.secondary">
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                }}
+              >
                 Modules
               </Typography>
               <Typography variant="body1">{modules.length > 0 ? `${modules.length} enabled` : "None"}</Typography>
@@ -93,7 +118,12 @@ const SafePreview: React.FC = () => {
 
           {safeLabels.length > 0 && (
             <Box sx={{ mt: 2 }}>
-              <Typography variant="body2" color="text.secondary">
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                }}
+              >
                 Labels
               </Typography>
               <Typography variant="body1">{safeLabels.join(", ")}</Typography>
@@ -102,16 +132,33 @@ const SafePreview: React.FC = () => {
 
           {modules.length > 0 && (
             <Box sx={{ mt: 2 }}>
-              <Typography variant="body2" color="text.secondary" gutterBottom>
+              <Typography
+                variant="body2"
+                gutterBottom
+                sx={{
+                  color: "text.secondary",
+                }}
+              >
                 Enabled Modules
               </Typography>
               <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
                 {setupModulesAddress && setupModulesAddress !== zeroAddress && (
                   <Box sx={{ mb: 1 }}>
-                    <Typography variant="caption" color="text.secondary">
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: "text.secondary",
+                      }}
+                    >
                       Setup Contract:
                     </Typography>
-                    <Typography variant="body2" fontFamily="monospace" sx={{ wordBreak: "break-all" }}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontFamily: "monospace",
+                        wordBreak: "break-all",
+                      }}
+                    >
                       {setupModulesAddress}
                     </Typography>
                   </Box>
@@ -121,7 +168,14 @@ const SafePreview: React.FC = () => {
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
                       <Chip label={`Module ${index + 1}`} size="small" variant="outlined" />
                     </Box>
-                    <Typography variant="body2" fontFamily="monospace" sx={{ wordBreak: "break-all", pl: 1 }}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontFamily: "monospace",
+                        wordBreak: "break-all",
+                        pl: 1,
+                      }}
+                    >
                       {moduleAddress}
                     </Typography>
                   </Box>
@@ -146,7 +200,13 @@ const SafePreview: React.FC = () => {
           <Typography variant="subtitle2" gutterBottom>
             Deployment Address
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+              mb: 1,
+            }}
+          >
             Your Safe will be deployed at:
           </Typography>
           <Typography variant="body1">

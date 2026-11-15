@@ -13,7 +13,13 @@ const SaltPanel: React.FC<SaltPanelProps> = ({ salt, setSalt }) => {
       <Typography variant="h6" gutterBottom>
         Salt
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+      <Typography
+        variant="body2"
+        sx={{
+          color: "text.secondary",
+          mb: 3,
+        }}
+      >
         Customize the salt value to generate a different Safe address with the same configuration
       </Typography>
 
@@ -22,7 +28,13 @@ const SaltPanel: React.FC<SaltPanelProps> = ({ salt, setSalt }) => {
           <Typography variant="subtitle1" sx={{ mb: 1 }}>
             Salt Value
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+              mb: 2,
+            }}
+          >
             A unique number that affects the final Safe address. Different salt values will produce different addresses.
           </Typography>
 

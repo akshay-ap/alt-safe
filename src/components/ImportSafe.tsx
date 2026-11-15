@@ -1,5 +1,5 @@
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
 import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
 import {
   Alert,
@@ -15,7 +15,7 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { type Address, isAddress, isAddressEqual, zeroAddress } from "viem";
@@ -146,10 +146,22 @@ const ImportSafe: React.FC = () => {
 
   return (
     <Box sx={{ p: 3, maxWidth: 1000, mx: "auto" }}>
-      <Typography variant="h4" gutterBottom fontWeight={500}>
+      <Typography
+        variant="h4"
+        gutterBottom
+        sx={{
+          fontWeight: 500,
+        }}
+      >
         Import Existing Safe
       </Typography>
-      <Typography variant="body1" color="text.secondary" paragraph>
+      <Typography
+        variant="body1"
+        sx={{
+          color: "text.secondary",
+          marginBottom: "16px",
+        }}
+      >
         Import an existing Safe to manage it with this interface.
       </Typography>
 
@@ -170,7 +182,12 @@ const ImportSafe: React.FC = () => {
               <Typography variant="h6" gutterBottom>
                 Enter Safe Address
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                }}
+              >
                 Provide the address of your existing Safe to import it.
               </Typography>
             </Box>
@@ -207,7 +224,12 @@ const ImportSafe: React.FC = () => {
               <Typography variant="h6" gutterBottom>
                 Verify Safe Information
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                }}
+              >
                 Please verify this is the correct Safe you want to import.
               </Typography>
             </Box>
@@ -245,7 +267,12 @@ const ImportSafe: React.FC = () => {
               <Typography variant="h6" gutterBottom>
                 Configure Safe Settings
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                }}
+              >
                 Add a name and optional labels to help you identify this Safe.
               </Typography>
             </Box>

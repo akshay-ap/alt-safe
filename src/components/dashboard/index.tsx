@@ -1,5 +1,5 @@
 import { Box, Button, Card, CardActionArea, CardContent, Chip, Paper, Typography, useTheme } from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import type React from "react";
 import { useNavigate } from "react-router-dom";
 import { formatEther } from "viem";
@@ -87,10 +87,22 @@ const SafeInfo: React.FC = () => {
           background: `linear-gradient(145deg, ${theme.palette.background.paper} 0%, ${theme.palette.background.default} 100%)`,
         }}
       >
-        <Grid container spacing={3} alignItems="center">
+        <Grid
+          container
+          spacing={3}
+          sx={{
+            alignItems: "center",
+          }}
+        >
           <Grid size={{ xs: 12, md: 8 }}>
             <Box sx={{ mb: 2 }}>
-              <Typography variant="h4" gutterBottom fontWeight={500}>
+              <Typography
+                variant="h4"
+                gutterBottom
+                sx={{
+                  fontWeight: 500,
+                }}
+              >
                 Safe Account Overview
               </Typography>
               <AccountAddress address={safeAccount} showCopy={true} showExplorer={true} />
@@ -167,7 +179,12 @@ const SafeInfo: React.FC = () => {
                       {action.title}
                     </Typography>
                   </Box>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: "text.secondary",
+                    }}
+                  >
                     {action.description}
                   </Typography>
                 </CardContent>

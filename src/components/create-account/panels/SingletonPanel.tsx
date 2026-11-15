@@ -1,5 +1,5 @@
 import { Alert, Box, Button, Checkbox, Chip, FormControlLabel, Stack, Typography } from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import type React from "react";
 import AddressInput from "../../common/AddressInput";
 
@@ -34,7 +34,13 @@ const SingletonPanel: React.FC<SingletonPanelProps> = ({
       <Typography variant="h6" gutterBottom>
         Singleton Address Configuration
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+      <Typography
+        variant="body2"
+        sx={{
+          color: "text.secondary",
+          mb: 3,
+        }}
+      >
         Configure the Safe singleton address that contains the Safe contract logic. L2 singleton is optimized for Layer
         2 networks.
       </Typography>

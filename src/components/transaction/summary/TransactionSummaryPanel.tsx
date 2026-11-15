@@ -46,7 +46,13 @@ const TransactionSummaryPanel: React.FC<TransactionSummaryPanelProps> = ({
       >
         <Typography variant="h6">
           Transaction Summary
-          <Typography component="span" color="text.secondary" sx={{ ml: 1 }}>
+          <Typography
+            component="span"
+            sx={{
+              color: "text.secondary",
+              ml: 1,
+            }}
+          >
             ({transactions.length})
           </Typography>
         </Typography>

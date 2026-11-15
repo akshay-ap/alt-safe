@@ -3,7 +3,7 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import FingerprintIcon from "@mui/icons-material/Fingerprint";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { Alert, Box, Button, Paper, Typography, useMediaQuery, useTheme } from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import { readContract, signTypedData, simulateContract } from "@wagmi/core";
 import { useState } from "react";
 import { bytesToHex, encodeFunctionData, stringToBytes } from "viem";
@@ -331,13 +331,23 @@ const Review: React.FC<ReviewProps> = ({ setActiveStep }) => {
                 >
                   <Grid container spacing={2}>
                     <Grid size={{ xs: 6 }}>
-                      <Typography variant="body2" color="text.secondary">
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: "text.secondary",
+                        }}
+                      >
                         Number of transactions
                       </Typography>
                       <Typography variant="body1">{transactions.length}</Typography>
                     </Grid>
                     <Grid size={{ xs: 6 }}>
-                      <Typography variant="body2" color="text.secondary">
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: "text.secondary",
+                        }}
+                      >
                         Safe account
                       </Typography>
                       <Typography variant="body1" sx={{ wordBreak: "break-all" }}>
@@ -345,7 +355,12 @@ const Review: React.FC<ReviewProps> = ({ setActiveStep }) => {
                       </Typography>
                     </Grid>
                     <Grid size={{ xs: 12 }}>
-                      <Typography variant="body2" color="text.secondary">
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: "text.secondary",
+                        }}
+                      >
                         Transaction hash
                       </Typography>
                       <Typography variant="body1" sx={{ wordBreak: "break-all" }}>

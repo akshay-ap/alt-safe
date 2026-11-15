@@ -58,7 +58,14 @@ const AccountAddress: React.FC<AccountAddressProps> = ({
 
   if (!address || isAddressEqual(address, zeroAddress)) {
     return (
-      <Typography color="text.secondary" sx={getFontSize()}>
+      <Typography
+        sx={[
+          {
+            color: "text.secondary",
+          },
+          getFontSize(),
+        ]}
+      >
         {address === zeroAddress ? "0x0...0000 (Zero Address)" : "Not set"}
       </Typography>
     );

@@ -1,4 +1,4 @@
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import ExistingSafeAccounts from "./ExistingSafeAccounts";
 
 const Home: React.FC = () => {

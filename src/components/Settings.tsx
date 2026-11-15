@@ -15,7 +15,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import type React from "react";
 import { useEffect, useState } from "react";
 import { isAddressEqual, zeroAddress } from "viem";
@@ -134,7 +134,13 @@ const Settings: React.FC = () => {
                 <Divider sx={{ mb: 2 }} />
 
                 <Box sx={{ mb: 3 }}>
-                  <Typography variant="body2" color="text.secondary" gutterBottom>
+                  <Typography
+                    variant="body2"
+                    gutterBottom
+                    sx={{
+                      color: "text.secondary",
+                    }}
+                  >
                     Address
                   </Typography>
                   <AccountAddress address={safeAccount} />
@@ -148,7 +154,13 @@ const Settings: React.FC = () => {
                       alignItems: "center",
                     }}
                   >
-                    <Typography variant="body2" color="text.secondary" gutterBottom>
+                    <Typography
+                      variant="body2"
+                      gutterBottom
+                      sx={{
+                        color: "text.secondary",
+                      }}
+                    >
                       Name
                     </Typography>
                     <IconButton size="small" onClick={() => setEditNameOpen(true)} sx={{ p: 0.5 }}>
@@ -166,7 +178,13 @@ const Settings: React.FC = () => {
                       alignItems: "center",
                     }}
                   >
-                    <Typography variant="body2" color="text.secondary" gutterBottom>
+                    <Typography
+                      variant="body2"
+                      gutterBottom
+                      sx={{
+                        color: "text.secondary",
+                      }}
+                    >
                       Labels
                     </Typography>
                     <IconButton size="small" onClick={() => setEditLabelsOpen(true)} sx={{ p: 0.5 }}>
@@ -177,7 +195,12 @@ const Settings: React.FC = () => {
                     {safeLabels.length > 0 ? (
                       safeLabels.map((label) => <Chip key={label} label={label} size="small" variant="outlined" />)
                     ) : (
-                      <Typography variant="body2" color="text.secondary">
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: "text.secondary",
+                        }}
+                      >
                         No labels
                       </Typography>
                     )}
@@ -251,7 +274,13 @@ const Settings: React.FC = () => {
           </IconButton>
         </DialogTitle>
         <DialogContent>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+              mb: 2,
+            }}
+          >
             Labels help you organize and categorize your Safe accounts.
           </Typography>
 
@@ -278,7 +307,13 @@ const Settings: React.FC = () => {
               <Chip key={label} label={label} onDelete={() => handleRemoveLabel(label)} sx={{ m: 0.5 }} />
             ))}
             {safeLabels.length === 0 && (
-              <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                  py: 2,
+                }}
+              >
                 No labels added yet
               </Typography>
             )}

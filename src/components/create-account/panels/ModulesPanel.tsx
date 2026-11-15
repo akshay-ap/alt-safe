@@ -1,4 +1,4 @@
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutlineOutlined";
 import DeleteIcon from "@mui/icons-material/Delete";
 import {
   Alert,
@@ -63,7 +63,13 @@ const ModulesPanel: React.FC = () => {
       <Typography variant="h6" gutterBottom>
         Modules Configuration
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+      <Typography
+        variant="body2"
+        sx={{
+          color: "text.secondary",
+          mb: 3,
+        }}
+      >
         Modules are contracts that can execute transactions on behalf of the Safe. They extend Safe functionality but
         should be used with caution.
       </Typography>
@@ -80,7 +86,13 @@ const ModulesPanel: React.FC = () => {
         <Typography variant="subtitle1" gutterBottom>
           Default Modules
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+            mb: 2,
+          }}
+        >
           Select from pre-configured trusted modules
         </Typography>
         <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
@@ -97,10 +109,21 @@ const ModulesPanel: React.FC = () => {
                 }
                 label={
                   <Box>
-                    <Typography variant="body2" fontWeight="medium">
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontWeight: "medium",
+                      }}
+                    >
                       {module.name}
                     </Typography>
-                    <Typography variant="caption" fontFamily="monospace" color="text.secondary">
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        fontFamily: "monospace",
+                        color: "text.secondary",
+                      }}
+                    >
                       {module.address}
                     </Typography>
                     {modules.includes(module.address) && (
@@ -128,7 +151,13 @@ const ModulesPanel: React.FC = () => {
         <Typography variant="subtitle1" gutterBottom>
           Setup Modules Contract Address
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+            mb: 2,
+          }}
+        >
           Contract address for setting up modules during Safe creation
         </Typography>
         <AddressInput
@@ -197,7 +226,12 @@ const ModulesPanel: React.FC = () => {
                   primary={
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                       <Chip label={`Module ${modules.indexOf(module) + 1}`} size="small" />
-                      <Typography variant="body2" fontFamily="monospace">
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontFamily: "monospace",
+                        }}
+                      >
                         {module}
                       </Typography>
                     </Box>

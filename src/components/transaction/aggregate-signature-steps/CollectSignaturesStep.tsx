@@ -37,7 +37,12 @@ const CollectSignaturesStep: React.FC<{
         <Typography variant="h6" gutterBottom>
           Collect Signatures
         </Typography>
-        <Typography variant="body2" color="text.secondary">
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+          }}
+        >
           Import signatures or verify on-chain approvals. Required: {threshold.toString()} signatures.
         </Typography>
       </Box>

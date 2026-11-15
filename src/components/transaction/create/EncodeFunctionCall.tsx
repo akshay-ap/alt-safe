@@ -1,5 +1,5 @@
 import { Box, Button, Paper, TextField, Typography } from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import { useMemo, useState } from "react";
 import type React from "react";
 import { type AbiFunction, type AbiParameter, encodeFunctionData, parseAbiItem } from "viem";
@@ -123,7 +123,13 @@ const EncodeFunctionCall: React.FC<EncodeFunctionCallProps> = ({ onAdd, groupInf
       <Typography variant="h6" gutterBottom>
         Encode Function Call
       </Typography>
-      <Typography variant="body2" color="text.secondary" paragraph>
+      <Typography
+        variant="body2"
+        sx={{
+          color: "text.secondary",
+          marginBottom: "16px",
+        }}
+      >
         Enter a Solidity function signature to dynamically generate input fields and encode the function call.
       </Typography>
 

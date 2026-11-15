@@ -1,5 +1,5 @@
 import { Paper, Typography } from "@mui/material";
-import Grid from "@mui/material/Grid2";
+import Grid from "@mui/material/Grid";
 import type React from "react";
 import { formatEther } from "viem";
 import { type Transaction, TransactionType } from "../../../context/types";
@@ -20,17 +20,32 @@ const TransactionCard: React.FC<TransactionCardProps> = ({ transaction }) => {
 const EthTransferCard: React.FC<TransactionCardProps> = ({ transaction }) => (
   <Grid container spacing={2}>
     <Grid size={{ xs: 12, md: 6 }}>
-      <Typography variant="body2" color="text.secondary">
+      <Typography
+        variant="body2"
+        sx={{
+          color: "text.secondary",
+        }}
+      >
         Recipient
       </Typography>
       <AccountAddress showCopy={false} short address={transaction.to} />
     </Grid>
 
     <Grid size={{ xs: 12, md: 6 }}>
-      <Typography variant="body2" color="text.secondary">
+      <Typography
+        variant="body2"
+        sx={{
+          color: "text.secondary",
+        }}
+      >
         Amount
       </Typography>
-      <Typography variant="body1" fontWeight={500}>
+      <Typography
+        variant="body1"
+        sx={{
+          fontWeight: 500,
+        }}
+      >
         {formatEther(BigInt(transaction.value))} ETH
       </Typography>
     </Grid>
@@ -40,7 +55,12 @@ const EthTransferCard: React.FC<TransactionCardProps> = ({ transaction }) => (
 const ContractCallCard: React.FC<TransactionCardProps> = ({ transaction }) => (
   <Grid container spacing={2}>
     <Grid size={12}>
-      <Typography variant="body2" color="text.secondary">
+      <Typography
+        variant="body2"
+        sx={{
+          color: "text.secondary",
+        }}
+      >
         Contract
       </Typography>
       <AccountAddress showCopy={false} short address={transaction.to} />
@@ -48,7 +68,12 @@ const ContractCallCard: React.FC<TransactionCardProps> = ({ transaction }) => (
 
     {transaction.value && BigInt(transaction.value) > 0n && (
       <Grid size={{ xs: 12, md: 6 }}>
-        <Typography variant="body2" color="text.secondary">
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+          }}
+        >
           Value
         </Typography>
         <Typography variant="body1">{formatEther(BigInt(transaction.value))} ETH</Typography>
@@ -56,7 +81,12 @@ const ContractCallCard: React.FC<TransactionCardProps> = ({ transaction }) => (
     )}
 
     <Grid size={{ xs: 12 }}>
-      <Typography variant="body2" color="text.secondary">
+      <Typography
+        variant="body2"
+        sx={{
+          color: "text.secondary",
+        }}
+      >
         Data
       </Typography>
       <Paper

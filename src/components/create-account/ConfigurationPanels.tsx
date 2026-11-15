@@ -179,7 +179,12 @@ const ConfigurationPanels: React.FC = () => {
           }}
         >
           <Box sx={{ p: 2, bgcolor: "primary.main", color: "primary.contrastText" }}>
-            <Typography variant="h6" fontWeight="bold">
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: "bold",
+              }}
+            >
               Configuration
             </Typography>
             <Typography variant="body2" sx={{ opacity: 0.9 }}>
@@ -206,7 +211,12 @@ const ConfigurationPanels: React.FC = () => {
                     }}
                   >
                     <ListItemIcon sx={{ minWidth: 40 }}>{item.icon}</ListItemIcon>
-                    <ListItemText primary={item.label} primaryTypographyProps={{ variant: "body2", fontWeight: 500 }} />
+                    <ListItemText
+                      primary={item.label}
+                      slotProps={{
+                        primary: { variant: "body2", sx: { fontWeight: 500 } },
+                      }}
+                    />
                   </ListItemButton>
                 </ListItem>
                 {index < NAVIGATION_ITEMS.length - 1 && <Divider />}

@@ -16,11 +16,23 @@ const ExecutionCompleteStep: React.FC<{
         }}
       />
 
-      <Typography variant="h6" gutterBottom color="success.main">
+      <Typography
+        variant="h6"
+        gutterBottom
+        sx={{
+          color: "success.main",
+        }}
+      >
         Transaction Executed Successfully
       </Typography>
 
-      <Typography variant="body2" color="text.secondary" paragraph>
+      <Typography
+        variant="body2"
+        sx={{
+          color: "text.secondary",
+          marginBottom: "16px",
+        }}
+      >
         Your transaction has been submitted to the blockchain.
       </Typography>
 
@@ -32,7 +44,13 @@ const ExecutionCompleteStep: React.FC<{
           mb: 3,
         }}
       >
-        <Typography variant="body2" color="text.secondary" gutterBottom>
+        <Typography
+          variant="body2"
+          gutterBottom
+          sx={{
+            color: "text.secondary",
+          }}
+        >
           Transaction Hash
         </Typography>
         <TransactionHash hash={transactionHash} />

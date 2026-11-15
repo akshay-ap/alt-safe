@@ -21,7 +21,13 @@ const FallbackHandlerPanel: React.FC<FallbackHandlerPanelProps> = ({ fallbackHan
       <Typography variant="h6" gutterBottom>
         Fallback Handler Configuration
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+      <Typography
+        variant="body2"
+        sx={{
+          color: "text.secondary",
+          mb: 3,
+        }}
+      >
         Configure the fallback handler that processes calls to function selectors that Safe Singleton does not support.
       </Typography>
 
