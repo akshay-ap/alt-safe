@@ -53,7 +53,11 @@ const theme = createTheme({
         root: { borderRadius: radius.control, paddingInline: 14, "&.Mui-focusVisible": focusRing },
         sizeLarge: { paddingBlock: 10, paddingInline: 20, fontSize: "0.9375rem" },
         outlined: { borderColor: color.hairlineStrong, color: color.text, "&:hover": { borderColor: color.textMuted } },
-        text: { "&:hover": { backgroundColor: alpha(color.text, 0.06) } },
+        // Brass is reserved for the one primary action; plain text buttons stay neutral.
+        text: ({ ownerState }) => ({
+          ...(ownerState.color === "primary" && { color: color.text }),
+          "&:hover": { backgroundColor: alpha(color.text, 0.06) },
+        }),
       },
     },
     MuiIconButton: { styleOverrides: { root: { borderRadius: radius.control, "&.Mui-focusVisible": focusRing } } },
