@@ -52,7 +52,7 @@ import { type SafeTransactionInfo, useSafeWalletContext } from "../../../context
 import { encodeMultiSend } from "../../../utils/multisend";
 import { SafeOperation, type SafeTransactionParams } from "../../../utils/utils";
 import { config } from "../../../wagmi";
-import AccountAddress from "../../common/AccountAddress";
+import PageHeader from "../../common/PageHeader";
 import LoadTransactionDialog from "../../dialogs/LoadTransactionDialog";
 import SaveTransactionDialog from "../../dialogs/SaveTransactionDialog";
 import ViewSafeTransactionDialog from "../../dialogs/ViewSafeTransactionDialog";
@@ -99,7 +99,7 @@ const CreateTransaction: React.FC = () => {
   const [pendingAction, setPendingAction] = useState<string | null>(null);
 
   // Steps in the transaction flow
-  const steps = ["Build Transactions", "Review & Sign", "Execute"];
+  const steps = ["Build batch", "Review and sign", "Execute"];
 
   const handleAddTransaction = async (newTransaction: Transaction) => {
     const updatedTransactions = [...transactions, { ...newTransaction }];
@@ -525,43 +525,30 @@ const CreateTransaction: React.FC = () => {
   // Update the renderStepContent method for consistent heights across all steps
 
   const renderStepContent = () => {
-    const contentHeight = "calc(100vh - 250px)";
-
     switch (activeStep) {
       case 0:
         return (
-          <Grid container spacing={2}>
-            <Grid
-              size={{ xs: 12, md: isSummaryExpanded ? 12 : 9 }}
-              sx={{ display: isMobile && isSummaryExpanded ? "none" : "block" }}
-            >
-              <Paper
-                elevation={0}
-                variant="outlined"
-                sx={{
-                  p: 2,
-                  mb: isMobile ? 2 : 0,
-                  height: contentHeight,
-                  display: "flex",
-                  flexDirection: "column",
-                  overflow: "hidden", // Hide overflow so inner scrollable content works properly
-                }}
-              >
-                <Box sx={{ flex: 1, overflow: "auto" }}>
-                  <TransactionBuilder
-                    importHex={importHex}
-                    setImportHex={setImportHex}
-                    handleAddTransaction={handleAddTransaction}
-                    handleImportTransactions={handleImportTransactions}
-                  />
-                </Box>
-              </Paper>
-            </Grid>
-
-            <Grid
-              size={{ xs: 12, md: isSummaryExpanded ? 12 : 3 }}
+          <Box
+            sx={{
+              display: "grid",
+              gap: 3,
+              alignItems: "start",
+              gridTemplateColumns: isSummaryExpanded ? "1fr" : { xs: "1fr", lg: "minmax(0, 1fr) 320px" },
+            }}
+          >
+            <Box sx={{ display: isMobile && isSummaryExpanded ? "none" : "block", minWidth: 0 }}>
+              <TransactionBuilder
+                importHex={importHex}
+                setImportHex={setImportHex}
+                handleAddTransaction={handleAddTransaction}
+                handleImportTransactions={handleImportTransactions}
+              />
+            </Box>
+            <Box
               sx={{
                 display: isMobile && !isSummaryExpanded ? "none" : "block",
+                position: { lg: "sticky" },
+                top: { lg: 80 },
               }}
             >
               <TransactionSummaryPanel
@@ -571,8 +558,8 @@ const CreateTransaction: React.FC = () => {
                 isSummaryExpanded={isSummaryExpanded}
                 toggleSummaryExpanded={toggleSummaryExpanded}
               />
-            </Grid>
-          </Grid>
+            </Box>
+          </Box>
         );
 
       case 1:
@@ -583,15 +570,8 @@ const CreateTransaction: React.FC = () => {
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, md: 9 }}>
               {/* Content container with fixed height and scrollable content */}
-              <Box
-                sx={{
-                  height: contentHeight,
-                  display: "flex",
-                  flexDirection: "column",
-                  overflow: "hidden", // Hide overflow so inner scrollable content works properly
-                }}
-              >
-                <Box sx={{ flex: 1, overflow: "auto" }}>
+              <Box>
+                <Box>
                   <Paper elevation={0} variant="outlined" sx={{ p: 2, mb: 2 }}>
                     <Typography variant="h5" gutterBottom>
                       Execute Transaction
@@ -778,43 +758,47 @@ const CreateTransaction: React.FC = () => {
   }, [safeAccount, storage, setTransactions, setError]);
 
   return (
-    <Box sx={{ p: { xs: 1, md: 3 }, maxWidth: "xl", mx: "auto" }}>
-      {/* Header with stepper */}
-      <Box
-        sx={{
-          p: { xs: 2, md: 3 },
-        }}
-      >
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            mb: 1,
-          }}
-        >
-          <Typography variant="h4" gutterBottom>
-            Create Transaction
-          </Typography>
+    <Box>
+      <PageHeader
+        title="New transaction"
+        description="Add one or more actions to a batch, review the Safe transaction, then sign and execute it."
+        actions={
+          activeStep === 0 && (
+            <>
+              {isEditingDraft && (
+                <Chip
+                  label={hasUnsavedChanges ? "Unsaved draft changes" : "Editing draft"}
+                  color={hasUnsavedChanges ? "warning" : "default"}
+                  variant="outlined"
+                />
+              )}
+              <Button startIcon={<FolderOpenIcon />} onClick={handleOpenLoadDraftDialog}>
+                Open draft
+              </Button>
+              <Button
+                variant="outlined"
+                startIcon={<SaveIcon />}
+                onClick={handleOpenSaveDraftDialog}
+                disabled={transactions.length === 0}
+              >
+                {isEditingDraft && hasUnsavedChanges
+                  ? "Update draft"
+                  : isEditingDraft
+                    ? "Save as new draft"
+                    : "Save draft"}
+              </Button>
+            </>
+          )
+        }
+      />
 
-          <AccountAddress address={safeAccount} />
-
-          {isEditingDraft && <Chip label="Draft" color="primary" icon={<SaveIcon />} size="small" />}
-        </Box>
-
-        <Stepper
-          activeStep={activeStep}
-          alternativeLabel={!isMobile}
-          orientation={isMobile ? "vertical" : "horizontal"}
-          sx={{ mt: 2 }}
-        >
-          {steps.map((label) => (
-            <Step key={label}>
-              <StepLabel>{label}</StepLabel>
-            </Step>
-          ))}
-        </Stepper>
-      </Box>
+      <Stepper activeStep={activeStep} orientation={isMobile ? "vertical" : "horizontal"} sx={{ mb: 4 }}>
+        {steps.map((label) => (
+          <Step key={label}>
+            <StepLabel>{label}</StepLabel>
+          </Step>
+        ))}
+      </Stepper>
 
       {/* Error display */}
       {error && (
@@ -852,37 +836,9 @@ const CreateTransaction: React.FC = () => {
           >
             Back
           </Button>
-
-          {activeStep === 0 && (
-            <>
-              <Button variant="outlined" startIcon={<FolderOpenIcon />} onClick={handleOpenLoadDraftDialog}>
-                Load
-              </Button>
-              <Button
-                variant="outlined"
-                startIcon={<SaveIcon />}
-                onClick={handleOpenSaveDraftDialog}
-                disabled={transactions.length === 0}
-                color={isEditingDraft && hasUnsavedChanges ? "primary" : "inherit"}
-              >
-                {isEditingDraft && hasUnsavedChanges ? "Update Draft" : isEditingDraft ? "Save As New" : "Save Draft"}
-              </Button>
-            </>
-          )}
         </Box>
 
         <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-          {isEditingDraft && activeStep === 0 && (
-            <Chip
-              label={`${hasUnsavedChanges ? "Unsaved Changes" : "Editing Draft"}${
-                currentDraftId ? ` #${currentDraftId.substring(6, 11)}` : ""
-              }`}
-              color={hasUnsavedChanges ? "warning" : "primary"}
-              variant="outlined"
-              sx={{ mr: 1 }}
-            />
-          )}
-
           {activeStep === 0 && (
             <Button
               variant="contained"
@@ -891,7 +847,7 @@ const CreateTransaction: React.FC = () => {
               endIcon={<KeyboardArrowRightIcon />}
               disabled={transactions.length === 0}
             >
-              {"Review"}
+              Review batch
             </Button>
           )}
         </Box>

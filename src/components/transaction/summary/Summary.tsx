@@ -38,7 +38,7 @@ const Summary: React.FC<SummaryProps> = ({
           fontStyle: "italic",
         }}
       >
-        No transactions added yet.
+        Actions you add appear here.
       </Typography>
     );
   }

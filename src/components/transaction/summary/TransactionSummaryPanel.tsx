@@ -45,7 +45,7 @@ const TransactionSummaryPanel: React.FC<TransactionSummaryPanelProps> = ({
         }}
       >
         <Typography variant="h6">
-          Transaction Summary
+          Batch
           <Typography
             component="span"
             sx={{
@@ -83,7 +83,7 @@ const TransactionSummaryPanel: React.FC<TransactionSummaryPanelProps> = ({
             onClick={toggleSummaryExpanded}
             startIcon={isSummaryExpanded ? <BuildIcon /> : <DoneIcon />}
           >
-            {isSummaryExpanded ? "Add More Transactions" : "View Transaction Summary"}
+            {isSummaryExpanded ? "Add more actions" : "View batch"}
           </Button>
         </Box>
       )}
