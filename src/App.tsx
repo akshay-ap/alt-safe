@@ -1,7 +1,6 @@
-import { Container, Toolbar } from "@mui/material";
+import { Container } from "@mui/material";
 import { Outlet, Route, BrowserRouter as Router, Routes } from "react-router-dom";
-import BottomBar from "./components/app/BottomBar.tsx";
-import NavigationBar from "./components/app/NavigationBar.tsx";
+import NavigationBar, { TOP_BAR_HEIGHT } from "./components/app/NavigationBar.tsx";
 import CreateSafe from "./components/create-account/CreateSafe.tsx";
 import SafeInfo from "./components/dashboard/index.tsx";
 import Home from "./components/Home";
@@ -24,8 +23,7 @@ function NavbarLayout() {
   return (
     <div>
       <NavigationBar />
-      <Toolbar />
-      <Container sx={{ minHeight: "100vh" }} maxWidth={false}>
+      <Container component="main" sx={{ pt: `${TOP_BAR_HEIGHT}px`, minHeight: "100vh" }} maxWidth={false}>
         <Outlet />
       </Container>
     </div>
@@ -64,7 +62,6 @@ function App() {
                   <Route path="/safe-info" element={<SafeInfo />} />
                 </Route>
               </Routes>
-              <BottomBar />
             </Router>
           </AddressBookProvider>
         </WalletProvider>
