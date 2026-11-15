@@ -11,6 +11,7 @@ export enum STORAGE_KEY {
   CUSTOM_DEPLOYMENTS = "customDeployments",
   TOKEN_LIST = "tokenList",
   RPC = "rpc",
+  RPC_URLS = "rpcUrls",
   DRAFT_TRANSACTIONS = "draft_transactions",
   ADDRESS_BOOK = "addressBook",
 }
