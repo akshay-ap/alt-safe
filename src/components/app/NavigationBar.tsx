@@ -2,11 +2,10 @@ import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutlineOutlin
 import ErrorIcon from "@mui/icons-material/Error";
 import { AppBar, Box, Button, IconButton, Toolbar, Tooltip, Typography } from "@mui/material";
 import type React from "react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAccount, useChainId, usePublicClient, useSwitchChain } from "wagmi";
-import { checkRPCStatus, getChainId } from "../../api/api";
-import { useSafeWalletContext } from "../../context/WalletContext";
+import { useAccount, useSwitchChain } from "wagmi";
+import { useRpcHealth } from "../../rpc/useRpcHealth";
 import { config } from "../../wagmi";
 import AccountAddress from "../common/AccountAddress";
 import ChainSelectionDialog from "../dialogs/ChainSelectionDialog";
@@ -14,35 +13,12 @@ import ChangeAccountDialog from "../dialogs/ChangeAccountDialog";
 
 const NavigationBar: React.FC = () => {
   const navigate = useNavigate();
-  const chainId = useChainId();
   const { address, chain } = useAccount();
   const { switchChain } = useSwitchChain({ config } as any);
-  const publicClient = usePublicClient();
-  const { rpc } = useSafeWalletContext();
   const [chainDialogOpen, setChainDialogOpen] = useState(false); // State for chain selection dialog
   const [disconnectDialogOpen, setDisconnectDialogOpen] = useState(false); // State for controlling the dialog
-  const [connected, setConnected] = useState(false);
-
-  useEffect(() => {
-    (async () => {
-      if (!publicClient || !rpc || !chain) {
-        setConnected(false);
-        return;
-      }
-
-      if (chainId && rpc) {
-        const status = await checkRPCStatus(rpc);
-        const chainIdFromRPC = await getChainId(rpc);
-        if (chainIdFromRPC !== chainId) {
-          setConnected(false);
-          return;
-        }
-        setConnected(status);
-      } else {
-        setConnected(false);
-      }
-    })();
-  }, [publicClient, chain, chainId, rpc]);
+  const rpcHealth = useRpcHealth(chain);
+  const connected = rpcHealth.result?.ok === true;
 
   // Handle chain dialog open/close
   const handleChainDialogOpen = () => {

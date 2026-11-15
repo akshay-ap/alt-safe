@@ -27,8 +27,6 @@ interface WalletContextType {
   safeStorage: SafeStorage | undefined;
   accountCode: string | undefined;
   loadStorage: (account: Address) => Promise<void>;
-  rpc: string | undefined;
-  setRpc: (rpc: string | undefined) => void;
   safeDeployment: SafeDeployment | undefined;
   tokenList: TokenList[];
   setTokenList: (list: TokenList[]) => void;
@@ -59,16 +57,10 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const [loading, setLoading] = useState<boolean>(false);
   const [safeStorage, setSafeStorage] = useState<SafeStorage>();
   const [accountCode, setAccountCode] = useState<string>();
-  const [rpc, setRpc] = useState<string>();
   const storage = createStorage({ key: WALLET_STORAGE_KEY, storage: localStorage });
   const [safeDeployment, setSafeDeployment] = useState<SafeDeployment>();
   const [tokenList, setTokenList] = useState<TokenList[]>([]);
   const [txBuilderSpec, _setTxBuilderSpec] = useState<TransactionGroupSpec[]>(trnasctionBuilderSpec);
-
-  const setCustomRPC = (rpc: string | undefined) => {
-    setRpc(rpc);
-    storage.setItem(STORAGE_KEY.RPC, rpc);
-  };
 
   // Set safeDeployment when account changes
   useEffect(() => {
@@ -128,15 +120,6 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       if (lastSelectedSafeAccount && isAddress(lastSelectedSafeAccount)) {
         setSafeAccount(lastSelectedSafeAccount);
       }
-      const customRPC = (await storage.getItem(STORAGE_KEY.RPC)) as string;
-      if (customRPC) {
-        setRpc(customRPC);
-      } else {
-        const defaultRPC = publicClient
-          ? publicClient.chain.rpcUrls.default.http[0]
-          : account.chain?.rpcUrls.default.http[0];
-        setCustomRPC(defaultRPC);
-      }
     })();
   });
 
@@ -155,8 +138,6 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         features,
         safeAccount,
         setSafeAccount,
-        rpc,
-        setRpc: setCustomRPC,
         safeDeployment,
         tokenList,
         setTokenList: saveTokenList,

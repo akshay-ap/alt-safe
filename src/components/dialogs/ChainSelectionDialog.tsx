@@ -1,4 +1,3 @@
-import RestoreIcon from "@mui/icons-material/Restore";
 import {
   Alert,
   Autocomplete,
@@ -8,13 +7,7 @@ import {
   DialogContent,
   DialogTitle,
   Divider,
-  FormControl,
-  IconButton,
-  InputAdornment,
-  InputLabel,
-  OutlinedInput,
   TextField,
-  Tooltip,
   Typography,
   useMediaQuery,
   useTheme,
@@ -23,11 +16,11 @@ import Grid from "@mui/material/Grid";
 import type React from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import type { Chain } from "viem";
-import { useAccount, usePublicClient } from "wagmi";
+import { useChainId } from "wagmi";
 import { STORAGE_KEY } from "../../constants";
 import { useSafeWalletContext } from "../../context/WalletContext";
 import { supportedChains } from "../../wagmi";
+import RpcUrlForm from "../settings/RpcUrlForm";
 import AddressBookDialog from "./AddressBookDialog";
 
 interface ChainSelectionDialogProps {
@@ -38,20 +31,13 @@ interface ChainSelectionDialogProps {
 
 const ChainSelectionDialog: React.FC<ChainSelectionDialogProps> = ({ open, onClose, onChange }) => {
   const theme = useTheme();
-  const publicClient = usePublicClient();
-  const { rpc, setRpc, storage } = useSafeWalletContext();
+  const { storage } = useSafeWalletContext();
   const [cleared, setCleared] = useState(false);
   const [addressBookOpen, setAddressBookOpen] = useState(false);
-  const account = useAccount();
+  const chainId = useChainId();
+  const currentChain = supportedChains.find((chain) => chain.id === chainId);
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm")); // Checks if screen is < sm
   const navigate = useNavigate();
-
-  const handleResetRPC = () => {
-    const defaultRPC = publicClient
-      ? publicClient.chain.rpcUrls.default.http[0]
-      : account.chain?.rpcUrls.default.http[0];
-    setRpc(defaultRPC);
-  };
 
   const handleAddCustomDeployment = () => {
     navigate("/add-custom-deployment");
@@ -90,43 +76,18 @@ const ChainSelectionDialog: React.FC<ChainSelectionDialogProps> = ({ open, onClo
             <Grid size={12}>
               <Autocomplete
                 options={supportedChains}
-                value={supportedChains.find((chain: Chain) => chain.id === account.chainId)}
+                value={currentChain}
                 fullWidth
                 getOptionLabel={(option) => option.name}
                 renderInput={(params) => <TextField {...params} label="Search Chains" variant="outlined" />}
                 onChange={onChange}
               />
             </Grid>
-            <Grid size={12}>
-              <FormControl variant="outlined" fullWidth>
-                <InputLabel htmlFor="input-rpc">RPC</InputLabel>
-                <OutlinedInput
-                  id="input-rpc"
-                  type="text"
-                  fullWidth
-                  endAdornment={
-                    <InputAdornment position="end">
-                      <Tooltip title="Reset to default">
-                        <IconButton aria-label="Reset to default" onClick={handleResetRPC} edge="end">
-                          <RestoreIcon />
-                        </IconButton>
-                      </Tooltip>
-                    </InputAdornment>
-                  }
-                  label="RPC"
-                  value={rpc}
-                  onChange={(e) => setRpc(e.target.value)}
-                />
-              </FormControl>
-            </Grid>
-            <Grid size={12}>
-              <Alert severity="info">Refresh page after updating RPC</Alert>
-            </Grid>
-            <Grid size={12}>
-              <Button fullWidth variant="contained" onClick={() => window.location.reload()}>
-                Refresh page
-              </Button>
-            </Grid>
+            {currentChain && (
+              <Grid size={12} sx={{ mt: 1 }}>
+                <RpcUrlForm key={currentChain.id} chain={currentChain} />
+              </Grid>
+            )}
 
             <Divider />
 

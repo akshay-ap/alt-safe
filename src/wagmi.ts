@@ -1,6 +1,5 @@
 import { createConfig } from "@wagmi/core";
-import { createClient } from "viem";
-import { http } from "wagmi";
+import type { Transport } from "viem";
 import {
   arbitrum,
   arbitrumGoerli,
@@ -22,9 +21,11 @@ import {
   worldchainSepolia,
 } from "wagmi/chains";
 import { coinbaseWallet, injected } from "wagmi/connectors";
-import { STORAGE_KEY, WALLET_STORAGE_KEY } from "./constants";
+import { chainRpcTransport } from "./rpc/transport";
 
-export const supportedChains: Chain[] = [
+// The first chain is wagmi's default before a wallet connects, so it must be a public network.
+export const supportedChains = [
+  mainnet,
   arbitrum,
   arbitrumGoerli,
   avalanche,
@@ -35,41 +36,25 @@ export const supportedChains: Chain[] = [
   gnosis,
   linea,
   lineaSepolia,
-  mainnet,
   optimism,
   optimismSepolia,
   sepolia,
   worldchain,
   worldchainSepolia,
   hardhat,
-];
+] as const satisfies readonly [Chain, ...Chain[]];
+
+type SupportedChainId = (typeof supportedChains)[number]["id"];
+
+const transports = Object.fromEntries(
+  supportedChains.map((chain) => [chain.id, chainRpcTransport(chain.id)]),
+) as Record<SupportedChainId, Transport>;
 
 export const config = createConfig({
-  chains: [
-    hardhat,
-    arbitrum,
-    arbitrumGoerli,
-    avalanche,
-    base,
-    baseSepolia,
-    blast,
-    blastSepolia,
-    gnosis,
-    linea,
-    lineaSepolia,
-    mainnet,
-    optimism,
-    optimismSepolia,
-    sepolia,
-    worldchain,
-    worldchainSepolia,
-  ],
-  // TODO: Walletconnect support walletConnect({ projectId: import.meta.env.VITE_WC_PROJECT_ID })
+  chains: supportedChains,
+  // TODO: Walletconnect support walletConnect({ projectId: <project id> })
   connectors: [injected(), coinbaseWallet()],
-  client({ chain }) {
-    const rpc = (localStorage.getItem(`${WALLET_STORAGE_KEY}.${STORAGE_KEY.RPC}`) as string).replace(/"/g, "");
-    return createClient({ chain, transport: rpc ? http(rpc) : http() });
-  },
+  transports,
 });
 
 declare module "wagmi" {
