@@ -1,13 +1,8 @@
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DoneIcon from "@mui/icons-material/Done";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import SaveIcon from "@mui/icons-material/Save";
-import VisibilityIcon from "@mui/icons-material/Visibility";
 import {
   Alert,
   Badge,
@@ -19,8 +14,8 @@ import {
   DialogContent,
   DialogTitle,
   Fab,
-  Paper,
   Snackbar,
+  Stack,
   Step,
   StepLabel,
   Stepper,
@@ -28,7 +23,6 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import Grid from "@mui/material/Grid";
 import { readContract, simulateContract } from "@wagmi/core";
 import { useEffect, useState } from "react";
 import {
@@ -38,6 +32,7 @@ import {
   ContractFunctionRevertedError,
   encodeFunctionData,
   hexToBytes,
+  isAddressEqual,
   stringToBytes,
   zeroAddress,
 } from "viem";
@@ -57,6 +52,7 @@ import LoadTransactionDialog from "../../dialogs/LoadTransactionDialog";
 import SaveTransactionDialog from "../../dialogs/SaveTransactionDialog";
 import ViewSafeTransactionDialog from "../../dialogs/ViewSafeTransactionDialog";
 import TransactionSummaryPanel from "../summary/TransactionSummaryPanel";
+import { ExecuteCard, SignedTransactionCard } from "./ExecuteStep";
 import Review from "./Review";
 import TransactionBuilder from "./TransactionBuilder";
 
@@ -97,6 +93,10 @@ const CreateTransaction: React.FC = () => {
   // Add this state for the unsaved changes warning dialog
   const [unsavedChangesDialog, setUnsavedChangesDialog] = useState<boolean>(false);
   const [pendingAction, setPendingAction] = useState<string | null>(null);
+
+  const isConnectedOwner = Boolean(
+    account.address && safeStorage?.owners?.some((owner) => isAddressEqual(owner, account.address as Address)),
+  );
 
   // Steps in the transaction flow
   const steps = ["Build batch", "Review and sign", "Execute"];
@@ -567,159 +567,37 @@ const CreateTransaction: React.FC = () => {
 
       case 2:
         return (
-          <Grid container spacing={2}>
-            <Grid size={{ xs: 12, md: 9 }}>
-              {/* Content container with fixed height and scrollable content */}
-              <Box>
-                <Box>
-                  <Paper elevation={0} variant="outlined" sx={{ p: 2, mb: 2 }}>
-                    <Typography variant="h5" gutterBottom>
-                      Execute Transaction
-                    </Typography>
-
-                    <Box sx={{ mb: 3 }}>
-                      <Alert severity="success" sx={{ mb: 2 }} icon={<CheckCircleIcon fontSize="inherit" />}>
-                        Transaction successfully signed! You can now execute it or share it with other owners.
-                      </Alert>
-
-                      <Box
-                        sx={{
-                          mb: 2,
-                          p: 2,
-                          bgcolor: "background.paper",
-                          borderRadius: 1,
-                          border: 1,
-                          borderColor: "divider",
-                        }}
-                      >
-                        <Grid container spacing={2}>
-                          <Grid size={{ xs: 12 }}>
-                            <Typography
-                              variant="body2"
-                              sx={{
-                                color: "text.secondary",
-                              }}
-                            >
-                              Safe Transaction Hash
-                            </Typography>
-                            <Typography variant="body1" sx={{ wordBreak: "break-all" }}>
-                              {safeTransactionHash}
-                            </Typography>
-                          </Grid>
-                        </Grid>
-                      </Box>
-
-                      <Box
-                        sx={{
-                          p: 2,
-                          bgcolor: "background.paper",
-                          borderRadius: 1,
-                          border: 1,
-                          borderColor: "divider",
-                        }}
-                      >
-                        <Grid container spacing={2}>
-                          <Grid size={{ xs: 12 }}>
-                            <Typography
-                              variant="body2"
-                              sx={{
-                                color: "text.secondary",
-                              }}
-                            >
-                              Signature
-                            </Typography>
-                            <Typography variant="body1" sx={{ wordBreak: "break-all" }}>
-                              {signature}
-                            </Typography>
-                          </Grid>
-                        </Grid>
-                      </Box>
-                    </Box>
-
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        mt: 2,
-                        flexWrap: "wrap",
-                        gap: 1,
-                      }}
-                    >
-                      <Button variant="outlined" startIcon={<VisibilityIcon />} onClick={handleViewSafeTransaction}>
-                        View Safe Transaction Details
-                      </Button>
-
-                      <Box sx={{ display: "flex", gap: 1 }}>
-                        <Button
-                          variant="outlined"
-                          startIcon={<ContentCopyIcon />}
-                          onClick={() => {
-                            if (signature) {
-                              navigator.clipboard.writeText(signature);
-                              setSnackbarMessage("Signature copied to clipboard");
-                              setSnackbarOpen(true);
-                            }
-                          }}
-                        >
-                          Copy Signature
-                        </Button>
-
-                        <Button
-                          variant="outlined"
-                          startIcon={<ContentCopyIcon />}
-                          onClick={handleCopyToClipboardSigned}
-                        >
-                          Copy Signed Tx
-                        </Button>
-                      </Box>
-                    </Box>
-                  </Paper>
-
-                  <Paper elevation={0} variant="outlined" sx={{ p: 2 }}>
-                    <Typography variant="h6" gutterBottom>
-                      Execute Options
-                    </Typography>
-
-                    {account && safeStorage?.owners?.find((owner) => owner === account.address) === undefined ? (
-                      <Alert severity="warning" sx={{ mb: 2 }}>
-                        You are not an owner of this Safe. You can still create and sign transactions, but they must be
-                        executed by a Safe owner.
-                      </Alert>
-                    ) : (
-                      <Box sx={{ mb: 2 }}>
-                        <Alert severity="info" icon={<InfoOutlinedIcon />}>
-                          Execute this transaction to submit it to the blockchain. Make sure you have enough ETH for gas
-                          fees.
-                        </Alert>
-                      </Box>
-                    )}
-
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      startIcon={<PlayArrowIcon />}
-                      onClick={handleExecuteTransaction}
-                      fullWidth
-                      disabled={
-                        account && safeStorage?.owners?.find((owner) => owner === account.address) === undefined
-                      }
-                    >
-                      Execute Transaction
-                    </Button>
-                  </Paper>
-                </Box>
-              </Box>
-            </Grid>
-
-            <Grid size={{ xs: 12, md: 3 }}>
+          <Box
+            sx={{
+              display: "grid",
+              gap: 3,
+              alignItems: "start",
+              gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 1fr) 320px" },
+            }}
+          >
+            <Stack spacing={3} sx={{ minWidth: 0 }}>
+              <SignedTransactionCard
+                safeTransactionHash={safeTransactionHash}
+                signature={signature}
+                onViewDetails={handleViewSafeTransaction}
+                onCopySigned={handleCopyToClipboardSigned}
+              />
+              <ExecuteCard
+                isOwner={isConnectedOwner}
+                threshold={safeStorage?.threshold}
+                executionHash={transactionHash}
+                onExecute={handleExecuteTransaction}
+              />
+            </Stack>
+            <Box sx={{ position: { lg: "sticky" }, top: { lg: 80 } }}>
               <TransactionSummaryPanel
                 transactions={transactions}
                 handleDeleteTransaction={handleDeleteTransaction}
                 viewOnly={true}
                 isMobile={isMobile}
               />
-            </Grid>
-          </Grid>
+            </Box>
+          </Box>
         );
 
       default:
@@ -808,11 +686,6 @@ const CreateTransaction: React.FC = () => {
       )}
 
       {/* Transaction hash success message */}
-      {transactionHash && (
-        <Alert severity="success" sx={{ mb: 3 }}>
-          Transaction submitted successfully with hash: {transactionHash}
-        </Alert>
-      )}
 
       {/* Main content area based on step */}
       {renderStepContent()}
@@ -828,14 +701,17 @@ const CreateTransaction: React.FC = () => {
         }}
       >
         <Box sx={{ display: "flex", gap: 1 }}>
-          <Button
-            variant="outlined"
-            onClick={handleBackStep}
-            disabled={activeStep === 0}
-            startIcon={<KeyboardArrowLeftIcon />}
-          >
-            Back
-          </Button>
+          {/* Once executed the nonce is spent, so going back to re-sign would only produce a dead transaction. */}
+          {!transactionHash && (
+            <Button
+              variant="outlined"
+              onClick={handleBackStep}
+              disabled={activeStep === 0}
+              startIcon={<KeyboardArrowLeftIcon />}
+            >
+              Back
+            </Button>
+          )}
         </Box>
 
         <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
