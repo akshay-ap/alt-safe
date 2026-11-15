@@ -558,6 +558,16 @@ const CreateTransaction: React.FC = () => {
                 isSummaryExpanded={isSummaryExpanded}
                 toggleSummaryExpanded={toggleSummaryExpanded}
               />
+              <Button
+                variant="contained"
+                fullWidth
+                onClick={handleNextStep}
+                endIcon={<KeyboardArrowRightIcon />}
+                disabled={transactions.length === 0}
+                sx={{ mt: 2 }}
+              >
+                Review batch
+              </Button>
             </Box>
           </Box>
         );
@@ -641,36 +651,43 @@ const CreateTransaction: React.FC = () => {
         title="New transaction"
         description="Add one or more actions to a batch, review the Safe transaction, then sign and execute it."
         actions={
-          activeStep === 0 && (
-            <>
-              {isEditingDraft && (
-                <Chip
-                  label={hasUnsavedChanges ? "Unsaved draft changes" : "Editing draft"}
-                  color={hasUnsavedChanges ? "warning" : "default"}
+          activeStep > 0 && !transactionHash ? (
+            // Once executed the nonce is spent, so going back to re-sign would only produce a dead transaction.
+            <Button variant="outlined" onClick={handleBackStep} startIcon={<KeyboardArrowLeftIcon />}>
+              Back
+            </Button>
+          ) : (
+            activeStep === 0 && (
+              <>
+                {isEditingDraft && (
+                  <Chip
+                    label={hasUnsavedChanges ? "Unsaved draft changes" : "Editing draft"}
+                    color={hasUnsavedChanges ? "warning" : "default"}
+                    variant="outlined"
+                  />
+                )}
+                <Button startIcon={<FolderOpenIcon />} onClick={handleOpenLoadDraftDialog}>
+                  Open draft
+                </Button>
+                <Button
                   variant="outlined"
-                />
-              )}
-              <Button startIcon={<FolderOpenIcon />} onClick={handleOpenLoadDraftDialog}>
-                Open draft
-              </Button>
-              <Button
-                variant="outlined"
-                startIcon={<SaveIcon />}
-                onClick={handleOpenSaveDraftDialog}
-                disabled={transactions.length === 0}
-              >
-                {isEditingDraft && hasUnsavedChanges
-                  ? "Update draft"
-                  : isEditingDraft
-                    ? "Save as new draft"
-                    : "Save draft"}
-              </Button>
-            </>
+                  startIcon={<SaveIcon />}
+                  onClick={handleOpenSaveDraftDialog}
+                  disabled={transactions.length === 0}
+                >
+                  {isEditingDraft && hasUnsavedChanges
+                    ? "Update draft"
+                    : isEditingDraft
+                      ? "Save as new draft"
+                      : "Save draft"}
+                </Button>
+              </>
+            )
           )
         }
       />
 
-      <Stepper activeStep={activeStep} alternativeLabel={isMobile} sx={{ mb: 4 }}>
+      <Stepper activeStep={activeStep} alternativeLabel={isMobile} sx={{ mb: 3 }}>
         {steps.map((label) => (
           <Step key={label}>
             <StepLabel>{label}</StepLabel>
@@ -689,45 +706,6 @@ const CreateTransaction: React.FC = () => {
 
       {/* Main content area based on step */}
       {renderStepContent()}
-
-      {/* Navigation buttons */}
-      <Box
-        sx={{
-          mt: 3,
-          display: "flex",
-          justifyContent: "space-between",
-          flexWrap: "wrap",
-          gap: 2,
-        }}
-      >
-        <Box sx={{ display: "flex", gap: 1 }}>
-          {/* Once executed the nonce is spent, so going back to re-sign would only produce a dead transaction. */}
-          {!transactionHash && (
-            <Button
-              variant="outlined"
-              onClick={handleBackStep}
-              disabled={activeStep === 0}
-              startIcon={<KeyboardArrowLeftIcon />}
-            >
-              Back
-            </Button>
-          )}
-        </Box>
-
-        <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-          {activeStep === 0 && (
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleNextStep}
-              endIcon={<KeyboardArrowRightIcon />}
-              disabled={transactions.length === 0}
-            >
-              Review batch
-            </Button>
-          )}
-        </Box>
-      </Box>
 
       {/* Floating action button on mobile for step 0 */}
       {isMobile && activeStep === 0 && !isSummaryExpanded && (
