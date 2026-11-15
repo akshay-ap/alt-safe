@@ -300,7 +300,7 @@ const TransactionTypePanel: React.FC<TransactionTypePanelProps> = ({ onSelect })
                     onClick={() => handleGroupToggle(group.name)}
                     disabled={group.disabled}
                     sx={{
-                      py: 1.5,
+                      py: 0.75,
                       "&:hover": {
                         bgcolor: group.disabled ? "transparent" : alpha(theme.palette.primary.main, 0.08),
                       },
