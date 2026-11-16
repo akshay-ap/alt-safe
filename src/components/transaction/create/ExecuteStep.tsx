@@ -1,7 +1,21 @@
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import ShareIcon from "@mui/icons-material/ShareOutlined";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import { Alert, Box, Button, CircularProgress, Paper, Stack, Typography } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  IconButton,
+  Menu,
+  MenuItem,
+  Paper,
+  Snackbar,
+  Stack,
+  Tooltip,
+  Typography,
+} from "@mui/material";
+import { useState } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import { useWaitForTransactionReceipt } from "wagmi";
 import { font } from "../../../theme/tokens";
@@ -16,16 +30,52 @@ const Field: React.FC<{ label: string; children: React.ReactNode }> = ({ label, 
   </Box>
 );
 
+type ShareOption = { label: string; value: string; copiedMessage: string };
+
+const ShareMenu: React.FC<{ options: ShareOption[] }> = ({ options }) => {
+  const [anchor, setAnchor] = useState<HTMLElement | null>(null);
+  const [copiedMessage, setCopiedMessage] = useState<string>();
+
+  const share = async (option: ShareOption) => {
+    setAnchor(null);
+    await navigator.clipboard.writeText(option.value);
+    setCopiedMessage(option.copiedMessage);
+  };
+
+  return (
+    <>
+      <Tooltip title="Share with other owners">
+        <IconButton onClick={(event) => setAnchor(event.currentTarget)} aria-label="Share" aria-haspopup="menu">
+          <ShareIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
+      <Menu anchorEl={anchor} open={Boolean(anchor)} onClose={() => setAnchor(null)}>
+        {options.map((option) => (
+          <MenuItem key={option.label} onClick={() => share(option)}>
+            {option.label}
+          </MenuItem>
+        ))}
+      </Menu>
+      <Snackbar
+        open={Boolean(copiedMessage)}
+        autoHideDuration={3000}
+        onClose={() => setCopiedMessage(undefined)}
+        message={copiedMessage}
+      />
+    </>
+  );
+};
+
 export const SignedTransactionCard: React.FC<{
   safeTransactionHash?: `0x${string}`;
   signature?: `0x${string}`;
+  signedTransactionHex: string;
   onViewDetails: () => void;
-  onCopySigned: () => void;
-}> = ({ safeTransactionHash, signature, onViewDetails, onCopySigned }) => (
+}> = ({ safeTransactionHash, signature, signedTransactionHex, onViewDetails }) => (
   <Paper variant="outlined">
     <Box sx={{ px: 2.5, pt: 2.5, pb: 1.5 }}>
       <Alert severity="success" sx={{ mb: 1.5 }}>
-        Signed. Execute it now, or copy it for the other owners to add their signatures.
+        Signed. Execute it now, or share it with the other owners to add their signatures.
       </Alert>
       <Field label="Safe transaction hash">
         <TransactionHash hash={safeTransactionHash} />
@@ -39,19 +89,18 @@ export const SignedTransactionCard: React.FC<{
     <Stack
       direction="row"
       spacing={1}
-      sx={{ px: 2.5, py: 1.5, borderTop: 1, borderColor: "divider", flexWrap: "wrap", rowGap: 1 }}
+      sx={{ px: 2.5, py: 1.5, borderTop: 1, borderColor: "divider", alignItems: "center" }}
     >
       <Button startIcon={<VisibilityIcon />} onClick={onViewDetails}>
         View all parameters
       </Button>
-      <Button startIcon={<ContentCopyIcon />} onClick={onCopySigned}>
-        Copy signed transaction
-      </Button>
-      {signature && (
-        <Button startIcon={<ContentCopyIcon />} onClick={() => navigator.clipboard.writeText(signature)}>
-          Copy signature only
-        </Button>
-      )}
+      <Box sx={{ flex: 1 }} />
+      <ShareMenu
+        options={[
+          { label: "Copy signed transaction", value: signedTransactionHex, copiedMessage: "Signed transaction copied" },
+          ...(signature ? [{ label: "Copy signature", value: signature, copiedMessage: "Signature copied" }] : []),
+        ]}
+      />
     </Stack>
   </Paper>
 );
@@ -67,7 +116,7 @@ const ExecuteBlocker: React.FC<{ isOwner: boolean; threshold?: bigint }> = ({ is
   if (!isOwner) {
     return (
       <Alert severity="warning">
-        The connected wallet is not an owner of this Safe, so it cannot execute. Copy the signed transaction for an
+        The connected wallet is not an owner of this Safe, so it cannot execute. Share the signed transaction with an
         owner.
       </Alert>
     );
@@ -81,7 +130,7 @@ const ExecuteBlocker: React.FC<{ isOwner: boolean; threshold?: bigint }> = ({ is
         </Button>
       }
     >
-      This Safe needs {threshold?.toString()} signatures. Copy the signed transaction, gather the others, then execute
+      This Safe needs {threshold?.toString()} signatures. Share the signed transaction, gather the others, then execute
       it from Collect signatures.
     </Alert>
   );

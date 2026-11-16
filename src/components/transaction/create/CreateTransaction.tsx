@@ -26,21 +26,18 @@ import {
 } from "@mui/material";
 import { simulateContract } from "@wagmi/core";
 import { useEffect, useState } from "react";
-import {
-  type Address,
-  BaseError,
-  bytesToHex,
-  ContractFunctionRevertedError,
-  hexToBytes,
-  isAddressEqual,
-  stringToBytes,
-} from "viem";
+import { type Address, BaseError, ContractFunctionRevertedError, hexToBytes, isAddressEqual } from "viem";
 import { useAccount, usePublicClient, useWriteContract } from "wagmi";
 import safe from "../../../abis/Safe.json";
-import { deleteDraftTransaction, getDraftTransactionById, updateDraftTransaction } from "../../../api/api";
+import {
+  deleteDraftTransaction,
+  exportSignedTransactionToHex,
+  getDraftTransactionById,
+  updateDraftTransaction,
+} from "../../../api/api";
 import { STORAGE_KEY } from "../../../constants";
 import { useCreateTransactionContext } from "../../../context/CreateTransactionContext";
-import type { ImportData, ImportSignedData, SafeTransactionDraft, Transaction } from "../../../context/types";
+import type { ImportData, SafeTransactionDraft, Transaction } from "../../../context/types";
 import { type SafeTransactionInfo, useSafeWalletContext } from "../../../context/WalletContext";
 import { NONCE_LOADING_ERROR, prepareSafeTransaction } from "../../../utils/safeTransaction";
 import { config } from "../../../wagmi";
@@ -167,35 +164,16 @@ const CreateTransaction: React.FC = () => {
     setViewDialogOpen(true);
   };
 
-  const getExportHexSigned = (): string => {
-    if (safeAccount && safeTransaction && account.address && signature && safeTransactionHash) {
-      const exportData: ImportSignedData = {
-        transactions: transactions,
-        safeAccount: safeAccount,
-        signature: { signer: account.address, data: signature },
-        safeTransaction: safeTransaction,
-        safeTransactionHash: safeTransactionHash,
-      };
-
-      const exportDataString = JSON.stringify(exportData, (_key, value) =>
-        typeof value === "bigint" ? value.toString() : value,
-      );
-      return bytesToHex(stringToBytes(exportDataString));
-    }
-    return "";
-  };
-
-  const handleCopyToClipboardSigned = async () => {
-    if (safeTransaction) {
-      const hexString = getExportHexSigned();
-      navigator.clipboard.writeText(hexString);
-
-      setSnackbarMessage("Signed transaction copied to clipboard");
-      setSnackbarOpen(true);
-    } else {
-      console.error("safeTransaction undefined");
-    }
-  };
+  const signedTransactionHex =
+    safeAccount && safeTransaction && account.address && signature && safeTransactionHash
+      ? exportSignedTransactionToHex({
+          transactions,
+          safeAccount,
+          signature: { signer: account.address, data: signature },
+          safeTransaction,
+          safeTransactionHash,
+        })
+      : "";
 
   const handleDeleteTransaction = async (id: number) => {
     const updatedTransactions = transactions.filter((_, index) => index !== id);
@@ -538,7 +516,7 @@ const CreateTransaction: React.FC = () => {
                 safeTransactionHash={safeTransactionHash}
                 signature={signature}
                 onViewDetails={handleViewSafeTransaction}
-                onCopySigned={handleCopyToClipboardSigned}
+                signedTransactionHex={signedTransactionHex}
               />
               <ExecuteCard
                 isOwner={isConnectedOwner}
