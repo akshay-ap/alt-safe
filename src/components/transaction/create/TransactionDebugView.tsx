@@ -1,8 +1,8 @@
 import { Code as CodeIcon } from "@mui/icons-material";
 import { Box, Chip, Divider, IconButton, Paper, Tooltip, Typography, useTheme } from "@mui/material";
 import { Parser } from "expr-eval";
-import { useState } from "react";
 import type React from "react";
+import { useState } from "react";
 import { type AbiFunction, encodeFunctionData, parseAbiItem } from "viem";
 import type { TransactionSpec } from "../../../context/types";
 
@@ -33,7 +33,7 @@ const TransactionDebugView: React.FC<TransactionDebugViewProps> = ({ spec, conte
         if (!calldata.startsWith("0x")) {
           throw new Error("Data must start with 0x");
         }
-      } else if (!!spec.functionSignature && "calldataArgs" in spec.onFinalize) {
+      } else if (spec.functionSignature && "calldataArgs" in spec.onFinalize) {
         const abiItem = parseAbiItem(spec.functionSignature) as AbiFunction;
         calldata = encodeFunctionData({
           abi: [abiItem],

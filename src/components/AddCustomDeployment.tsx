@@ -19,7 +19,7 @@ import { useEffect, useState } from "react";
 import type { Address } from "viem";
 import { STORAGE_KEY } from "../constants";
 import { type CustomDeployment, useSafeWalletContext } from "../context/WalletContext";
-import { type SafeDeployment, canonicalAddresses_141 } from "../safe-contracts/addresses/addresses";
+import { canonicalAddresses_141, type SafeDeployment } from "../safe-contracts/addresses/addresses";
 import { config } from "../wagmi";
 import Title from "./common/Title";
 

@@ -19,12 +19,11 @@ import Grid from "@mui/material/Grid";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { type Address, isAddress, isAddressEqual, zeroAddress } from "viem";
-import { useAccount } from "wagmi";
-import { usePublicClient } from "wagmi";
+import { useAccount, usePublicClient } from "wagmi";
 import { STORAGE_KEY } from "../constants";
-import { useSafeWalletContext } from "../context/WalletContext";
 import type { SafeAccount } from "../context/types";
-import { type SafeStorage, fetchStorageData } from "../utils/storageReader";
+import { useSafeWalletContext } from "../context/WalletContext";
+import { fetchStorageData, type SafeStorage } from "../utils/storageReader";
 import NameAndLabels from "./common/NameAndLabels";
 import ViewSafeStorage from "./common/SafeStorage";
 

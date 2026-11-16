@@ -1,5 +1,4 @@
-import { hexToNumber } from "viem";
-import { bytesToHex, hexToBytes, stringToBytes } from "viem";
+import { bytesToHex, hexToBytes, hexToNumber, stringToBytes } from "viem";
 import { STORAGE_KEY } from "../constants";
 import type { ImportData, SafeTransactionDraft, Transaction } from "../context/types";
 

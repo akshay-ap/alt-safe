@@ -1,4 +1,4 @@
-import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
+import { CssBaseline, createTheme, ThemeProvider } from "@mui/material";
 import type { ReactNode } from "react";
 
 const gradientTheme = createTheme({

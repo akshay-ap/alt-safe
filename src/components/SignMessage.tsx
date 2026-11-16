@@ -13,17 +13,16 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { signTypedData } from "@wagmi/core";
-import { readContract } from "@wagmi/core";
+import { readContract, signTypedData } from "@wagmi/core";
 import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import {
   type Address,
   type Hex,
-  type Signature,
   keccak256,
   parseSignature,
   recoverTypedDataAddress,
+  type Signature,
   serializeSignature,
   toHex,
 } from "viem";

@@ -1,11 +1,11 @@
 import type React from "react";
-import { type ReactNode, createContext, useCallback, useContext, useEffect, useState } from "react";
+import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import { type Address, isAddress, isAddressEqual, zeroAddress } from "viem"; // Import viem library for validation
 import { createStorage, useAccount, usePublicClient } from "wagmi";
 import { type FEATURES, STORAGE_KEY, WALLET_STORAGE_KEY } from "../constants";
 import { type SafeDeployment, SafeDeploymentType, SafeVersion } from "../safe-contracts/addresses/addresses";
-import { type SafeStorage, fetchStorageData } from "../utils/storageReader";
-import { type SafeTransactionParams, getSafeAddresses } from "../utils/utils";
+import { fetchStorageData, type SafeStorage } from "../utils/storageReader";
+import { getSafeAddresses, type SafeTransactionParams } from "../utils/utils";
 import trnasctionBuilderSpec from "./TransactionSpecs";
 import type { TransactionGroupSpec } from "./types";
 
@@ -77,7 +77,9 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         return;
       }
 
-      const customDeployments = (await storage.getItem(STORAGE_KEY.CUSTOM_DEPLOYMENTS)) as CustomDeployment[] | undefined;
+      const customDeployments = (await storage.getItem(STORAGE_KEY.CUSTOM_DEPLOYMENTS)) as
+        | CustomDeployment[]
+        | undefined;
       const chainSpecificDeployment = customDeployments?.find(
         (deployment) => deployment.chainId === account.chainId,
       )?.deployment;

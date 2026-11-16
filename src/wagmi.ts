@@ -2,7 +2,6 @@ import { createConfig } from "@wagmi/core";
 import { createClient } from "viem";
 import { http } from "wagmi";
 import {
-  type Chain,
   arbitrum,
   arbitrumGoerli,
   avalanche,
@@ -10,6 +9,7 @@ import {
   baseSepolia,
   blast,
   blastSepolia,
+  type Chain,
   gnosis,
   hardhat,
   linea,

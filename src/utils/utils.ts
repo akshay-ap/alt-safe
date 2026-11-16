@@ -12,10 +12,10 @@ import safeABI from "../abis/Safe.json";
 import safe from "../abis/Safe.json";
 import safeModuleSetupABI from "../abis/SafeModuleSetup.json";
 import {
+  canonicalAddresses_141,
   type SafeDeployment,
   SafeDeploymentType,
   SafeVersion,
-  canonicalAddresses_141,
 } from "../safe-contracts/addresses/addresses";
 import safeProxy from "../safe-contracts/artifacts/SafeProxy.json";
 import { config } from "../wagmi";
@@ -111,28 +111,6 @@ export const calculateInitData = (
   });
 
   return setupCalldata;
-};
-
-export type MultiSendTransaction = {
-  to: `0x${string}`;
-  value: bigint;
-  data: `0x${string}`;
-  operation: number;
-};
-
-export type MultiSendTransactions = MultiSendTransaction[];
-
-export const getMultiSendCallData = (transactions: MultiSendTransactions): `0x${string}` => {
-  // Encode the transactions into the format required by MultiSend contract
-  let packedTransactions = "0x"; // Start with empty hex string
-  for (const tx of transactions) {
-    const encodedTx = encodePacked(
-      ["uint8", "address", "uint256", "uint256", "bytes"],
-      [tx.operation, tx.to, tx.value, BigInt(tx.data.length), tx.data],
-    );
-    packedTransactions += encodedTx.slice(2); // Append the packed transaction data
-  }
-  return packedTransactions as `0x${string}`;
 };
 
 export const getShortAddress = (address: Address): string => {

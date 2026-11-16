@@ -3,6 +3,7 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import {
   Alert,
   Autocomplete,
+  alpha,
   Box,
   Button,
   Container,
@@ -15,16 +16,14 @@ import {
   TextField,
   Tooltip,
   Typography,
-  alpha,
   useTheme,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import { readContract } from "@wagmi/core";
-import { useEffect, useState } from "react";
 import type React from "react";
+import { useEffect, useState } from "react";
 import { type AbiFunction, encodeFunctionData, parseAbi, parseAbiItem } from "viem";
 import { useAccount, usePublicClient } from "wagmi";
-import { useSafeWalletContext } from "../../../context/WalletContext";
 import {
   type Transaction,
   type TransactionSpec,
@@ -32,6 +31,7 @@ import {
   ValidationType,
   ValueFetchType,
 } from "../../../context/types";
+import { useSafeWalletContext } from "../../../context/WalletContext";
 import { createBigIntParser } from "../../../utils/parser";
 import { config } from "../../../wagmi";
 import AccountAddress from "../../common/AccountAddress";
@@ -122,7 +122,7 @@ const TransactionInputBuilder: React.FC<TransactionInputBuilderProps> = ({ onAdd
    *  biome-ignore lint/correctness/useExhaustiveDependencies(errors): No need to re-run effect when errors changes.
    *  biome-ignore lint/correctness/useExhaustiveDependencies(spec.onInputUpdate): No need to re-run effect as spec is not expectec to change.
    *  biome-ignore lint/correctness/useExhaustiveDependencies(context): Adding context to dependencies will cause infinite re-render.
-   *  biome-ignore lint/correctness/useExhaustiveDependencies(parser.parse):
+   *  biome-ignore lint/correctness/useExhaustiveDependencies(parser.parse): parser is stateless; its per-render instance must not retrigger the fetch.
    */
   useEffect(() => {
     // Only run onInputUpdate logic if at least one input has been touched
@@ -254,7 +254,7 @@ const TransactionInputBuilder: React.FC<TransactionInputBuilderProps> = ({ onAdd
       if (!calldata.startsWith("0x")) {
         throw new Error("Data must start with 0x");
       }
-    } else if (!!spec.functionSignature && "calldataArgs" in spec.onFinalize) {
+    } else if (spec.functionSignature && "calldataArgs" in spec.onFinalize) {
       const abiItem = parseAbiItem(spec.functionSignature) as AbiFunction;
 
       calldata = encodeFunctionData({

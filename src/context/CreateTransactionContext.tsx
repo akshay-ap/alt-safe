@@ -1,12 +1,12 @@
 import { readContract } from "@wagmi/core";
 import type React from "react";
-import { type ReactNode, createContext, useContext, useEffect, useState } from "react";
+import { createContext, type ReactNode, useContext, useEffect, useState } from "react";
 import { type Address, zeroAddress } from "viem";
 import safe from "../abis/Safe.json";
 import type { SafeTransactionParams } from "../utils/utils";
 import { config } from "./../wagmi";
-import { useSafeWalletContext } from "./WalletContext";
 import type { Transaction } from "./types";
+import { useSafeWalletContext } from "./WalletContext";
 
 interface CreateTransactionContextType {
   // State
