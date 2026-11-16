@@ -23,29 +23,25 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { readContract, simulateContract } from "@wagmi/core";
+import { simulateContract } from "@wagmi/core";
 import { useEffect, useState } from "react";
 import {
   type Address,
   BaseError,
   bytesToHex,
   ContractFunctionRevertedError,
-  encodeFunctionData,
   hexToBytes,
   isAddressEqual,
   stringToBytes,
-  zeroAddress,
 } from "viem";
 import { useAccount, usePublicClient, useWriteContract } from "wagmi";
-import multisendCallOnly from "../../../abis/MultiSendCallOnly.json";
 import safe from "../../../abis/Safe.json";
 import { deleteDraftTransaction, getDraftTransactionById, updateDraftTransaction } from "../../../api/api";
 import { STORAGE_KEY } from "../../../constants";
 import { useCreateTransactionContext } from "../../../context/CreateTransactionContext";
 import type { ImportData, ImportSignedData, SafeTransactionDraft, Transaction } from "../../../context/types";
 import { type SafeTransactionInfo, useSafeWalletContext } from "../../../context/WalletContext";
-import { encodeMultiSend } from "../../../utils/multisend";
-import { SafeOperation, type SafeTransactionParams } from "../../../utils/utils";
+import { prepareSafeTransaction } from "../../../utils/safeTransaction";
 import { config } from "../../../wagmi";
 import PageHeader from "../../common/PageHeader";
 import LoadTransactionDialog from "../../dialogs/LoadTransactionDialog";
@@ -77,6 +73,12 @@ const CreateTransaction: React.FC = () => {
     setSafeTransactionHash,
     error,
     setError,
+    nonce,
+    gasPrice,
+    safeTxGas,
+    baseGas,
+    refundToAddress,
+    refundTokenAddress,
   } = useCreateTransactionContext();
   const [importHex, setImportHex] = useState<`0x${string}`>("0x");
   const [viewDialogOpen, setViewDialogOpen] = useState<boolean>(false);
@@ -121,84 +123,17 @@ const CreateTransaction: React.FC = () => {
     }
   };
 
-  const getSafeTransactionInfo = async (): Promise<{
-    safeTx: SafeTransactionParams;
-    safeTxHash: `0x${string}`;
-  }> => {
-    let safeTransactionHashFromContractCall: `0x${string}` = "0x";
-    let to: Address;
-    let value: bigint;
-    let callData: `0x${string}`;
-    let operation: SafeOperation;
-    const baseGas = 0n;
-    const safeTxGas = 0n;
-    const gasPrice = 0n;
-    const gasToken: Address = zeroAddress;
-    const refundReceiver: Address = zeroAddress;
-
-    const abi = safe;
-    if (safeAccount === undefined) {
-      throw new Error("Safe account is undefined");
-    }
-
-    if (transactions.length < 1) {
-      throw new Error("No transactions");
-    }
-
-    const nonce = (await readContract(config, {
-      abi,
-      address: safeAccount,
-      functionName: "nonce",
-    })) as bigint;
-
-    if (transactions.length === 1) {
-      to = transactions[0].to;
-      value = BigInt(transactions[0].value);
-      callData = transactions[0].data;
-      operation = SafeOperation.CALL;
-    } else {
-      const metaTransactions = transactions.map((transaction) => {
-        return {
-          to: transaction.to,
-          value: BigInt(transaction.value),
-          data: transaction.data,
-          operation: SafeOperation.CALL,
-        };
-      });
-
-      callData = encodeFunctionData({
-        abi: multisendCallOnly,
-        functionName: "multiSend",
-        args: [encodeMultiSend(metaTransactions)],
-      });
-
-      to = safeDeployment?.multiSendCallOnly ?? zeroAddress;
-      value = 0n;
-      operation = SafeOperation.DELEGATE_CALL;
-    }
-
-    safeTransactionHashFromContractCall = (await readContract(config, {
-      abi,
-      address: safeAccount,
-      functionName: "getTransactionHash",
-      args: [to, value, callData, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, nonce],
-    })) as `0x${string}`;
-
-    return {
-      safeTx: {
-        to,
-        value,
-        data: callData,
-        operation,
-        safeTxGas: safeTxGas,
-        baseGas: baseGas,
-        gasPrice: gasPrice,
-        gasToken: gasToken,
-        refundReceiver: refundReceiver,
-        nonce,
-      },
-      safeTxHash: safeTransactionHashFromContractCall,
+  const getSafeTransactionInfo = () => {
+    if (safeAccount === undefined) throw new Error("Safe account is undefined");
+    const settings = {
+      nonce,
+      safeTxGas,
+      baseGas,
+      gasPrice,
+      gasToken: refundTokenAddress,
+      refundReceiver: refundToAddress,
     };
+    return prepareSafeTransaction(safeAccount, transactions, settings, safeDeployment?.multiSendCallOnly);
   };
 
   const handleViewSafeTransaction = async () => {
