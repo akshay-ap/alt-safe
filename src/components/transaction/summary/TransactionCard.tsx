@@ -2,12 +2,23 @@ import { Paper, Typography } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import type React from "react";
 import { formatEther } from "viem";
+import { useAccount } from "wagmi";
 import { type Transaction, TransactionType } from "../../../context/types";
 import AccountAddress from "../../common/AccountAddress";
 
 interface TransactionCardProps {
   transaction: Transaction;
 }
+
+// Exact amount, never rounded: this is what the Safe will send. Long values wrap instead of overflowing.
+const NativeAmount: React.FC<{ value: string }> = ({ value }) => {
+  const symbol = useAccount().chain?.nativeCurrency.symbol ?? "ETH";
+  return (
+    <Typography variant="body1" sx={{ fontWeight: 500, overflowWrap: "anywhere", fontVariantNumeric: "tabular-nums" }}>
+      {formatEther(BigInt(value))} {symbol}
+    </Typography>
+  );
+};
 
 const TransactionCard: React.FC<TransactionCardProps> = ({ transaction }) => {
   if (transaction.type === TransactionType.ETH_TRANSFER) return <EthTransferCard transaction={transaction} />;
@@ -40,14 +51,7 @@ const EthTransferCard: React.FC<TransactionCardProps> = ({ transaction }) => (
       >
         Amount
       </Typography>
-      <Typography
-        variant="body1"
-        sx={{
-          fontWeight: 500,
-        }}
-      >
-        {formatEther(BigInt(transaction.value))} ETH
-      </Typography>
+      <NativeAmount value={transaction.value} />
     </Grid>
   </Grid>
 );
@@ -76,7 +80,7 @@ const ContractCallCard: React.FC<TransactionCardProps> = ({ transaction }) => (
         >
           Value
         </Typography>
-        <Typography variant="body1">{formatEther(BigInt(transaction.value))} ETH</Typography>
+        <NativeAmount value={transaction.value} />
       </Grid>
     )}
 
