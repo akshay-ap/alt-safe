@@ -66,7 +66,7 @@ const GroupRows: React.FC<{
           selected={section.group === selectedGroup}
           onClick={() => (isSingle ? onSelect(section.group, only) : onOpen(section.group))}
         >
-          <ListItemText primary={section.group} secondary={isSingle ? only : undefined} />
+          <ListItemText primary={section.group} />
           {!isSingle && (
             <>
               <Chip size="small" label={section.actions.length} sx={{ mr: 0.5 }} />
