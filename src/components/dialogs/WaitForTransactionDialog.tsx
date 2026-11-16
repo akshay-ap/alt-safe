@@ -1,8 +1,8 @@
 import { CircularProgress, Dialog, DialogContent, DialogTitle } from "@mui/material";
 import { waitForTransactionReceipt } from "@wagmi/core";
 import { useEffect, useRef, useState } from "react";
-
 import { config } from "../../wagmi";
+import TransactionHash from "../common/TransactionHash";
 
 interface WaitForTransactionDialogProps {
   open: boolean;
@@ -33,9 +33,9 @@ const WaitForTransactionDialog: React.FC<WaitForTransactionDialogProps> = ({ ope
 
   return (
     <Dialog open={open}>
-      <DialogTitle>Waiting for transaciton confirmation</DialogTitle>
+      <DialogTitle>Waiting for transaction confirmation</DialogTitle>
       <DialogContent>
-        {hash}
+        <TransactionHash hash={hash} showExplorer />
         {loading && <CircularProgress />}
       </DialogContent>
     </Dialog>

@@ -2,6 +2,7 @@ import { Autocomplete, Box, ListItem, TextField, type TextFieldProps, Typography
 import Grid from "@mui/material/Grid";
 import React from "react";
 import { isAddress } from "viem";
+import AccountAddress from "./AccountAddress";
 import { useAddressBookSelector } from "./AddressBookSelector";
 
 interface Option {
@@ -100,17 +101,13 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
                   <Typography>{typedOption.name}</Typography>
                 </Grid>
                 <Grid>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: "text.secondary",
-                      fontFamily: "monospace",
-                    }}
-                  >
-                    {isAddress(typedOption.value)
-                      ? `${typedOption.value.slice(0, 6)}...${typedOption.value.slice(-4)}`
-                      : typedOption.value}
-                  </Typography>
+                  {isAddress(typedOption.value) ? (
+                    <AccountAddress address={typedOption.value} short showCopy={false} size="small" />
+                  ) : (
+                    <Typography variant="body2" color="text.secondary">
+                      {typedOption.value}
+                    </Typography>
+                  )}
                 </Grid>
               </Grid>
             </ListItem>

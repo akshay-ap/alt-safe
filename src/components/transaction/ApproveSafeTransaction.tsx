@@ -12,6 +12,7 @@ import { calculateSafeTransactionHash } from "../../utils/utils";
 import { config } from "../../wagmi";
 import SafeTransactionForm from "../common/SafeTransactionForm";
 import Title from "../common/Title";
+import TransactionHash from "../common/TransactionHash";
 
 const ApproveSafeTransactionForm: React.FC = () => {
   const { safeAccount, safeStorage } = useSafeWalletContext();
@@ -146,7 +147,9 @@ const ApproveSafeTransactionForm: React.FC = () => {
       )}
       {transactionHash && (
         <Grid size={12}>
-          <Alert severity="success">Transaction hash approved! Hash: {transactionHash}</Alert>
+          <Alert severity="success">
+            Transaction hash approved. <TransactionHash hash={transactionHash as `0x${string}`} short showExplorer />
+          </Alert>
         </Grid>
       )}
     </Grid>
