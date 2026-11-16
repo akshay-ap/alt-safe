@@ -17,9 +17,6 @@ import {
   Fab,
   Snackbar,
   Stack,
-  Step,
-  StepLabel,
-  Stepper,
   Typography,
   useMediaQuery,
   useTheme,
@@ -102,7 +99,12 @@ const CreateTransaction: React.FC = () => {
   );
 
   // Steps in the transaction flow
-  const steps = ["Build batch", "Review and sign", "Execute"];
+  // No stepper: the page heading names the current step instead.
+  const stepHeadings = [
+    { title: "New transaction", description: "Add one or more actions to a batch, then review it." },
+    { title: "Review and sign", description: "Check the Safe transaction, then sign it with your wallet." },
+    { title: "Execute", description: "Submit the signed transaction, or share it with the other owners." },
+  ];
 
   const handleAddTransaction = async (newTransaction: Transaction) => {
     const updatedTransactions = [...transactions, { ...newTransaction }];
@@ -563,8 +565,8 @@ const CreateTransaction: React.FC = () => {
       }
     >
       <PageHeader
-        title="New transaction"
-        description="Add one or more actions to a batch, review the Safe transaction, then sign and execute it."
+        title={stepHeadings[activeStep].title}
+        description={stepHeadings[activeStep].description}
         actions={
           activeStep > 0 && !transactionHash ? (
             // Once executed the nonce is spent, so going back to re-sign would only produce a dead transaction.
@@ -604,14 +606,6 @@ const CreateTransaction: React.FC = () => {
           )
         }
       />
-
-      <Stepper activeStep={activeStep} alternativeLabel={isMobile} sx={{ mb: 3 }}>
-        {steps.map((label) => (
-          <Step key={label}>
-            <StepLabel>{label}</StepLabel>
-          </Step>
-        ))}
-      </Stepper>
 
       {/* Error display */}
       {error && (
