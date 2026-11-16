@@ -26,7 +26,7 @@ import {
 } from "@mui/material";
 import { simulateContract } from "@wagmi/core";
 import { useEffect, useState } from "react";
-import { type Address, BaseError, ContractFunctionRevertedError, hexToBytes, isAddressEqual } from "viem";
+import { type Address, BaseError, ContractFunctionRevertedError, isAddressEqual } from "viem";
 import { useAccount, usePublicClient, useWriteContract } from "wagmi";
 import safe from "../../../abis/Safe.json";
 import {
@@ -37,7 +37,7 @@ import {
 } from "../../../api/api";
 import { STORAGE_KEY } from "../../../constants";
 import { useCreateTransactionContext } from "../../../context/CreateTransactionContext";
-import type { ImportData, SafeTransactionDraft, Transaction } from "../../../context/types";
+import type { SafeTransactionDraft, Transaction } from "../../../context/types";
 import { type SafeTransactionInfo, useSafeWalletContext } from "../../../context/WalletContext";
 import { NONCE_LOADING_ERROR, prepareSafeTransaction } from "../../../utils/safeTransaction";
 import { config } from "../../../wagmi";
@@ -81,7 +81,6 @@ const CreateTransaction: React.FC = () => {
     refundToAddress,
     refundTokenAddress,
   } = useCreateTransactionContext();
-  const [importHex, setImportHex] = useState<`0x${string}`>("0x");
   const [viewDialogOpen, setViewDialogOpen] = useState<boolean>(false);
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string>("");
@@ -238,22 +237,6 @@ const CreateTransaction: React.FC = () => {
           setError("Transaction failed");
         }
       }
-    }
-  };
-
-  const handleImportTransactions = () => {
-    try {
-      if (importHex) {
-        const jsonString = new TextDecoder().decode(hexToBytes(importHex));
-        const importedData = JSON.parse(jsonString) as ImportData;
-        setTransactions(importedData.transactions);
-
-        setSnackbarMessage("Transactions imported successfully");
-        setSnackbarOpen(true);
-      }
-    } catch (error) {
-      console.error("Invalid hex input");
-      setError("Invalid hex input. Please check the format and try again.");
     }
   };
 
@@ -461,12 +444,7 @@ const CreateTransaction: React.FC = () => {
             <Box
               sx={{ display: isMobile && isSummaryExpanded ? "none" : "block", minWidth: 0, height: { lg: "100%" } }}
             >
-              <TransactionBuilder
-                importHex={importHex}
-                setImportHex={setImportHex}
-                handleAddTransaction={handleAddTransaction}
-                handleImportTransactions={handleImportTransactions}
-              />
+              <TransactionBuilder handleAddTransaction={handleAddTransaction} />
             </Box>
             <Box
               sx={{

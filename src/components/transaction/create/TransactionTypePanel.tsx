@@ -1,11 +1,9 @@
-import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import SearchIcon from "@mui/icons-material/Search";
 import {
   Box,
   InputAdornment,
   List,
   ListItemButton,
-  ListItemIcon,
   ListItemText,
   ListSubheader,
   Paper,
@@ -18,8 +16,6 @@ import { useLocation } from "react-router-dom";
 import { useAccount } from "wagmi";
 import { useSafeWalletContext } from "../../../context/WalletContext";
 import { buildActionCatalog } from "../../../utils/actionCatalog";
-
-export const IMPORT_GROUP = "Import";
 
 interface TransactionTypePanelProps {
   onSelect: (group: string, type: string) => void;
@@ -60,16 +56,6 @@ const TransactionTypePanel: React.FC<TransactionTypePanelProps> = ({ onSelect })
       />
       <Paper variant="outlined" sx={{ overflow: "hidden" }}>
         <List id="transaction-types-list" dense disablePadding component="nav" aria-label="Transaction actions">
-          <ListItemButton
-            id="import-transaction-button"
-            selected={selected.group === IMPORT_GROUP}
-            onClick={() => onSelect(IMPORT_GROUP, IMPORT_GROUP)}
-          >
-            <ListItemIcon sx={{ minWidth: 32 }}>
-              <FileDownloadOutlinedIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText primary="Import shared transaction" />
-          </ListItemButton>
           {sections.map((section) => (
             <li key={section.group}>
               <List dense disablePadding>
