@@ -17,6 +17,9 @@ interface TransactionBuilderProps {
   handleImportTransactions: () => void;
 }
 
+// On wide screens each column scrolls on its own so the page never grows past the viewport.
+const COLUMN_SCROLL = { height: { lg: "100%" }, overflowY: { lg: "auto" }, minHeight: 0 } as const;
+
 const TransactionBuilder: React.FC<TransactionBuilderProps> = ({
   importHex,
   setImportHex,
@@ -41,13 +44,15 @@ const TransactionBuilder: React.FC<TransactionBuilderProps> = ({
         gap: 3,
         alignItems: "start",
         gridTemplateColumns: { xs: "1fr", md: "260px minmax(0, 1fr)" },
+        height: { lg: "100%" },
+        gridTemplateRows: { lg: "minmax(0, 1fr)" },
       }}
     >
-      <Box id="transaction-type-panel-container">
+      <Box id="transaction-type-panel-container" sx={COLUMN_SCROLL}>
         <TransactionTypePanel onSelect={handleTransactionTypeSelect} />
       </Box>
 
-      <Box id="transaction-input-panel-container" sx={{ minWidth: 0 }}>
+      <Box id="transaction-input-panel-container" sx={{ minWidth: 0, ...COLUMN_SCROLL }}>
         <Routes>
           <Route index element={<EmptyForm />} />
           <Route

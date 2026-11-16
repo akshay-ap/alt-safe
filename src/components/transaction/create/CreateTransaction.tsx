@@ -43,6 +43,7 @@ import type { ImportData, ImportSignedData, SafeTransactionDraft, Transaction } 
 import { type SafeTransactionInfo, useSafeWalletContext } from "../../../context/WalletContext";
 import { NONCE_LOADING_ERROR, prepareSafeTransaction } from "../../../utils/safeTransaction";
 import { config } from "../../../wagmi";
+import { TOP_BAR_HEIGHT } from "../../app/NavigationBar";
 import PageHeader from "../../common/PageHeader";
 import LoadTransactionDialog from "../../dialogs/LoadTransactionDialog";
 import SaveTransactionDialog from "../../dialogs/SaveTransactionDialog";
@@ -472,9 +473,13 @@ const CreateTransaction: React.FC = () => {
               gap: 3,
               alignItems: "start",
               gridTemplateColumns: isSummaryExpanded ? "1fr" : { xs: "1fr", lg: "minmax(0, 1fr) 320px" },
+              height: { lg: "100%" },
+              gridTemplateRows: { lg: "minmax(0, 1fr)" },
             }}
           >
-            <Box sx={{ display: isMobile && isSummaryExpanded ? "none" : "block", minWidth: 0 }}>
+            <Box
+              sx={{ display: isMobile && isSummaryExpanded ? "none" : "block", minWidth: 0, height: { lg: "100%" } }}
+            >
               <TransactionBuilder
                 importHex={importHex}
                 setImportHex={setImportHex}
@@ -484,18 +489,20 @@ const CreateTransaction: React.FC = () => {
             </Box>
             <Box
               sx={{
-                display: isMobile && !isSummaryExpanded ? "none" : "block",
-                position: { lg: "sticky" },
-                top: { lg: 80 },
+                display: isMobile && !isSummaryExpanded ? "none" : "flex",
+                flexDirection: "column",
+                height: { lg: "100%" },
               }}
             >
-              <TransactionSummaryPanel
-                transactions={transactions}
-                handleDeleteTransaction={handleDeleteTransaction}
-                isMobile={isMobile}
-                isSummaryExpanded={isSummaryExpanded}
-                toggleSummaryExpanded={toggleSummaryExpanded}
-              />
+              <Box sx={{ flex: { lg: 1 }, minHeight: 0, overflowY: { lg: "auto" } }}>
+                <TransactionSummaryPanel
+                  transactions={transactions}
+                  handleDeleteTransaction={handleDeleteTransaction}
+                  isMobile={isMobile}
+                  isSummaryExpanded={isSummaryExpanded}
+                  toggleSummaryExpanded={toggleSummaryExpanded}
+                />
+              </Box>
               <Button
                 variant="contained"
                 fullWidth
@@ -584,7 +591,18 @@ const CreateTransaction: React.FC = () => {
   }, [safeAccount, storage, setTransactions, setError]);
 
   return (
-    <Box>
+    // While building, the page is exactly the viewport (minus the shell's top bar and padding); columns scroll inside.
+    <Box
+      sx={
+        activeStep === 0
+          ? {
+              display: { lg: "flex" },
+              flexDirection: "column",
+              height: { lg: `calc(100vh - ${TOP_BAR_HEIGHT + 48}px)` },
+            }
+          : undefined
+      }
+    >
       <PageHeader
         title="New transaction"
         description="Add one or more actions to a batch, review the Safe transaction, then sign and execute it."
@@ -643,7 +661,7 @@ const CreateTransaction: React.FC = () => {
       {/* Transaction hash success message */}
 
       {/* Main content area based on step */}
-      {renderStepContent()}
+      <Box sx={{ flex: 1, minHeight: 0 }}>{renderStepContent()}</Box>
 
       {/* Floating action button on mobile for step 0 */}
       {isMobile && activeStep === 0 && !isSummaryExpanded && (
