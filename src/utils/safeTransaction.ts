@@ -79,3 +79,23 @@ export const prepareSafeTransaction = async (
   const safeTx = buildSafeTransaction(transactions, settings, multiSendCallOnly);
   return { safeTx, safeTxHash: await readSafeTransactionHash(safeAccount, safeTx) };
 };
+
+/** Readable JSON for sharing a Safe transaction; numbers are decimal strings so nothing loses precision. */
+export const safeTransactionToJson = (tx: SafeTransactionParams, safeTransactionHash: `0x${string}`) =>
+  JSON.stringify(
+    {
+      to: tx.to,
+      value: tx.value.toString(),
+      data: tx.data,
+      operation: tx.operation,
+      safeTxGas: tx.safeTxGas.toString(),
+      baseGas: tx.baseGas.toString(),
+      gasPrice: tx.gasPrice.toString(),
+      gasToken: tx.gasToken,
+      refundReceiver: tx.refundReceiver,
+      nonce: tx.nonce.toString(),
+      safeTransactionHash,
+    },
+    null,
+    2,
+  );
