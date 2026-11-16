@@ -7,7 +7,6 @@ import { useSafeWalletContext } from "../../../context/WalletContext";
 import ErrorBoundary from "../../common/ErrorBoundary";
 import EncodeFunctionCall from "./EncodeFunctionCall";
 import TransactionInputBuilder from "./TransactionInputBuilder";
-import TransactionParamsForm from "./TransactionParamsForm";
 import TransactionTypePanel from "./TransactionTypePanel";
 
 interface TransactionBuilderProps {
@@ -28,13 +27,7 @@ const TransactionBuilder: React.FC<TransactionBuilderProps> = ({
 }) => {
   const navigate = useNavigate();
 
-  const handleTransactionTypeSelect = (group: string, type: string) => {
-    if (group === "TransactionDefaults" && type === "TransactionDefaults") {
-      navigate("/create-transaction/transaction-defaults");
-    } else {
-      navigate(`/create-transaction/${group}/${type}`);
-    }
-  };
+  const handleTransactionTypeSelect = (group: string, type: string) => navigate(`/create-transaction/${group}/${type}`);
 
   return (
     <Box
@@ -55,14 +48,6 @@ const TransactionBuilder: React.FC<TransactionBuilderProps> = ({
       <Box id="transaction-input-panel-container" sx={{ minWidth: 0, ...COLUMN_SCROLL }}>
         <Routes>
           <Route index element={<EmptyForm />} />
-          <Route
-            path="/transaction-defaults"
-            element={
-              <Grid id="tx-params-form" size={12}>
-                <TransactionParamsForm />
-              </Grid>
-            }
-          />
           <Route
             path="/:group/:type"
             element={
