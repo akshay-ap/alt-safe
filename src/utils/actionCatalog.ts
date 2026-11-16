@@ -3,7 +3,24 @@ import type { TransactionGroupSpec } from "../context/types";
 export type ActionSection = { group: string; actions: string[] };
 
 /** Not a template: the free-form ABI encoder, always offered last. */
-export const ENCODE_FUNCTION_CALL: ActionSection = { group: "Encode Function Call", actions: ["encodeFunctionCall"] };
+export const ENCODE_FUNCTION_CALL: ActionSection = { group: "Custom call", actions: ["Function call"] };
+
+export type QuickAction = { group: string; action: string; title: string; subtitle: string };
+
+/** The few things most batches start with; shown as tiles before anything is picked. */
+export const QUICK_ACTIONS: QuickAction[] = [
+  { group: "Native", action: "ETH Transfer", title: "Send native token", subtitle: "ETH, xDAI, …" },
+  { group: "ERC-20", action: "Transfer", title: "Send tokens", subtitle: "Any ERC-20" },
+  {
+    ...{ group: ENCODE_FUNCTION_CALL.group, action: ENCODE_FUNCTION_CALL.actions[0] },
+    title: "Call a contract",
+    subtitle: "From a function signature",
+  },
+];
+
+/** Quick actions whose template exists on this network. */
+export const availableQuickActions = (sections: ActionSection[]) =>
+  QUICK_ACTIONS.filter((quick) => sections.some((s) => s.group === quick.group && s.actions.includes(quick.action)));
 
 // Chain ID 0 in a template means "every chain".
 const isAvailable = (spec: TransactionGroupSpec, chainId: number | undefined) =>
