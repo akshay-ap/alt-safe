@@ -95,7 +95,7 @@ const SafeSidebar: React.FC<{ onNavigate?: () => void }> = ({ onNavigate }) => {
                 key={item.path}
                 component={RouterLink}
                 to={item.path}
-                selected={pathname.startsWith(item.path)}
+                selected={pathname === item.path || pathname.startsWith(`${item.path}/`)}
                 onClick={onNavigate}
                 sx={{ mx: 1, borderRadius: 1.5 }}
               >

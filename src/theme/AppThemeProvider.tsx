@@ -8,7 +8,7 @@ const typography = {
   h1: { fontSize: "2rem", fontWeight: 600, lineHeight: 1.2, letterSpacing: "-0.01em" },
   h2: { fontSize: "1.5rem", fontWeight: 600, lineHeight: 1.25, letterSpacing: "-0.005em" },
   h3: { fontSize: "1.25rem", fontWeight: 600, lineHeight: 1.3 },
-  h4: { fontSize: "1.25rem", fontWeight: 600, lineHeight: 1.3 },
+  h4: { fontSize: "1.125rem", fontWeight: 600, lineHeight: 1.35 },
   h5: { fontSize: "1.0625rem", fontWeight: 600, lineHeight: 1.4 },
   h6: { fontSize: "0.9375rem", fontWeight: 600, lineHeight: 1.4 },
   subtitle1: { fontSize: "0.9375rem", fontWeight: 500, lineHeight: 1.5 },

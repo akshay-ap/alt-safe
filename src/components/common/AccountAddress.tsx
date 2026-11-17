@@ -1,9 +1,9 @@
 import CheckIcon from "@mui/icons-material/Check";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
-import { Box, IconButton, Tooltip, Typography } from "@mui/material";
-import { useState } from "react";
-import { isAddressEqual, zeroAddress } from "viem";
+import { Box, IconButton, Snackbar, Tooltip, Typography } from "@mui/material";
+import { useEffect, useRef, useState } from "react";
+import { zeroAddress } from "viem";
 import { useChainId, useChains } from "wagmi";
 import { font } from "../../theme/tokens";
 import { chunkHex } from "../../utils/address";
@@ -52,10 +52,14 @@ const AccountAddress: React.FC<AccountAddressProps> = ({
   showCopy = true,
 }) => {
   const [copied, setCopied] = useState(false);
+  const [copyFailed, setCopyFailed] = useState(false);
+  const copiedTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  useEffect(() => () => clearTimeout(copiedTimer.current), []);
   const explorer = useExplorerUrl(explorerUrl);
   const fontSize = FONT_SIZES[size];
 
-  if (!address || isAddressEqual(address, zeroAddress)) {
+  // A plain comparison: this also renders values that are not valid addresses, which isAddressEqual would throw on.
+  if (!address || address.toLowerCase() === zeroAddress) {
     return (
       <Typography component="span" sx={{ color: "text.secondary", fontSize }}>
         {address ? "Zero address" : "Not set"}
@@ -63,10 +67,16 @@ const AccountAddress: React.FC<AccountAddressProps> = ({
     );
   }
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(address);
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(address);
+    } catch {
+      setCopyFailed(true);
+      return;
+    }
     setCopied(true);
-    setTimeout(() => setCopied(false), COPIED_FEEDBACK_MS);
+    clearTimeout(copiedTimer.current);
+    copiedTimer.current = setTimeout(() => setCopied(false), COPIED_FEEDBACK_MS);
   };
 
   return (
@@ -100,6 +110,12 @@ const AccountAddress: React.FC<AccountAddressProps> = ({
           </IconButton>
         </Tooltip>
       )}
+      <Snackbar
+        open={copyFailed}
+        autoHideDuration={4000}
+        onClose={() => setCopyFailed(false)}
+        message="Could not copy to the clipboard"
+      />
     </Box>
   );
 };
