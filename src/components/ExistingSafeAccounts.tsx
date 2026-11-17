@@ -1,5 +1,6 @@
 import AddIcon from "@mui/icons-material/Add";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
+import TuneIcon from "@mui/icons-material/Tune";
 import {
   Alert,
   Box,
@@ -145,6 +146,9 @@ const ExistingSafeAccounts: React.FC = () => {
         description="Safes you created or added in this browser. Open one to build, sign and execute transactions."
         actions={
           <>
+            <Button startIcon={<TuneIcon />} onClick={() => navigate("/app-settings")}>
+              App settings
+            </Button>
             <Button startIcon={<FileDownloadOutlinedIcon />} onClick={() => fileInputRef.current?.click()}>
               Import address book
             </Button>

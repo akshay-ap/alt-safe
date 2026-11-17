@@ -93,7 +93,10 @@ const Settings: React.FC = () => {
 
   return (
     <Box>
-      <Title text="Settings" description="This Safe's local name and labels, and the configuration read from chain." />
+      <Title
+        text="Safe settings"
+        description="This Safe's local name and labels, and the configuration read from chain. Settings for the whole app are under App settings."
+      />
 
       {!safeAccount || isAddressEqual(safeAccount, zeroAddress) ? (
         <Alert severity="info" sx={{ mb: 2 }}>
