@@ -1,5 +1,5 @@
 import type React from "react";
-import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from "react";
+import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { type Address, isAddress, isAddressEqual, zeroAddress } from "viem"; // Import viem library for validation
 import { createStorage, useAccount, usePublicClient } from "wagmi";
 import { type FEATURES, STORAGE_KEY, WALLET_STORAGE_KEY } from "../constants";
@@ -27,19 +27,13 @@ interface WalletContextType {
   safeStorage: SafeStorage | undefined;
   accountCode: string | undefined;
   loadStorage: (account: Address) => Promise<void>;
+  /** Default-version contract addresses for the connected chain. */
   safeDeployment: SafeDeployment | undefined;
-  /** The user-entered deployment for the connected chain, if any. */
-  customDeployment: SafeDeployment | undefined;
   tokenList: TokenList[];
   setTokenList: (list: TokenList[]) => void;
   storage: any;
   txBuilderSpec: TransactionGroupSpec[];
 }
-
-export type CustomDeployment = {
-  chainId: number;
-  deployment: SafeDeployment;
-};
 
 export type TokenList = {
   safeAccount: Address;
@@ -61,33 +55,13 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const [accountCode, setAccountCode] = useState<string>();
   // Stable across renders so effects that depend on it do not re-run every time.
   const [storage] = useState(() => createStorage({ key: WALLET_STORAGE_KEY, storage: localStorage }));
-  const [safeDeployment, setSafeDeployment] = useState<SafeDeployment>();
-  const [customDeployment, setCustomDeployment] = useState<SafeDeployment>();
   const [tokenList, setTokenList] = useState<TokenList[]>([]);
   const [txBuilderSpec, _setTxBuilderSpec] = useState<TransactionGroupSpec[]>(trnasctionBuilderSpec);
 
-  // Set safeDeployment when account changes
-  useEffect(() => {
-    (async () => {
-      if (account.address === zeroAddress || account.chainId === undefined) {
-        return;
-      }
-
-      const customDeployments = (await storage.getItem(STORAGE_KEY.CUSTOM_DEPLOYMENTS)) as
-        | CustomDeployment[]
-        | undefined;
-      const chainSpecificDeployment = customDeployments?.find(
-        (deployment) => deployment.chainId === account.chainId,
-      )?.deployment;
-
-      setCustomDeployment(chainSpecificDeployment);
-      if (chainSpecificDeployment) {
-        setSafeDeployment(chainSpecificDeployment);
-      } else {
-        setSafeDeployment(getSafeDeployment(DEFAULT_SAFE_VERSION, account.chainId));
-      }
-    })();
-  }, [account]);
+  const safeDeployment = useMemo(
+    () => (account.chainId === undefined ? undefined : getSafeDeployment(DEFAULT_SAFE_VERSION, account.chainId)),
+    [account.chainId],
+  );
 
   const loadStorage = useCallback(
     async (accountAddress: Address) => {
@@ -152,7 +126,6 @@ export const WalletProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         safeAccount,
         setSafeAccount: selectSafeAccount,
         safeDeployment,
-        customDeployment,
         tokenList,
         setTokenList: saveTokenList,
         storage,

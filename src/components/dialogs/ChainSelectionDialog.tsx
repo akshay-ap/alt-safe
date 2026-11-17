@@ -15,7 +15,6 @@ import {
 import Grid from "@mui/material/Grid";
 import type React from "react";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useChainId } from "wagmi";
 import { STORAGE_KEY } from "../../constants";
 import { useSafeWalletContext } from "../../context/WalletContext";
@@ -37,12 +36,6 @@ const ChainSelectionDialog: React.FC<ChainSelectionDialogProps> = ({ open, onClo
   const chainId = useChainId();
   const currentChain = supportedChains.find((chain) => chain.id === chainId);
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm")); // Checks if screen is < sm
-  const navigate = useNavigate();
-
-  const handleAddCustomDeployment = () => {
-    navigate("/add-custom-deployment");
-    onClose();
-  };
 
   const handleClearStorage = async () => {
     for (const key of Object.values(STORAGE_KEY)) {
@@ -102,16 +95,6 @@ const ChainSelectionDialog: React.FC<ChainSelectionDialogProps> = ({ open, onClo
             </Grid>
 
             <Divider />
-
-            <Grid size={12}>
-              <Typography variant="h6">Safe deployment addresses</Typography>
-            </Grid>
-
-            <Grid size={12}>
-              <Button fullWidth onClick={handleAddCustomDeployment} variant="outlined">
-                Use custom contract addresses (only v1.4.1)
-              </Button>
-            </Grid>
 
             <Grid size={12}>
               <Typography variant="h6">Clear storage</Typography>

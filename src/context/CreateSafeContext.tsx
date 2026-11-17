@@ -13,7 +13,6 @@ import {
   type SafeDeployment,
 } from "../safe-contracts/addresses/addresses";
 import {
-  CUSTOM_DEPLOYMENT_ID,
   type DeploymentOption,
   type DeploymentOptionId,
   findDeploymentOption,
@@ -26,7 +25,7 @@ import { useSafeWalletContext } from "./WalletContext";
 type DefaultModules = Array<{ name: string; address: Address }>;
 
 type CreateSafeState = {
-  /** Safe versions (and the user's custom deployment) that can be deployed on this chain. */
+  /** Safe versions that can be deployed on this chain. */
   deploymentOptions: DeploymentOption[];
   deploymentId: DeploymentOptionId;
   /** Contract addresses of the selected option; the configuration resets to these on change. */
@@ -115,17 +114,12 @@ export const CreateSafeProvider: React.FC<CreateSafeProviderProps> = ({ children
   const account = useAccount();
   const publicClient = usePublicClient();
   const chainId = useChainId();
-  const { customDeployment, storage } = useSafeWalletContext();
-  const deploymentOptions = useMemo(() => getDeploymentOptions(chainId, customDeployment), [chainId, customDeployment]);
+  const { storage } = useSafeWalletContext();
+  const deploymentOptions = useMemo(() => getDeploymentOptions(chainId), [chainId]);
   const [deploymentId, setDeploymentId] = useState<DeploymentOptionId>(DEFAULT_SAFE_VERSION);
   const deployment =
     findDeploymentOption(deploymentOptions, deploymentId)?.deployment ??
     getSafeDeployment(DEFAULT_SAFE_VERSION, chainId);
-
-  // A custom deployment exists because the canonical one is unusable here, so prefer it like before.
-  useEffect(() => {
-    if (customDeployment) setDeploymentId(CUSTOM_DEPLOYMENT_ID);
-  }, [customDeployment]);
 
   // Basic Safe configuration
   const [owners, setOwners] = useState<Address[]>([account.address || zeroAddress]);

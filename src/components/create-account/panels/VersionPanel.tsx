@@ -9,7 +9,6 @@ import { useDeploymentAvailability } from "../../../safe-contracts/useDeployment
 const describeOption = (id: DeploymentOptionId): string => {
   if (id === SAFE_VERSIONS[0]) return "Latest release.";
   if (id === DEFAULT_SAFE_VERSION) return "The version ALT Safe has used so far.";
-  if (id === "custom") return "The contract addresses you saved for this network.";
   return "Older release, for compatibility with existing tooling.";
 };
 

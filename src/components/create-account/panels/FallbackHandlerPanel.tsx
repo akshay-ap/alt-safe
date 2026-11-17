@@ -11,7 +11,7 @@ interface FallbackHandlerPanelProps {
 
 const FallbackHandlerPanel: React.FC<FallbackHandlerPanelProps> = ({ fallbackHandler, setFallbackHandler }) => {
   const { deployment } = useCreateSafeContext();
-  const defaultFallbackHandler = deployment?.fallbackHandler ?? "";
+  const defaultFallbackHandler = deployment.fallbackHandler;
 
   const resetToDefault = () => {
     setFallbackHandler(defaultFallbackHandler as Address);

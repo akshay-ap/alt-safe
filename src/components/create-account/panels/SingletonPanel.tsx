@@ -22,8 +22,8 @@ const SingletonPanel: React.FC<SingletonPanelProps> = ({
   setUseSingletonL2,
 }) => {
   const { deployment } = useCreateSafeContext();
-  const defaultSingleton = deployment?.singleton ?? "";
-  const defaultSingletonL2 = deployment?.singletonL2 ?? "";
+  const defaultSingleton = deployment.singleton;
+  const defaultSingletonL2 = deployment.singletonL2;
 
   const resetToDefaults = () => {
     setSingleton(defaultSingleton);
