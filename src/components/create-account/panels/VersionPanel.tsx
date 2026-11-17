@@ -2,15 +2,9 @@ import { Box, Chip, CircularProgress, FormControlLabel, Radio, RadioGroup, Stack
 import type React from "react";
 import { useChainId, useChains } from "wagmi";
 import { useCreateSafeContext } from "../../../context/CreateSafeContext";
-import { DEFAULT_SAFE_VERSION, SAFE_VERSIONS } from "../../../safe-contracts/addresses/addresses";
+import { DEFAULT_SAFE_VERSION } from "../../../safe-contracts/addresses/addresses";
 import type { DeploymentOption, DeploymentOptionId } from "../../../safe-contracts/deploymentOptions";
 import { useDeploymentAvailability } from "../../../safe-contracts/useDeploymentAvailability";
-
-const describeOption = (id: DeploymentOptionId): string => {
-  if (id === SAFE_VERSIONS[0]) return "Latest release.";
-  if (id === DEFAULT_SAFE_VERSION) return "The version ALT Safe has used so far.";
-  return "Older release, for compatibility with existing tooling.";
-};
 
 const AvailabilityChip: React.FC<{ available: boolean | undefined; chainName: string }> = ({
   available,
@@ -35,9 +29,6 @@ const OptionLabel: React.FC<{ option: DeploymentOption; available: boolean | und
       {option.id === DEFAULT_SAFE_VERSION && <Chip size="small" label="Default" />}
       <AvailabilityChip available={available} chainName={chainName} />
     </Stack>
-    <Typography variant="body2" color="text.secondary">
-      {describeOption(option.id)}
-    </Typography>
   </Box>
 );
 

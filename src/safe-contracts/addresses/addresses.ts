@@ -25,7 +25,7 @@ export enum SafeVersion {
 /** Newest first, the order versions are offered in. */
 export const SAFE_VERSIONS = [SafeVersion.V1_5_0, SafeVersion.V1_4_1, SafeVersion.V1_3_0] as const;
 
-export const DEFAULT_SAFE_VERSION = SafeVersion.V1_4_1;
+export const DEFAULT_SAFE_VERSION = SafeVersion.V1_5_0;
 
 export const CANONICAL_DEPLOYMENTS: Record<SafeVersion, SafeDeployment> = {
   [SafeVersion.V1_3_0]: {
