@@ -23,6 +23,7 @@ import { useAccount } from "wagmi";
 import { STORAGE_KEY } from "../constants";
 import type { SafeAccount } from "../context/types";
 import { useSafeWalletContext } from "../context/WalletContext";
+import { notifySavedSafesChanged, useSavedSafe } from "../hooks/useSavedSafe";
 import AccountAddress from "./common/AccountAddress";
 import ViewSafeStorage from "./common/SafeStorage";
 import Title from "./common/Title";
@@ -36,25 +37,18 @@ const Settings: React.FC = () => {
   const [safeLabels, setSafeLabels] = useState<string[]>([]);
   const [newLabel, setNewLabel] = useState("");
 
+  const saved = useSavedSafe(safeAccount);
+
   useEffect(() => {
     if (safeAccount && isConnected && !isAddressEqual(safeAccount, zeroAddress)) {
       loadStorage(safeAccount);
-      loadSafeInfo();
     }
   }, [isConnected, safeAccount, loadStorage]);
 
-  const loadSafeInfo = async () => {
-    if (!safeAccount) return;
-
-    const safeAccounts = (await storage.getItem(STORAGE_KEY.SAFE_ACCOUNTS)) as SafeAccount[];
-    if (!safeAccounts) return;
-
-    const account = safeAccounts.find((acc) => acc.address === safeAccount);
-    if (account) {
-      setSafeName(account.name || "");
-      setSafeLabels(account.labels || []);
-    }
-  };
+  useEffect(() => {
+    setSafeName(saved?.name || "");
+    setSafeLabels(saved?.labels || []);
+  }, [saved]);
 
   const handleSaveNameAndLabels = async (newName?: string, newLabels?: string[]) => {
     if (!safeAccount) return;
@@ -63,7 +57,7 @@ const Settings: React.FC = () => {
     if (!safeAccounts) return;
 
     const updatedAccounts = safeAccounts.map((acc) => {
-      if (acc.address === safeAccount) {
+      if (isAddressEqual(acc.address, safeAccount)) {
         return {
           ...acc,
           name: newName !== undefined ? newName : acc.name,
@@ -74,6 +68,7 @@ const Settings: React.FC = () => {
     });
 
     await storage.setItem(STORAGE_KEY.SAFE_ACCOUNTS, updatedAccounts);
+    notifySavedSafesChanged();
 
     if (newName !== undefined) setSafeName(newName);
     if (newLabels !== undefined) setSafeLabels(newLabels);

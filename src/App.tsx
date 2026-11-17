@@ -1,7 +1,5 @@
-import { Container, Toolbar } from "@mui/material";
-import { Outlet, Route, BrowserRouter as Router, Routes } from "react-router-dom";
-import BottomBar from "./components/app/BottomBar.tsx";
-import NavigationBar from "./components/app/NavigationBar.tsx";
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import { AppLayout, SafeLayout } from "./components/app/Layouts.tsx";
 import CreateSafe from "./components/create-account/CreateSafe.tsx";
 import SafeInfo from "./components/dashboard/index.tsx";
 import Home from "./components/Home";
@@ -20,18 +18,6 @@ import { CreateTransactionProvider } from "./context/CreateTransactionContext";
 import { WalletProvider } from "./context/WalletContext";
 import AppThemeProvider from "./theme/AppThemeProvider.tsx";
 
-function NavbarLayout() {
-  return (
-    <div>
-      <NavigationBar />
-      <Toolbar />
-      <Container sx={{ minHeight: "100vh" }} maxWidth={false}>
-        <Outlet />
-      </Container>
-    </div>
-  );
-}
-
 function App() {
   return (
     <>
@@ -43,7 +29,13 @@ function App() {
               <Routes>
                 <Route path="/" element={<Welcome />} />
                 <Route path="/welcome" element={<Welcome />} />
-                <Route element={<NavbarLayout />}>
+                <Route element={<AppLayout />}>
+                  <Route path="/home" element={<Home />} />
+                  <Route path="/import" element={<ImportSafe />} />
+                  <Route path="/create" element={<CreateSafe />} />
+                </Route>
+                <Route element={<SafeLayout />}>
+                  <Route path="/safe-info" element={<SafeInfo />} />
                   <Route
                     path="/create-transaction/*"
                     element={
@@ -52,19 +44,14 @@ function App() {
                       </CreateTransactionProvider>
                     }
                   />
-                  <Route path="/home" element={<Home />} />
-                  <Route path="/history" element={<SafeTransactionHistory />} />
-                  <Route path="/import" element={<ImportSafe />} />
-                  <Route path="/create" element={<CreateSafe />} />
-                  <Route path="/approve-transaction-hash" element={<ApproveTransactionHash />} />
-                  <Route path="/approve-transaction" element={<ApproveSafeTransactionForm />} />
                   <Route path="/aggregate-signatures" element={<AggregateSignaturesAndExecute />} />
-                  <Route path="/settings" element={<Settings />} />
+                  <Route path="/approve-transaction" element={<ApproveSafeTransactionForm />} />
+                  <Route path="/approve-transaction-hash" element={<ApproveTransactionHash />} />
                   <Route path="/sign-message" element={<SignMessage />} />
-                  <Route path="/safe-info" element={<SafeInfo />} />
+                  <Route path="/history" element={<SafeTransactionHistory />} />
+                  <Route path="/settings" element={<Settings />} />
                 </Route>
               </Routes>
-              <BottomBar />
             </Router>
           </AddressBookProvider>
         </WalletProvider>
