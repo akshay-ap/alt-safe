@@ -21,8 +21,8 @@ export const color = {
 } as const;
 
 export const font = {
-  sans: "'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif",
-  mono: "'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace",
+  sans: "system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+  mono: "ui-monospace, 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace",
 } as const;
 
 export const radius = {
