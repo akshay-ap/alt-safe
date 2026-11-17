@@ -1,18 +1,14 @@
-import DataObjectIcon from "@mui/icons-material/DataObject";
-import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
-import TollOutlinedIcon from "@mui/icons-material/TollOutlined";
-import { Box, Card, CardActionArea, Typography } from "@mui/material";
-import Grid from "@mui/material/Grid";
+import { Box, Typography } from "@mui/material";
 import type React from "react";
+import { useState } from "react";
 import { Route, Routes, useNavigate, useParams } from "react-router-dom";
-import { useAccount } from "wagmi";
 import type { Transaction, TransactionSpec } from "../../../context/types";
 import { useSafeWalletContext } from "../../../context/WalletContext";
-import { availableQuickActions, buildActionCatalog, ENCODE_FUNCTION_CALL } from "../../../utils/actionCatalog";
+import { ENCODE_FUNCTION_CALL } from "../../../utils/actionCatalog";
 import ErrorBoundary from "../../common/ErrorBoundary";
 import EncodeFunctionCall from "./EncodeFunctionCall";
+import { ProtocolGrid, ProtocolHeader } from "./ProtocolPicker";
 import TransactionInputBuilder from "./TransactionInputBuilder";
-import TransactionTypePanel from "./TransactionTypePanel";
 
 interface TransactionBuilderProps {
   handleAddTransaction: (newTransaction: Transaction) => void;
@@ -23,73 +19,46 @@ const COLUMN_SCROLL = { height: { lg: "100%" }, overflowY: { lg: "auto" }, minHe
 
 const TransactionBuilder: React.FC<TransactionBuilderProps> = ({ handleAddTransaction }) => {
   const navigate = useNavigate();
+  // Bumped after each add so the form starts empty for the next action of the same protocol.
+  const [addedCount, setAddedCount] = useState(0);
 
-  const handleTransactionTypeSelect = (group: string, type: string) => navigate(`/create-transaction/${group}/${type}`);
+  const select = (group: string, action: string) => navigate(`/create-transaction/${group}/${action}`);
+  const addAndReset = (transaction: Transaction) => {
+    handleAddTransaction(transaction);
+    setAddedCount((count) => count + 1);
+  };
 
   return (
-    <Box
-      id="transaction-builder-container"
-      sx={{
-        display: "grid",
-        gap: 3,
-        alignItems: "start",
-        gridTemplateColumns: { xs: "1fr", md: "260px minmax(0, 1fr)" },
-        height: { lg: "100%" },
-        gridTemplateRows: { lg: "minmax(0, 1fr)" },
-      }}
-    >
-      <Box id="transaction-type-panel-container" sx={COLUMN_SCROLL}>
-        <TransactionTypePanel onSelect={handleTransactionTypeSelect} />
-      </Box>
-
-      <Box id="transaction-input-panel-container" sx={{ minWidth: 0, ...COLUMN_SCROLL }}>
-        <Routes>
-          <Route index element={<QuickStart onSelect={handleTransactionTypeSelect} />} />
-          <Route
-            path="/:group/:type"
-            element={
-              <Grid id="tx-action-input-form" size={12}>
-                <TransactionInputForm handleAddTransaction={handleAddTransaction} />
-              </Grid>
-            }
-          />
-        </Routes>
-      </Box>
+    <Box id="transaction-builder-container" sx={{ minWidth: 0, ...COLUMN_SCROLL }}>
+      <Routes>
+        <Route index element={<ProtocolGrid onSelect={select} />} />
+        <Route
+          path="/:group/:type"
+          element={
+            <ActionView
+              onSelect={select}
+              onBack={() => navigate("/create-transaction")}
+              handleAddTransaction={addAndReset}
+              formKey={addedCount}
+            />
+          }
+        />
+      </Routes>
     </Box>
   );
 };
 
-const QUICK_ICONS: Record<string, React.ReactNode> = {
-  "Send native token": <SendOutlinedIcon />,
-  "Send tokens": <TollOutlinedIcon />,
-  "Call a contract": <DataObjectIcon />,
-};
-
-/** Start screen: the few common actions as tiles; everything else is in the list. */
-const QuickStart: React.FC<{ onSelect: (group: string, action: string) => void }> = ({ onSelect }) => {
-  const { chainId } = useAccount();
-  const { txBuilderSpec } = useSafeWalletContext();
-  const quickActions = availableQuickActions(buildActionCatalog(txBuilderSpec, chainId, ""));
-
+const ActionView: React.FC<{
+  onSelect: (group: string, action: string) => void;
+  onBack: () => void;
+  handleAddTransaction: (transaction: Transaction) => void;
+  formKey: number;
+}> = ({ onSelect, onBack, handleAddTransaction, formKey }) => {
+  const { group = "", type = "" } = useParams();
   return (
-    <Box sx={{ pt: { md: 1 } }}>
-      <Typography variant="h5" component="h2">
-        What would you like to do?
-      </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5 }}>
-        Start here, or pick any action from the list.
-      </Typography>
-      <Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: { xs: "1fr", sm: "repeat(3, minmax(0, 1fr))" } }}>
-        {quickActions.map((quick) => (
-          <Card key={quick.title}>
-            <CardActionArea onClick={() => onSelect(quick.group, quick.action)} sx={{ p: 2, height: "100%" }}>
-              <Box sx={{ color: "primary.main", mb: 1.5, display: "flex" }}>{QUICK_ICONS[quick.title]}</Box>
-              <Typography variant="subtitle2">{quick.title}</Typography>
-              <Typography variant="caption">{quick.subtitle}</Typography>
-            </CardActionArea>
-          </Card>
-        ))}
-      </Box>
+    <Box id="tx-action-input-form">
+      <ProtocolHeader group={group} action={type} onSelect={onSelect} onBack={onBack} />
+      <TransactionInputForm key={formKey} handleAddTransaction={handleAddTransaction} />
     </Box>
   );
 };

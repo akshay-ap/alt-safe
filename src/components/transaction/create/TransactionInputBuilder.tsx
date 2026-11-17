@@ -283,24 +283,17 @@ const TransactionInputBuilder: React.FC<TransactionInputBuilderProps> = ({ onAdd
       <Paper variant="outlined" sx={{ overflow: "hidden", display: "flex", flexDirection: "column" }}>
         {/* Header Section */}
         <Box sx={{ borderBottom: `1px solid ${theme.palette.divider}`, p: 3 }}>
-          {/* Breadcrumb */}
-          <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-            <Typography variant="caption">
-              {groupInfo.name} / {spec.name}
+          {/* Protocol and action are in the breadcrumb above the card, so the title row carries only the description. */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Typography variant="h5" component="h2" sx={{ flex: 1 }}>
+              {spec.display.description}
             </Typography>
-            <Box sx={{ ml: "auto" }}>
-              <Tooltip title="Inspect how this action is built">
-                <IconButton onClick={() => setDebugDialogOpen(true)} size="small" aria-label="Inspect action">
-                  <DeveloperModeIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            </Box>
+            <Tooltip title="Inspect how this action is built">
+              <IconButton onClick={() => setDebugDialogOpen(true)} size="small" aria-label="Inspect action">
+                <DeveloperModeIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
           </Box>
-
-          {/* Title */}
-          <Typography variant="h5" component="h2">
-            {spec.display.description}
-          </Typography>
         </Box>
 
         {/* Content Section */}

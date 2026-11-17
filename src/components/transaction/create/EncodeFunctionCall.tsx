@@ -122,7 +122,6 @@ const EncodeFunctionCall: React.FC<EncodeFunctionCallProps> = ({ onAdd, groupInf
     // Same card as the template forms: header, fields, then the action in a footer.
     <Paper variant="outlined">
       <Box sx={{ p: 3, borderBottom: 1, borderColor: "divider" }}>
-        <Typography variant="caption">Custom call</Typography>
         <Typography variant="h5" component="h2">
           Call any contract function
         </Typography>
