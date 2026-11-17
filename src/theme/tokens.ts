@@ -11,10 +11,15 @@ export const color = {
   text: "#E6E9EE",
   textMuted: "#8B95A5",
   textFaint: "#5F6878",
-  brass: "#D6B370",
-  brassHover: "#E2C48A",
-  brassMuted: "rgba(214, 179, 112, 0.14)",
-  success: "#5CC8A1",
+  // Jade green taken from the lifebuoy mark; the mark's ring is one step darker (accentDeep).
+  accent: "#2FB386",
+  accentHover: "#45C497",
+  accentDeep: "#24A57A",
+  accentMuted: "rgba(47, 179, 134, 0.14)",
+  // White bands of the lifebuoy mark.
+  band: "#F2F5F3",
+  // Lime, so success never reads as the green accent.
+  success: "#A3D977",
   warning: "#F0A04B",
   error: "#F06A6A",
   info: "#7FA7E8",

@@ -20,12 +20,12 @@ const typography = {
   button: { fontSize: "0.875rem", fontWeight: 600, textTransform: "none" as const, letterSpacing: 0 },
 };
 
-const focusRing = { outline: `2px solid ${color.brass}`, outlineOffset: 2 };
+const focusRing = { outline: `2px solid ${color.accent}`, outlineOffset: 2 };
 
 const theme = createTheme({
   palette: {
     mode: "dark",
-    primary: { main: color.brass, light: color.brassHover, dark: "#B8955A", contrastText: color.ink },
+    primary: { main: color.accent, light: color.accentHover, dark: color.accentDeep, contrastText: color.ink },
     secondary: { main: color.info, contrastText: color.ink },
     success: { main: color.success, contrastText: color.ink },
     warning: { main: color.warning, contrastText: color.ink },
@@ -34,7 +34,7 @@ const theme = createTheme({
     background: { default: color.ink, paper: color.surface },
     text: { primary: color.text, secondary: color.textMuted, disabled: color.textFaint },
     divider: color.hairline,
-    action: { hover: alpha(color.text, 0.05), selected: color.brassMuted, disabledBackground: color.raised },
+    action: { hover: alpha(color.text, 0.05), selected: color.accentMuted, disabledBackground: color.raised },
   },
   typography,
   shape: { borderRadius: radius.control },
@@ -42,7 +42,7 @@ const theme = createTheme({
     MuiCssBaseline: {
       styleOverrides: {
         body: { backgroundColor: color.ink, fontFeatureSettings: "'ss02'" },
-        "::selection": { backgroundColor: alpha(color.brass, 0.3) },
+        "::selection": { backgroundColor: alpha(color.accent, 0.3) },
         "code, kbd, pre, samp": { fontFamily: font.mono },
       },
     },
@@ -53,7 +53,7 @@ const theme = createTheme({
         root: { borderRadius: radius.control, paddingInline: 14, "&.Mui-focusVisible": focusRing },
         sizeLarge: { paddingBlock: 10, paddingInline: 20, fontSize: "0.9375rem" },
         outlined: { borderColor: color.hairlineStrong, color: color.text, "&:hover": { borderColor: color.textMuted } },
-        // Brass is reserved for the one primary action; plain text buttons stay neutral.
+        // The accent is reserved for the one primary action; plain text buttons stay neutral.
         text: ({ ownerState }) => ({
           ...(ownerState.color === "primary" && { color: color.text }),
           "&:hover": { backgroundColor: alpha(color.text, 0.06) },
@@ -95,11 +95,11 @@ const theme = createTheme({
           backgroundColor: color.ink,
           "& .MuiOutlinedInput-notchedOutline": { borderColor: color.hairlineStrong },
           "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: color.textMuted },
-          "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: color.brass, borderWidth: 1 },
+          "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: color.accent, borderWidth: 1 },
         },
       },
     },
-    MuiInputLabel: { styleOverrides: { root: { "&.Mui-focused": { color: color.brass } } } },
+    MuiInputLabel: { styleOverrides: { root: { "&.Mui-focused": { color: color.accent } } } },
     MuiChip: {
       styleOverrides: {
         root: { borderRadius: radius.control, fontWeight: 500 },
@@ -120,7 +120,7 @@ const theme = createTheme({
     MuiTab: { styleOverrides: { root: { textTransform: "none", fontWeight: 500, minHeight: 44 } } },
     MuiTableCell: { styleOverrides: { root: { borderColor: color.hairline }, head: { color: color.textMuted } } },
     MuiDivider: { styleOverrides: { root: { borderColor: color.hairline } } },
-    MuiLink: { defaultProps: { underline: "hover" }, styleOverrides: { root: { color: color.brass } } },
+    MuiLink: { defaultProps: { underline: "hover" }, styleOverrides: { root: { color: color.accent } } },
     MuiStepIcon: { styleOverrides: { text: { fill: color.ink, fontWeight: 600 } } },
   },
 });
