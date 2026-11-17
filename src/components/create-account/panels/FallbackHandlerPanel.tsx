@@ -1,6 +1,7 @@
 import { Box, Button, Chip, Stack, Typography } from "@mui/material";
 import type React from "react";
 import type { Address } from "viem";
+import { useCreateSafeContext } from "../../../context/CreateSafeContext";
 import AddressInput from "../../common/AddressInput";
 
 interface FallbackHandlerPanelProps {
@@ -9,8 +10,8 @@ interface FallbackHandlerPanelProps {
 }
 
 const FallbackHandlerPanel: React.FC<FallbackHandlerPanelProps> = ({ fallbackHandler, setFallbackHandler }) => {
-  // Get default values from environment variables
-  const defaultFallbackHandler = import.meta.env.VITE_FALLBACK_HANDLER_ADDRESS || "";
+  const { deployment } = useCreateSafeContext();
+  const defaultFallbackHandler = deployment.fallbackHandler;
 
   const resetToDefault = () => {
     setFallbackHandler(defaultFallbackHandler as Address);

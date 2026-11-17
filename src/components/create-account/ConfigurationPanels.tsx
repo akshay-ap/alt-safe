@@ -2,6 +2,7 @@ import {
   AccountBox as AccountBoxIcon,
   Extension as ExtensionIcon,
   Label as LabelIcon,
+  Layers as LayersIcon,
   Numbers as NumbersIcon,
   Security as SecurityIcon,
   Settings as SettingsIcon,
@@ -30,8 +31,10 @@ import NameLabelsPanel from "./panels/NameLabelsPanel";
 import OwnersPanel from "./panels/OwnersPanel";
 import SaltPanel from "./panels/SaltPanel";
 import SingletonPanel from "./panels/SingletonPanel";
+import VersionPanel from "./panels/VersionPanel";
 
 export enum ConfigurationSection {
+  VERSION = "version",
   NAME_LABELS = "name-labels",
   SINGLETON = "singleton",
   OWNERS = "owners",
@@ -41,6 +44,11 @@ export enum ConfigurationSection {
 }
 
 const NAVIGATION_ITEMS = [
+  {
+    id: ConfigurationSection.VERSION,
+    label: "Safe Version",
+    icon: <LayersIcon />,
+  },
   {
     id: ConfigurationSection.NAME_LABELS,
     label: "Name & Labels",
@@ -76,7 +84,7 @@ const NAVIGATION_ITEMS = [
 const ConfigurationPanels: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  const [activeSection, setActiveSection] = useState<ConfigurationSection>(ConfigurationSection.NAME_LABELS);
+  const [activeSection, setActiveSection] = useState<ConfigurationSection>(ConfigurationSection.VERSION);
 
   const {
     // Name and Labels
@@ -110,6 +118,8 @@ const ConfigurationPanels: React.FC = () => {
 
   const renderActivePanel = () => {
     switch (activeSection) {
+      case ConfigurationSection.VERSION:
+        return <VersionPanel />;
       case ConfigurationSection.NAME_LABELS:
         return (
           <NameLabelsPanel

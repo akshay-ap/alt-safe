@@ -1,6 +1,5 @@
 import { Container, Toolbar } from "@mui/material";
 import { Outlet, Route, BrowserRouter as Router, Routes } from "react-router-dom";
-import AddCustomDeployment from "./components/AddCustomDeployment.tsx";
 import BottomBar from "./components/app/BottomBar.tsx";
 import NavigationBar from "./components/app/NavigationBar.tsx";
 import CreateSafe from "./components/create-account/CreateSafe.tsx";
@@ -56,7 +55,6 @@ function App() {
                   <Route path="/home" element={<Home />} />
                   <Route path="/history" element={<SafeTransactionHistory />} />
                   <Route path="/import" element={<ImportSafe />} />
-                  <Route path="/add-custom-deployment" element={<AddCustomDeployment />} />
                   <Route path="/create" element={<CreateSafe />} />
                   <Route path="/approve-transaction-hash" element={<ApproveTransactionHash />} />
                   <Route path="/approve-transaction" element={<ApproveSafeTransactionForm />} />

@@ -11,12 +11,6 @@ import {
 import safeABI from "../abis/Safe.json";
 import safe from "../abis/Safe.json";
 import safeModuleSetupABI from "../abis/SafeModuleSetup.json";
-import {
-  canonicalAddresses_141,
-  type SafeDeployment,
-  SafeDeploymentType,
-  SafeVersion,
-} from "../safe-contracts/addresses/addresses";
 import safeProxy from "../safe-contracts/artifacts/SafeProxy.json";
 import { config } from "../wagmi";
 
@@ -119,14 +113,6 @@ export const getShortAddress = (address: Address): string => {
 
 export const getShortTransactionHash = (address: Address): string => {
   return `${address.slice(0, 10)}...${address.slice(-10)}`;
-};
-
-export const getSafeAddresses = (
-  _chainId: number,
-  version: SafeVersion = SafeVersion.V1_4_1,
-  _deploymentType: SafeDeploymentType = SafeDeploymentType.CANONICAL,
-): SafeDeployment | undefined => {
-  if (version === SafeVersion.V1_4_1) return canonicalAddresses_141;
 };
 
 export enum SafeOperation {

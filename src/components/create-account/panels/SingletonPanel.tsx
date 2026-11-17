@@ -1,6 +1,7 @@
 import { Alert, Box, Button, Checkbox, Chip, FormControlLabel, Stack, Typography } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import type React from "react";
+import { useCreateSafeContext } from "../../../context/CreateSafeContext";
 import AddressInput from "../../common/AddressInput";
 
 interface SingletonPanelProps {
@@ -20,9 +21,9 @@ const SingletonPanel: React.FC<SingletonPanelProps> = ({
   useSingletonL2,
   setUseSingletonL2,
 }) => {
-  // Get default values from environment variables
-  const defaultSingleton = import.meta.env.VITE_SINGLETON_ADDRESS || "";
-  const defaultSingletonL2 = import.meta.env.VITE_SINGLETON_L2_ADDRESS || "";
+  const { deployment } = useCreateSafeContext();
+  const defaultSingleton = deployment.singleton;
+  const defaultSingletonL2 = deployment.singletonL2;
 
   const resetToDefaults = () => {
     setSingleton(defaultSingleton);

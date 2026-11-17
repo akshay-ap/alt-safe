@@ -27,6 +27,8 @@ const SafePreview: React.FC = () => {
     safeCreationTxHash,
     handleCreateSafe,
     isCreating,
+    deploymentOptions,
+    deploymentId,
   } = useCreateSafeContext();
 
   // Check if initData is valid and there are no errors to show the expand icon
@@ -57,6 +59,14 @@ const SafePreview: React.FC = () => {
           </Box>
 
           <Grid container spacing={2}>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                Version
+              </Typography>
+              <Typography variant="body1">
+                {deploymentOptions.find((option) => option.id === deploymentId)?.label}
+              </Typography>
+            </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <Typography
                 variant="body2"

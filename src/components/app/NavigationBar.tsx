@@ -18,7 +18,8 @@ const NavigationBar: React.FC = () => {
   const [chainDialogOpen, setChainDialogOpen] = useState(false); // State for chain selection dialog
   const [disconnectDialogOpen, setDisconnectDialogOpen] = useState(false); // State for controlling the dialog
   const rpcHealth = useRpcHealth(chain);
-  const connected = rpcHealth.result?.ok === true;
+  // Only a finished failing check counts as an error; a check still in flight is not one.
+  const connected = rpcHealth.result?.ok !== false;
 
   // Handle chain dialog open/close
   const handleChainDialogOpen = () => {
