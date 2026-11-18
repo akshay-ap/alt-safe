@@ -18,7 +18,7 @@ import {
 import { useState } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import { useWaitForTransactionReceipt } from "wagmi";
-import { font } from "../../../theme/tokens";
+import HexValue from "../../common/HexValue";
 import TransactionHash from "../../common/TransactionHash";
 
 const Field: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
@@ -80,11 +80,7 @@ export const SignedTransactionCard: React.FC<{
       <Field label="Safe transaction hash">
         <TransactionHash hash={safeTransactionHash} />
       </Field>
-      <Field label="Your signature">
-        <Typography sx={{ fontFamily: font.mono, fontSize: "0.75rem", overflowWrap: "anywhere" }}>
-          {signature}
-        </Typography>
-      </Field>
+      <Field label="Your signature">{signature && <HexValue value={signature} noun="signature" size="small" />}</Field>
     </Box>
     <Stack
       direction="row"

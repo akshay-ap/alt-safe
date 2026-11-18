@@ -10,6 +10,7 @@ import { useSafeWalletContext } from "../../context/WalletContext";
 import { fetchApprovals } from "../../utils/utils";
 import { config } from "../../wagmi";
 import Title from "../common/Title";
+import TransactionHash from "../common/TransactionHash";
 import ApprovalStatus from "./ApprovalStatus";
 import TransactionHashInput from "./TransactionHashInput";
 
@@ -112,7 +113,7 @@ const ApproveTransactionHash: React.FC = () => {
         <Grid size={12}>
           {transactionHash && (
             <Alert severity="success" sx={{ marginTop: 2 }}>
-              Transaction approved successfully. Hash: {transactionHash}
+              Transaction approved. <TransactionHash hash={transactionHash as `0x${string}`} short showExplorer />
             </Alert>
           )}
         </Grid>

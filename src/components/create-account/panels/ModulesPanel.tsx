@@ -20,6 +20,7 @@ import { useState } from "react";
 import type { Address } from "viem";
 import { isAddress } from "viem";
 import { useCreateSafeContext } from "../../../context/CreateSafeContext";
+import AccountAddress from "../../common/AccountAddress";
 import AddressInput from "../../common/AddressInput";
 
 const ModulesPanel: React.FC = () => {
@@ -117,15 +118,7 @@ const ModulesPanel: React.FC = () => {
                       >
                         {module.name}
                       </Typography>
-                      <Typography
-                        variant="caption"
-                        sx={{
-                          fontFamily: "monospace",
-                          color: "text.secondary",
-                        }}
-                      >
-                        {module.address}
-                      </Typography>
+                      <AccountAddress address={module.address} size="small" showCopy={false} />
                       {modules.includes(module.address) && (
                         <Chip size="small" label="Already Added" color="success" sx={{ ml: 1 }} />
                       )}
@@ -227,14 +220,7 @@ const ModulesPanel: React.FC = () => {
                   primary={
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                       <Chip label={`Module ${modules.indexOf(module) + 1}`} size="small" />
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          fontFamily: "monospace",
-                        }}
-                      >
-                        {module}
-                      </Typography>
+                      <AccountAddress address={module} size="small" />
                     </Box>
                   }
                 />

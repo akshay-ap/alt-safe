@@ -2,6 +2,7 @@ import { ContactsOutlined } from "@mui/icons-material";
 import { Box, Divider, IconButton, InputAdornment, Menu, MenuItem, Typography } from "@mui/material";
 import React from "react";
 import { useAddressBook } from "../../context/AddressBookContext";
+import AccountAddress from "./AccountAddress";
 
 export interface AddressBookSelectorProps {
   showAddressBook?: boolean;
@@ -134,17 +135,9 @@ const AddressBookMenuContent: React.FC<AddressBookMenuContentProps> = ({ address
             >
               {entry.name}
             </Typography>
-            <Typography
-              variant="caption"
-              color="textSecondary"
-              sx={{
-                fontFamily: "monospace",
-                display: "block",
-                mb: 0.25,
-              }}
-            >
-              {entry.address}
-            </Typography>
+            <Box sx={{ mb: 0.25 }}>
+              <AccountAddress address={entry.address as `0x${string}`} size="small" showCopy={false} />
+            </Box>
             <Typography variant="caption" color="textSecondary">
               Chain ID: {entry.chainId}
             </Typography>

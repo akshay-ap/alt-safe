@@ -28,6 +28,7 @@ import type { Address } from "viem";
 import { isAddress } from "viem";
 import { useAccount } from "wagmi";
 import { type AddressBookEntry, useAddressBook } from "../../context/AddressBookContext";
+import AccountAddress from "../common/AccountAddress";
 
 interface AddressBookDialogProps {
   open: boolean;
@@ -224,7 +225,7 @@ const AddressBookDialog: React.FC<AddressBookDialogProps> = ({ open, onClose }) 
                     color: "text.secondary",
                   }}
                 >
-                  Address: {editingEntry.address}
+                  <AccountAddress address={editingEntry.address} size="small" />
                 </Typography>
               </Grid>
               <Grid size={8}>
@@ -323,7 +324,16 @@ const AddressBookDialog: React.FC<AddressBookDialogProps> = ({ open, onClose }) 
                       </div>
                     }
                   >
-                    <ListItemText primary={entry.name} secondary={`${entry.address} (Chain ${entry.chainId})`} />
+                    <ListItemText
+                      primary={entry.name}
+                      secondary={
+                        <>
+                          <AccountAddress address={entry.address} size="small" showCopy={false} /> · Chain{" "}
+                          {entry.chainId}
+                        </>
+                      }
+                      slotProps={{ secondary: { component: "div" } }}
+                    />
                   </ListItem>
                 ))}
               </List>
