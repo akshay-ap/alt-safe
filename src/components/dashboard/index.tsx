@@ -1,18 +1,5 @@
 import AddIcon from "@mui/icons-material/Add";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import {
-  Alert,
-  Box,
-  Button,
-  Grid,
-  List,
-  ListItemButton,
-  ListItemText,
-  Paper,
-  Skeleton,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Alert, Box, Button, Grid, Paper, Skeleton, Stack, Typography } from "@mui/material";
 import type React from "react";
 import { Link as RouterLink } from "react-router-dom";
 import { useBalance, useReadContract } from "wagmi";
@@ -23,25 +10,6 @@ import { color } from "../../theme/tokens";
 import { formatTokenAmount } from "../../utils/format";
 import AccountAddress from "../common/AccountAddress";
 import PageHeader from "../common/PageHeader";
-
-const SIGNING_TOOLS = [
-  {
-    title: "Collect signatures and execute",
-    description: "Import a transaction, gather owner signatures, then execute it.",
-    path: "/aggregate-signatures",
-  },
-  {
-    title: "Approve a transaction",
-    description: "Review a shared transaction and approve or sign it as an owner.",
-    path: "/approve-transaction",
-  },
-  {
-    title: "Approve a hash",
-    description: "Approve a Safe transaction hash on chain.",
-    path: "/approve-transaction-hash",
-  },
-  { title: "Sign a message", description: "Sign an off-chain message on behalf of this Safe.", path: "/sign-message" },
-];
 
 const Stat: React.FC<{ label: string; value: React.ReactNode }> = ({ label, value }) => (
   <Box sx={{ px: 2.5, py: 2 }}>
@@ -111,6 +79,45 @@ const Owners: React.FC = () => {
   );
 };
 
+const ConfigRow: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
+  <Box sx={{ px: 2.5, py: 1.5 }}>
+    <Typography variant="caption" component="div" sx={{ mb: 0.25 }}>
+      {label}
+    </Typography>
+    {children}
+  </Box>
+);
+
+/** What the sidebar cannot show: how this Safe is wired on chain. */
+const Configuration: React.FC = () => {
+  const { safeStorage } = useSafeWalletContext();
+  if (!safeStorage) return <Skeleton variant="rounded" height={96} />;
+  const modules = safeStorage.modules ?? [];
+
+  return (
+    <Stack divider={<Box sx={{ borderTop: `1px solid ${color.hairline}` }} />}>
+      <ConfigRow label="Singleton">
+        <AccountAddress address={safeStorage.singleton} size="small" showExplorer />
+      </ConfigRow>
+      <ConfigRow label="Fallback handler">
+        <AccountAddress address={safeStorage.fallbackHandler} size="small" showExplorer />
+      </ConfigRow>
+      <ConfigRow label="Guard">
+        <AccountAddress address={safeStorage.guard} size="small" showExplorer />
+      </ConfigRow>
+      <ConfigRow label={`Modules (${modules.length})`}>
+        {modules.length === 0 ? (
+          <Typography variant="body2" color="text.secondary">
+            None enabled
+          </Typography>
+        ) : (
+          modules.map((module) => <AccountAddress key={module} address={module} size="small" showExplorer />)
+        )}
+      </ConfigRow>
+    </Stack>
+  );
+};
+
 const SafeInfo: React.FC = () => {
   const { safeAccount } = useSafeWalletContext();
   const saved = useSavedSafe(safeAccount);
@@ -138,15 +145,8 @@ const SafeInfo: React.FC = () => {
           </Section>
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>
-          <Section title="Sign & execute">
-            <List disablePadding>
-              {SIGNING_TOOLS.map((tool) => (
-                <ListItemButton key={tool.path} component={RouterLink} to={tool.path} sx={{ px: 2.5, py: 1.5 }}>
-                  <ListItemText primary={tool.title} secondary={tool.description} />
-                  <ChevronRightIcon fontSize="small" sx={{ color: "text.secondary" }} />
-                </ListItemButton>
-              ))}
-            </List>
+          <Section title="Configuration">
+            <Configuration />
           </Section>
         </Grid>
       </Grid>

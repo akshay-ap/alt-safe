@@ -58,9 +58,22 @@ const AdvancedSettings: React.FC = () => {
   );
 };
 
+export const NameSection: React.FC = () => {
+  const { safeName, setSafeName, safeLabels, setSafeLabels } = useCreateSafeContext();
+  return (
+    <Section>
+      <NameLabelsPanel
+        safeName={safeName}
+        setSafeName={setSafeName}
+        safeLabels={safeLabels}
+        setSafeLabels={setSafeLabels}
+      />
+    </Section>
+  );
+};
+
 const ConfigurationPanels: React.FC = () => {
-  const { safeName, setSafeName, safeLabels, setSafeLabels, owners, setOwners, threshold, setThreshold } =
-    useCreateSafeContext();
+  const { owners, setOwners, threshold, setThreshold } = useCreateSafeContext();
 
   return (
     <Stack spacing={2}>
@@ -69,14 +82,6 @@ const ConfigurationPanels: React.FC = () => {
       </Section>
       <Section>
         <OwnersPanel owners={owners} setOwners={setOwners} threshold={threshold} setThreshold={setThreshold} />
-      </Section>
-      <Section>
-        <NameLabelsPanel
-          safeName={safeName}
-          setSafeName={setSafeName}
-          safeLabels={safeLabels}
-          setSafeLabels={setSafeLabels}
-        />
       </Section>
       <AdvancedSettings />
     </Stack>

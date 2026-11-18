@@ -1,7 +1,7 @@
 import { Alert, Box, Button, CircularProgress, Divider, Paper, Stack, Typography } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useChainId, useChains, useWaitForTransactionReceipt } from "wagmi";
+import { useWaitForTransactionReceipt } from "wagmi";
 import { useCreateSafeContext } from "../../context/CreateSafeContext";
 import { useSafeWalletContext } from "../../context/WalletContext";
 import AccountAddress from "../common/AccountAddress";
@@ -9,7 +9,7 @@ import TransactionHash from "../common/TransactionHash";
 import InitDataDialog from "./InitDataDialog";
 
 const Row: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
-  <Stack direction="row" spacing={2} sx={{ justifyContent: "space-between", py: 0.5 }}>
+  <Stack direction="row" spacing={2} sx={{ justifyContent: "space-between", py: 0.25 }}>
     <Typography variant="body2" color="text.secondary">
       {label}
     </Typography>
@@ -20,17 +20,12 @@ const Row: React.FC<{ label: string; children: React.ReactNode }> = ({ label, ch
 );
 
 const Summary: React.FC = () => {
-  const { safeName, owners, threshold, salt, modules, deploymentOptions, deploymentId, useSingletonL2 } =
-    useCreateSafeContext();
-  const chainId = useChainId();
-  const chainName = useChains().find((chain) => chain.id === chainId)?.name;
+  const { owners, threshold, salt, modules, deploymentOptions, deploymentId, useSingletonL2 } = useCreateSafeContext();
   const version = deploymentOptions.find((option) => option.id === deploymentId)?.label;
 
   return (
     <Box>
-      <Row label="Network">{chainName}</Row>
       <Row label="Version">{`${version}${useSingletonL2 ? " (L2)" : ""}`}</Row>
-      <Row label="Name">{safeName || "Unnamed Safe"}</Row>
       <Row label="Required signatures">
         {threshold} of {owners.length}
       </Row>
@@ -81,12 +76,12 @@ const SafePreview: React.FC = () => {
   const hasValidInitData = initData !== "0x" && error === undefined;
 
   return (
-    <Paper variant="outlined" sx={{ p: 2.5, position: { lg: "sticky" }, top: { lg: 80 } }}>
-      <Typography variant="h5" component="h2" sx={{ mb: 1.5 }}>
+    <Paper variant="outlined" sx={{ p: 2.5 }}>
+      <Typography variant="h5" component="h2" sx={{ mb: 1 }}>
         Review
       </Typography>
       <Summary />
-      <Divider sx={{ my: 2 }} />
+      <Divider sx={{ my: 1.5 }} />
       <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
         Your Safe will be deployed at
       </Typography>
@@ -98,7 +93,7 @@ const SafePreview: React.FC = () => {
         </Typography>
       )}
       {hasValidInitData && (
-        <Button size="small" onClick={() => setInitDataOpen(true)} sx={{ mt: 1, ml: -1 }}>
+        <Button size="small" onClick={() => setInitDataOpen(true)} sx={{ mt: 0.5, ml: -1 }}>
           View setup calldata
         </Button>
       )}

@@ -258,11 +258,11 @@ const SignMessage: React.FC = () => {
             </Box>
           )}
 
-          <Box sx={{ mb: 4 }}>
+          <Box sx={{ mb: 2 }}>
             <TextField
               fullWidth
               multiline
-              rows={4}
+              rows={2}
               onChange={handleChange}
               value={message}
               label="Message to sign"
@@ -280,9 +280,9 @@ const SignMessage: React.FC = () => {
             </Box>
           </Box>
 
-          <Divider sx={{ my: 3 }} />
+          <Divider sx={{ my: 2 }} />
 
-          <Box sx={{ mb: 4 }}>
+          <Box sx={{ mb: 2 }}>
             {renderSignatureFields()}
             <Box
               sx={{
@@ -300,7 +300,7 @@ const SignMessage: React.FC = () => {
             </Box>
           </Box>
 
-          <Divider sx={{ my: 3 }} />
+          <Divider sx={{ my: 2 }} />
 
           <Box>
             <Stack
@@ -313,7 +313,6 @@ const SignMessage: React.FC = () => {
               <TextField
                 fullWidth
                 placeholder="Encoded signature will appear here"
-                margin="normal"
                 value={encodedSignature || ""}
                 variant="outlined"
                 disabled
@@ -333,7 +332,7 @@ const SignMessage: React.FC = () => {
             >
               This encoded signature can be verified by calling ERC-1271 isValidSignature function on the Safe account.
             </Typography>
-            <Button variant="contained" onClick={handleCheckSignature}>
+            <Button variant="contained" onClick={handleCheckSignature} sx={{ mt: 1.5 }}>
               Verify
             </Button>
             {isValidSignature && (

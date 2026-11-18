@@ -1,4 +1,4 @@
-import { Box, Chip, CircularProgress, FormControlLabel, Radio, RadioGroup, Stack, Typography } from "@mui/material";
+import { Box, Chip, FormControlLabel, Radio, RadioGroup, Stack, Typography } from "@mui/material";
 import type React from "react";
 import { useChainId, useChains } from "wagmi";
 import { useCreateSafeContext } from "../../../context/CreateSafeContext";
@@ -6,28 +6,13 @@ import { DEFAULT_SAFE_VERSION } from "../../../safe-contracts/addresses/addresse
 import type { DeploymentOption, DeploymentOptionId } from "../../../safe-contracts/deploymentOptions";
 import { useDeploymentAvailability } from "../../../safe-contracts/useDeploymentAvailability";
 
-const AvailabilityChip: React.FC<{ available: boolean | undefined; chainName: string }> = ({
-  available,
-  chainName,
-}) => {
-  if (available === undefined) return <CircularProgress size={14} aria-label="Checking deployment" />;
-  return available ? (
-    <Chip size="small" color="success" variant="outlined" label="Deployed" />
-  ) : (
-    <Chip size="small" color="warning" variant="outlined" label={`Not on ${chainName}`} />
-  );
-};
-
 const OptionLabel: React.FC<{ option: DeploymentOption; available: boolean | undefined; chainName: string }> = ({
-  option,
-  available,
-  chainName,
+  option
 }) => (
   <Box sx={{ py: 1 }}>
-    <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+    <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap", rowGap: 0.5 }}>
       <Typography variant="subtitle2">{option.label}</Typography>
       {option.id === DEFAULT_SAFE_VERSION && <Chip size="small" label="Default" />}
-      <AvailabilityChip available={available} chainName={chainName} />
     </Stack>
   </Box>
 );
@@ -40,23 +25,35 @@ const VersionPanel: React.FC = () => {
 
   return (
     <Box sx={{ p: { xs: 2, md: 3 } }}>
-      <Typography variant="h6" gutterBottom>
+      <Typography variant="h6" component="h2">
         Safe version
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        The contract version your new Safe runs. Switching version resets the singleton, proxy factory and fallback
-        handler to that version's official addresses.
+        Switching version resets the singleton, proxy factory and fallback handler to that version's addresses.
       </Typography>
       <RadioGroup
         value={deploymentId}
         onChange={(event) => setDeploymentId(event.target.value as DeploymentOptionId)}
         aria-label="Safe version"
+        sx={{
+          display: "grid",
+          gap: 1.5,
+          gridTemplateColumns: { xs: "1fr", md: `repeat(${deploymentOptions.length}, minmax(0, 1fr))` },
+        }}
       >
         {deploymentOptions.map((option) => (
           <FormControlLabel
             key={option.id}
             value={option.id}
-            control={<Radio />}
+            sx={{
+              m: 0,
+              pr: 1.5,
+              alignItems: "flex-start",
+              border: 1,
+              borderRadius: 1.5,
+              borderColor: option.id === deploymentId ? "primary.main" : "divider",
+            }}
+            control={<Radio sx={{ mt: 0.5 }} />}
             disabled={availability[option.id] === false}
             label={<OptionLabel option={option} available={availability[option.id]} chainName={chainName} />}
           />
