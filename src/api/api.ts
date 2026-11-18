@@ -1,6 +1,6 @@
 import { bytesToHex, hexToBytes, stringToBytes } from "viem";
 import { STORAGE_KEY } from "../constants";
-import type { ImportData, SafeTransactionDraft, Transaction } from "../context/types";
+import type { ImportData, ImportSignedData, SafeTransactionDraft, Transaction } from "../context/types";
 
 // New functions for saved transaction drafts
 export const saveDraftTransaction = async (
@@ -136,11 +136,17 @@ export const exportTransactionsToHex = (
     ...(safeTxHash && { safeTransactionHash: safeTxHash }),
   };
 
-  const exportDataString = JSON.stringify(exportData, (_key, value) =>
-    typeof value === "bigint" ? value.toString() : value,
-  );
-  return bytesToHex(stringToBytes(exportDataString));
+  return toHexJson(exportData);
 };
+
+// The share format: JSON (bigints as decimal strings) as hex, so it survives chat apps that mangle text.
+const toHexJson = (data: unknown): string =>
+  bytesToHex(
+    stringToBytes(JSON.stringify(data, (_key, value) => (typeof value === "bigint" ? value.toString() : value))),
+  );
+
+/** What one owner shares after signing; Collect signatures imports it with importTransactionsFromHex. */
+export const exportSignedTransactionToHex = (data: ImportSignedData): string => toHexJson(data);
 
 export const importTransactionsFromHex = (hexData: `0x${string}`): ImportData => {
   const jsonString = new TextDecoder().decode(hexToBytes(hexData));
