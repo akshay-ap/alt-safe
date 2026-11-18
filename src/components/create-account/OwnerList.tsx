@@ -1,6 +1,5 @@
-import DeleteIcon from "@mui/icons-material/Delete";
-import { IconButton, InputAdornment, Typography } from "@mui/material";
-import Grid from "@mui/material/Grid";
+import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
+import { IconButton, Stack, Tooltip } from "@mui/material";
 import type { Address } from "viem";
 import AddressInput from "../common/AddressInput";
 
@@ -9,34 +8,31 @@ const OwnerList: React.FC<{
   onOwnerChange: (index: number, value: string) => void;
   onRemoveOwner: (index: number) => void;
 }> = ({ owners, onOwnerChange, onRemoveOwner }) => (
-  <>
-    <Typography variant="h5">Owners</Typography>
+  <Stack spacing={2}>
     {owners.map((owner, index) => (
-      <Grid container key={`owner-item-${index}`} size={12}>
-        <Grid size={12}>
-          <AddressInput
-            label={`Owner ${index + 1}`}
-            value={owner}
-            onChange={(value: string) => onOwnerChange(index, value)}
-            showAddressBook={true}
-            fullWidth
-            margin="normal"
-            slotProps={{
-              input: {
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton onClick={() => onRemoveOwner(index)} edge="end">
-                      <DeleteIcon />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              },
-            }}
-          />
-        </Grid>
-      </Grid>
+      <AddressInput
+        key={`owner-${index}`}
+        label={`Owner ${index + 1}`}
+        value={owner}
+        onChange={(value: string) => onOwnerChange(index, value)}
+        showAddressBook
+        endActions={
+          <Tooltip title={owners.length === 1 ? "A Safe needs at least one owner" : "Remove owner"}>
+            <span>
+              <IconButton
+                onClick={() => onRemoveOwner(index)}
+                disabled={owners.length === 1}
+                edge="end"
+                aria-label={`Remove owner ${index + 1}`}
+              >
+                <DeleteOutlinedIcon fontSize="small" />
+              </IconButton>
+            </span>
+          </Tooltip>
+        }
+      />
     ))}
-  </>
+  </Stack>
 );
 
 export default OwnerList;

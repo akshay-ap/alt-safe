@@ -117,6 +117,11 @@ const theme = createTheme({
         tooltip: { backgroundColor: color.raised, border: `1px solid ${color.hairline}`, fontSize: "0.75rem" },
       },
     },
+    MuiSnackbarContent: {
+      styleOverrides: {
+        root: { backgroundColor: color.raised, color: color.text, border: `1px solid ${color.hairline}` },
+      },
+    },
     MuiTab: { styleOverrides: { root: { textTransform: "none", fontWeight: 500, minHeight: 44 } } },
     MuiTableCell: { styleOverrides: { root: { borderColor: color.hairline }, head: { color: color.textMuted } } },
     MuiDivider: { styleOverrides: { root: { borderColor: color.hairline } } },

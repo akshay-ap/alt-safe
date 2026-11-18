@@ -22,7 +22,7 @@ const NameLabelsPanel: React.FC<NameLabelsPanelProps> = ({ safeName, setSafeName
           mb: 3,
         }}
       >
-        Give your Safe a recognizable name and optional labels for easy identification. This is stroed locally and not
+        Give your Safe a recognizable name and optional labels for easy identification. This is stored locally and not
         on-chain. You can change it later.
       </Typography>
 
