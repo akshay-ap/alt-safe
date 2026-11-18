@@ -4,6 +4,7 @@ import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import { Box, IconButton, Snackbar, Tooltip, Typography } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import { useChainId, useChains } from "wagmi";
+import { useAddressFormat } from "../../settings/addressFormat";
 import { font } from "../../theme/tokens";
 import { chunkHex } from "../../utils/address";
 
@@ -64,6 +65,7 @@ const HexValue: React.FC<HexValueProps> = ({
   useEffect(() => () => clearTimeout(copiedTimer.current), []);
   const explorer = useExplorerUrl(explorerUrl);
   const shortened = shortenTo && `${value.slice(0, shortenTo.head)}…${value.slice(-shortenTo.tail)}`;
+  const isGrouped = useAddressFormat() === "grouped";
 
   const handleCopy = async () => {
     try {
@@ -87,7 +89,14 @@ const HexValue: React.FC<HexValueProps> = ({
           component="span"
           sx={{ fontFamily: font.mono, fontSize: FONT_SIZES[size], fontVariantLigatures: "none" }}
         >
-          {shortened ?? <ChunkedHex value={value} />}
+          {shortened ??
+            (isGrouped ? (
+              <ChunkedHex value={value} />
+            ) : (
+              <Box component="span" sx={{ overflowWrap: "anywhere" }}>
+                {value}
+              </Box>
+            ))}
         </Typography>
       </Tooltip>
       {showCopy && (

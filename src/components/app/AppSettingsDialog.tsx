@@ -6,12 +6,16 @@ import {
   DialogContent,
   DialogTitle,
   Divider,
+  FormControlLabel,
   Stack,
+  Switch,
   Typography,
 } from "@mui/material";
 import { useState } from "react";
 import { STORAGE_KEY } from "../../constants";
 import { useSafeWalletContext } from "../../context/WalletContext";
+import { useAddressFormat, writeAddressFormat } from "../../settings/addressFormat";
+import AccountAddress from "../common/AccountAddress";
 import AddressBookDialog from "../dialogs/AddressBookDialog";
 
 interface AppSettingsDialogProps {
@@ -34,6 +38,26 @@ const Section: React.FC<{ title: string; description: string; children: React.Re
     {children}
   </Stack>
 );
+
+const PREVIEW_ADDRESS = "0xC2928299072B9918a6d62a2309b18b71b0c2Fbe5";
+
+const AddressFormatToggle: React.FC = () => {
+  const format = useAddressFormat();
+  return (
+    <Stack spacing={1}>
+      <FormControlLabel
+        control={
+          <Switch
+            checked={format === "grouped"}
+            onChange={(event) => writeAddressFormat(event.target.checked ? "grouped" : "plain")}
+          />
+        }
+        label="Group in fours, e.g. 0xC292 8299 072B"
+      />
+      <AccountAddress address={PREVIEW_ADDRESS} showCopy={false} />
+    </Stack>
+  );
+};
 
 const ClearDataButton: React.FC = () => {
   const { storage } = useSafeWalletContext();
@@ -84,6 +108,12 @@ const AppSettingsDialog: React.FC<AppSettingsDialogProps> = ({ open, onClose }) 
               <Button variant="outlined" onClick={() => setAddressBookOpen(true)} sx={{ alignSelf: "flex-start" }}>
                 Manage address book
               </Button>
+            </Section>
+            <Section
+              title="Address format"
+              description="How full addresses, hashes and signatures are shown everywhere in the app. Copying always gives the exact value."
+            >
+              <AddressFormatToggle />
             </Section>
             <Section title="App data" description="Everything ALT Safe stores lives only in this browser.">
               <ClearDataButton />
