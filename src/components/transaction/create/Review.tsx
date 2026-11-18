@@ -2,8 +2,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import FingerprintIcon from "@mui/icons-material/Fingerprint";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import { Alert, Box, Button, Paper, Typography, useMediaQuery, useTheme } from "@mui/material";
-import Grid from "@mui/material/Grid";
+import { Box, Button, Paper, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { readContract, signTypedData, simulateContract } from "@wagmi/core";
 import { useState } from "react";
 import type { Address } from "viem";
@@ -25,6 +24,8 @@ import { type SafeTransactionInfo, useSafeWalletContext } from "../../../context
 import { encodeMultiSend } from "../../../utils/multisend";
 import { EIP712_SAFE_TX_TYPE, SafeOperation, type SafeTransactionParams } from "../../../utils/utils";
 import { config } from "../../../wagmi";
+import AccountAddress from "../../common/AccountAddress";
+import TransactionHash from "../../common/TransactionHash";
 import ViewSafeTransactionDialog from "../../dialogs/ViewSafeTransactionDialog";
 import WaitForTransactionDialog from "../../dialogs/WaitForTransactionDialog";
 import TransactionSummaryPanel from "../summary/TransactionSummaryPanel";
@@ -32,6 +33,35 @@ import TransactionSummaryPanel from "../summary/TransactionSummaryPanel";
 interface ReviewProps {
   setActiveStep: (step: number) => void;
 }
+
+const ReviewRow: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
+  <Box sx={{ display: "grid", gridTemplateColumns: { sm: "180px 1fr" }, gap: { xs: 0.25, sm: 2 }, py: 1 }}>
+    <Typography variant="body2" color="text.secondary">
+      {label}
+    </Typography>
+    <Box sx={{ minWidth: 0 }}>{children}</Box>
+  </Box>
+);
+
+const SigningOption: React.FC<{ title: string; description: string; action: React.ReactNode }> = ({
+  title,
+  description,
+  action,
+}) => (
+  <Stack
+    direction={{ xs: "column", sm: "row" }}
+    spacing={2}
+    sx={{ alignItems: { sm: "center" }, justifyContent: "space-between" }}
+  >
+    <Box>
+      <Typography variant="subtitle2">{title}</Typography>
+      <Typography variant="body2" color="text.secondary">
+        {description}
+      </Typography>
+    </Box>
+    <Box sx={{ flexShrink: 0 }}>{action}</Box>
+  </Stack>
+);
 
 const Review: React.FC<ReviewProps> = ({ setActiveStep }) => {
   const theme = useTheme();
@@ -65,7 +95,6 @@ const Review: React.FC<ReviewProps> = ({ setActiveStep }) => {
   const [viewDialogOpen, setViewDialogOpen] = useState<boolean>(false);
 
   // Fixed height for consistent layout
-  const contentHeight = "calc(100vh - 250px)";
 
   const handleCloseWaitingDialog = () => {
     setWaitForTransactionDialogOpen(false);
@@ -304,132 +333,79 @@ const Review: React.FC<ReviewProps> = ({ setActiveStep }) => {
   };
 
   return (
-    <Grid container spacing={2}>
-      <Grid size={{ xs: 12, md: 9 }}>
-        {/* Content container with fixed height and scrollable content */}
-        <Box
-          sx={{
-            height: contentHeight,
-            display: "flex",
-            flexDirection: "column",
-            overflow: "hidden", // Hide overflow so inner scrollable content works properly
-          }}
-        >
-          <Box sx={{ flex: 1, overflow: "auto" }}>
-            <Paper elevation={0} variant="outlined" sx={{ p: 2, mb: 2 }}>
-              <Typography variant="h5" gutterBottom>
-                Review Transactions
-              </Typography>
-
-              <Box sx={{ mb: 3 }}>
-                <Typography variant="subtitle1" gutterBottom>
-                  Transaction Details
-                </Typography>
-                <Box
-                  sx={{
-                    p: 2,
-                    bgcolor: "background.paper",
-                    borderRadius: 1,
-                    border: 1,
-                    borderColor: "divider",
-                  }}
-                >
-                  <Grid container spacing={2}>
-                    <Grid size={{ xs: 6 }}>
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          color: "text.secondary",
-                        }}
-                      >
-                        Number of transactions
-                      </Typography>
-                      <Typography variant="body1">{transactions.length}</Typography>
-                    </Grid>
-                    <Grid size={{ xs: 6 }}>
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          color: "text.secondary",
-                        }}
-                      >
-                        Safe account
-                      </Typography>
-                      <Typography variant="body1" sx={{ wordBreak: "break-all" }}>
-                        {safeAccount}
-                      </Typography>
-                    </Grid>
-                    <Grid size={{ xs: 12 }}>
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          color: "text.secondary",
-                        }}
-                      >
-                        Transaction hash
-                      </Typography>
-                      <Typography variant="body1" sx={{ wordBreak: "break-all" }}>
-                        {safeTransactionHash}
-                      </Typography>
-                    </Grid>
-                  </Grid>
-                </Box>
-              </Box>
-
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  mt: 2,
-                }}
-              >
-                <Button variant="outlined" startIcon={<VisibilityIcon />} onClick={handleViewSafeTransaction}>
-                  View Safe Transaction Details
-                </Button>
-
-                <Button
-                  variant="outlined"
-                  startIcon={<ContentCopyIcon />}
-                  onClick={handleCopyToClipboard}
-                  disabled={!copyUnsignedTxButtonEnabled}
-                >
-                  Copy Unsigned
-                </Button>
-              </Box>
-            </Paper>
-
-            <Paper elevation={0} variant="outlined" sx={{ p: 2 }}>
-              <Typography variant="h6" gutterBottom>
-                Signing Options
-              </Typography>
-
-              <Alert severity="info" sx={{ mb: 2 }}>
-                Sign this transaction to execute it, or approve the transaction hash.
-              </Alert>
-
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  startIcon={<FingerprintIcon />}
-                  onClick={handleSignTransaction}
-                  fullWidth
-                >
-                  Sign Transaction
-                </Button>
-
-                <Button
-                  variant="outlined"
-                  startIcon={<CheckCircleIcon />}
-                  onClick={handleApproveTransactionHash}
-                  fullWidth
-                >
-                  Approve Transaction Hash
-                </Button>
-              </Box>
-            </Paper>
+    <Box
+      sx={{
+        display: "grid",
+        gap: 3,
+        alignItems: "start",
+        gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 1fr) 320px" },
+      }}
+    >
+      <Stack spacing={3} sx={{ minWidth: 0 }}>
+        <Paper variant="outlined">
+          <Box sx={{ px: 2.5, pt: 2.5, pb: 1 }}>
+            <Typography variant="h5" component="h2">
+              Safe transaction
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Your wallet will ask you to sign this hash. Check that it matches before you confirm.
+            </Typography>
           </Box>
-        </Box>
+          <Box sx={{ px: 2.5, pb: 1.5 }}>
+            <ReviewRow label="Safe transaction hash">
+              <TransactionHash hash={safeTransactionHash} />
+            </ReviewRow>
+            <ReviewRow label="Safe">
+              <AccountAddress address={safeAccount} />
+            </ReviewRow>
+            <ReviewRow label="Nonce">{safeTransaction?.nonce.toString() ?? "—"}</ReviewRow>
+            <ReviewRow label="Actions">
+              {transactions.length === 1 ? "1 action" : `${transactions.length} actions, batched with MultiSend`}
+            </ReviewRow>
+          </Box>
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{ px: 2.5, py: 1.5, borderTop: 1, borderColor: "divider", flexWrap: "wrap", rowGap: 1 }}
+          >
+            <Button startIcon={<VisibilityIcon />} onClick={handleViewSafeTransaction}>
+              View all parameters
+            </Button>
+            <Button
+              startIcon={<ContentCopyIcon />}
+              onClick={handleCopyToClipboard}
+              disabled={!copyUnsignedTxButtonEnabled}
+            >
+              Copy for other signers
+            </Button>
+          </Stack>
+        </Paper>
+
+        <Paper variant="outlined" sx={{ p: 2.5 }}>
+          <Typography variant="h5" component="h2" sx={{ mb: 2 }}>
+            Sign
+          </Typography>
+          <Stack spacing={2}>
+            <SigningOption
+              title="Sign with your wallet"
+              description="Free and off-chain. Execute right away if your signature is enough, or share it with the other owners."
+              action={
+                <Button variant="contained" startIcon={<FingerprintIcon />} onClick={handleSignTransaction}>
+                  Sign
+                </Button>
+              }
+            />
+            <SigningOption
+              title="Approve on chain"
+              description="Sends an approveHash transaction and costs gas. Useful when your wallet cannot sign typed data."
+              action={
+                <Button variant="outlined" startIcon={<CheckCircleIcon />} onClick={handleApproveTransactionHash}>
+                  Approve
+                </Button>
+              }
+            />
+          </Stack>
+        </Paper>
         {transactionHash && (
           <WaitForTransactionDialog
             open={waitForTransactionDialogOpen}
@@ -437,16 +413,16 @@ const Review: React.FC<ReviewProps> = ({ setActiveStep }) => {
             onClose={handleCloseWaitingDialog}
           />
         )}
-      </Grid>
+      </Stack>
 
-      <Grid size={{ xs: 12, md: 3 }}>
+      <Box sx={{ position: { lg: "sticky" }, top: { lg: 80 } }}>
         <TransactionSummaryPanel
           transactions={transactions}
           handleDeleteTransaction={() => {}}
           viewOnly={true}
           isMobile={isMobile}
         />
-      </Grid>
+      </Box>
 
       {/* Modal dialogs */}
       <ViewSafeTransactionDialog
@@ -455,7 +431,7 @@ const Review: React.FC<ReviewProps> = ({ setActiveStep }) => {
         safeTransaction={safeTransaction}
         safeTransactionHash={safeTransactionHash || "0x"}
       />
-    </Grid>
+    </Box>
   );
 };
 

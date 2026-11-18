@@ -52,7 +52,7 @@ function CustomTabPanel(props: TabPanelProps) {
       aria-labelledby={`transaction-tab-${index}`}
       {...other}
     >
-      {value === index && <Box>{children}</Box>}
+      {value === index && <Box sx={{ pt: 2 }}>{children}</Box>}
     </div>
   );
 }
@@ -177,23 +177,13 @@ const TransactionTypePanel: React.FC<TransactionTypePanelProps> = ({ onSelect })
   };
 
   return (
-    <Box
-      sx={{ display: "flex", flexDirection: "column", gap: 2, maxWidth: 800, mx: "auto" }}
-      id="transaction-type-panel"
-    >
-      {/* Header */}
-      <Box id="transaction-type-header">
-        <Typography variant="h5" gutterBottom id="transaction-type-title">
-          Transaction Builder
-        </Typography>
-      </Box>
-
+    <Box sx={{ display: "flex", flexDirection: "column" }} id="transaction-type-panel">
       {/* Tabs */}
       <Box sx={{ width: "100%" }}>
         <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
           <Tabs value={tabValue} onChange={handleTabChange} aria-label="transaction builder tabs">
             <Tab label="Actions" {...a11yProps(0)} />
-            <Tab label="Transaction Defaults" {...a11yProps(1)} />
+            <Tab label="Advanced" {...a11yProps(1)} />
           </Tabs>
         </Box>
 
@@ -206,7 +196,8 @@ const TransactionTypePanel: React.FC<TransactionTypePanelProps> = ({ onSelect })
               size="small"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search transaction types..."
+              placeholder="Search actions"
+              aria-label="Search actions"
               fullWidth
               slotProps={{
                 input: {
@@ -218,9 +209,10 @@ const TransactionTypePanel: React.FC<TransactionTypePanelProps> = ({ onSelect })
                 },
               }}
             />
-            <Tooltip title="Import Transaction">
+            <Tooltip title="Import a shared transaction">
               <IconButton
                 id="import-transaction-button"
+                aria-label="Import a shared transaction"
                 onClick={handleImportSelect}
                 sx={{
                   bgcolor: selectedAction?.group === "Import" ? alpha(theme.palette.success.main, 0.1) : "transparent",
@@ -233,9 +225,10 @@ const TransactionTypePanel: React.FC<TransactionTypePanelProps> = ({ onSelect })
                 <UploadIcon />
               </IconButton>
             </Tooltip>
-            <Tooltip title="Filter by Category">
+            <Tooltip title="Filter by category">
               <IconButton
                 id="filter-menu-button"
+                aria-label="Filter by category"
                 onClick={handleFilterMenuOpen}
                 sx={{
                   bgcolor: selectedTag !== "All" ? alpha(theme.palette.primary.main, 0.1) : "transparent",
@@ -297,16 +290,8 @@ const TransactionTypePanel: React.FC<TransactionTypePanelProps> = ({ onSelect })
           )}
 
           {/* Main Navigation List */}
-          <Paper
-            id="transaction-types-panel"
-            elevation={1}
-            sx={{
-              borderRadius: 1,
-              overflow: "hidden",
-              minHeight: 400,
-            }}
-          >
-            <List id="transaction-types-list" sx={{ width: "100%", bgcolor: "background.paper" }} component="nav">
+          <Paper id="transaction-types-panel" variant="outlined" sx={{ overflow: "hidden" }}>
+            <List id="transaction-types-list" disablePadding component="nav" aria-label="Transaction actions">
               {filteredGroups.map((group, index) => (
                 <React.Fragment key={group.name}>
                   {/* Group Header */}
@@ -423,20 +408,9 @@ const TransactionTypePanel: React.FC<TransactionTypePanelProps> = ({ onSelect })
         </CustomTabPanel>
 
         <CustomTabPanel value={tabValue} index={1}>
-          {/* Transaction Defaults Tab Content */}
-          <Box sx={{ textAlign: "center", py: 4 }}>
-            <Typography variant="h6" gutterBottom>
-              Transaction Defaults
-            </Typography>
-            <Typography
-              variant="body2"
-              sx={{
-                color: "text.secondary",
-              }}
-            >
-              Configure default transaction parameters in the form panel on the right.
-            </Typography>
-          </Box>
+          <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>
+            Override the nonce, gas and refund parameters of the Safe transaction in the form beside this list.
+          </Typography>
         </CustomTabPanel>
       </Box>
     </Box>

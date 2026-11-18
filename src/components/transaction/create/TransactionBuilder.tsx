@@ -1,4 +1,4 @@
-import { Button, TextField, Typography } from "@mui/material";
+import { Box, Button, Paper, TextField, Typography } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import type React from "react";
 import { Route, Routes, useNavigate, useParams } from "react-router-dom";
@@ -34,21 +34,22 @@ const TransactionBuilder: React.FC<TransactionBuilderProps> = ({
   };
 
   return (
-    <Grid container spacing={2} id="transaction-builder-container">
-      <Grid
-        size={4}
-        sx={{ overflowY: "scroll", height: "60vh", scrollbarWidth: "thin" }}
-        id="transaction-type-panel-container"
-      >
+    <Box
+      id="transaction-builder-container"
+      sx={{
+        display: "grid",
+        gap: 3,
+        alignItems: "start",
+        gridTemplateColumns: { xs: "1fr", md: "260px minmax(0, 1fr)" },
+      }}
+    >
+      <Box id="transaction-type-panel-container">
         <TransactionTypePanel onSelect={handleTransactionTypeSelect} />
-      </Grid>
+      </Box>
 
-      <Grid
-        size={8}
-        sx={{ overflowY: "scroll", height: "60vh", scrollbarWidth: "thin" }}
-        id="transaction-input-panel-container"
-      >
+      <Box id="transaction-input-panel-container" sx={{ minWidth: 0 }}>
         <Routes>
+          <Route index element={<EmptyForm />} />
           <Route
             path="/transaction-defaults"
             element={
@@ -71,10 +72,23 @@ const TransactionBuilder: React.FC<TransactionBuilderProps> = ({
             }
           />
         </Routes>
-      </Grid>
-    </Grid>
+      </Box>
+    </Box>
   );
 };
+
+const EmptyForm: React.FC = () => (
+  <Paper variant="outlined" sx={{ p: 3, borderStyle: "dashed" }}>
+    <Typography variant="h6" component="h2" gutterBottom>
+      Choose an action
+    </Typography>
+    <Typography variant="body2" color="text.secondary">
+      Pick what this transaction should do from the list: send the native token, transfer an ERC-20, call any contract,
+      or import a transaction someone shared with you. You can add several actions to one batch; they run in order when
+      the Safe executes, and if one fails, none of them take effect.
+    </Typography>
+  </Paper>
+);
 
 const TransactionInputForm: React.FC<{
   importHex: `0x${string}`;
