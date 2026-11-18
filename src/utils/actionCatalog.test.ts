@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
+import bundledSpecs from "../context/TransactionSpecs";
 import type { TransactionGroupSpec, TransactionSpec } from "../context/types";
-import { buildActionCatalog, ENCODE_FUNCTION_CALL } from "./actionCatalog";
+import { availableQuickActions, buildActionCatalog, ENCODE_FUNCTION_CALL, QUICK_ACTIONS } from "./actionCatalog";
 
 const action = (name: string) => ({ name }) as TransactionSpec;
 const group = (groupName: string, chainIds: number[], actions: string[]) =>
@@ -42,5 +43,22 @@ describe("buildActionCatalog", () => {
 
   it("treats an unknown chain as one where only all-chain groups apply", () => {
     expect(buildActionCatalog(SPECS, undefined, "").map((section) => section.group)).not.toContain("Aave");
+  });
+});
+
+describe("availableQuickActions", () => {
+  it("offers only quick actions whose template is available", () => {
+    const sections = buildActionCatalog(SPECS, SEPOLIA, "");
+    expect(availableQuickActions(sections).map((quick) => quick.title)).toEqual([
+      "Send native token",
+      "Send tokens",
+      "Call a contract",
+    ]);
+    expect(availableQuickActions([ENCODE_FUNCTION_CALL]).map((quick) => quick.title)).toEqual(["Call a contract"]);
+  });
+
+  it("matches the bundled templates, so renaming a template cannot silently hide a tile", () => {
+    const sections = buildActionCatalog(bundledSpecs, SEPOLIA, "");
+    expect(availableQuickActions(sections)).toEqual(QUICK_ACTIONS);
   });
 });
