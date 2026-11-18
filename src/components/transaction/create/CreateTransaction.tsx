@@ -3,6 +3,7 @@ import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import SaveIcon from "@mui/icons-material/Save";
+import TuneIcon from "@mui/icons-material/Tune";
 import {
   Alert,
   Badge,
@@ -52,6 +53,7 @@ import TransactionSummaryPanel from "../summary/TransactionSummaryPanel";
 import { ExecuteCard, SignedTransactionCard } from "./ExecuteStep";
 import Review from "./Review";
 import TransactionBuilder from "./TransactionBuilder";
+import TransactionParamsForm from "./TransactionParamsForm";
 
 const CreateTransaction: React.FC = () => {
   const theme = useTheme();
@@ -89,6 +91,7 @@ const CreateTransaction: React.FC = () => {
   // Current step in the transaction process
   const [activeStep, setActiveStep] = useState<number>(0);
   const [isSummaryExpanded, setIsSummaryExpanded] = useState<boolean>(false);
+  const [paramsDialogOpen, setParamsDialogOpen] = useState<boolean>(false);
   const [saveDraftDialogOpen, setSaveDraftDialogOpen] = useState<boolean>(false);
   const [loadDraftDialogOpen, setLoadDraftDialogOpen] = useState<boolean>(false);
   const [currentDraftId, setCurrentDraftId] = useState<string | undefined>();
@@ -622,6 +625,9 @@ const CreateTransaction: React.FC = () => {
                     variant="outlined"
                   />
                 )}
+                <Button startIcon={<TuneIcon />} onClick={() => setParamsDialogOpen(true)}>
+                  Nonce & gas
+                </Button>
                 <Button startIcon={<FolderOpenIcon />} onClick={handleOpenLoadDraftDialog}>
                   Open draft
                 </Button>
@@ -676,6 +682,16 @@ const CreateTransaction: React.FC = () => {
           </Badge>
         </Fab>
       )}
+
+      <Dialog
+        open={paramsDialogOpen}
+        onClose={() => setParamsDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        aria-labelledby="transaction-params-title"
+      >
+        <TransactionParamsForm onSaved={() => setParamsDialogOpen(false)} />
+      </Dialog>
 
       {/* Modal dialogs */}
       <ViewSafeTransactionDialog

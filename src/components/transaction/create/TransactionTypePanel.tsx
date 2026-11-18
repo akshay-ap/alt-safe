@@ -1,418 +1,101 @@
-import CodeIcon from "@mui/icons-material/Code";
-import ExpandLess from "@mui/icons-material/ExpandLess";
-import ExpandMore from "@mui/icons-material/ExpandMore";
-import FilterListIcon from "@mui/icons-material/FilterList";
+import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import SearchIcon from "@mui/icons-material/Search";
-import UploadIcon from "@mui/icons-material/Upload";
 import {
-  alpha,
   Box,
-  Chip,
-  Collapse,
-  Divider,
-  IconButton,
+  InputAdornment,
   List,
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Menu,
-  MenuItem,
+  ListSubheader,
   Paper,
-  Tab,
-  Tabs,
   TextField,
-  Tooltip,
   Typography,
-  useTheme,
 } from "@mui/material";
-import InputAdornment from "@mui/material/InputAdornment";
-import type { JSX } from "react";
-import React, { useMemo, useState } from "react";
+import type React from "react";
+import { useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { useAccount } from "wagmi";
-import { GroupTagType, LogoType } from "../../../context/types";
 import { useSafeWalletContext } from "../../../context/WalletContext";
+import { buildActionCatalog } from "../../../utils/actionCatalog";
 
-// Define GroupTagType as a value (array of strings) and add "All" as an option
-const groupTagValues: string[] = ["All", ...Object.values(GroupTagType)];
-
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
-
-function CustomTabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`transaction-tabpanel-${index}`}
-      aria-labelledby={`transaction-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box sx={{ pt: 2 }}>{children}</Box>}
-    </div>
-  );
-}
-
-function a11yProps(index: number) {
-  return {
-    id: `transaction-tab-${index}`,
-    "aria-controls": `transaction-tabpanel-${index}`,
-  };
-}
-
-interface TransactionGroup {
-  name: string;
-  icon: JSX.Element;
-  types: string[];
-  disabled: boolean;
-  tags: string[];
-}
+export const IMPORT_GROUP = "Import";
 
 interface TransactionTypePanelProps {
   onSelect: (group: string, type: string) => void;
 }
 
+// The selected action is part of the URL (/create-transaction/:group/:type), so deep links highlight too.
+const useSelectedAction = () => {
+  const [, , group, action] = useLocation().pathname.split("/").map(decodeURIComponent);
+  return { group, action };
+};
+
 const TransactionTypePanel: React.FC<TransactionTypePanelProps> = ({ onSelect }) => {
   const { chainId } = useAccount();
   const { txBuilderSpec } = useSafeWalletContext();
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  const [selectedTag, setSelectedTag] = useState<string>("All");
-  const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
-  const [filterMenuAnchor, setFilterMenuAnchor] = useState<null | HTMLElement>(null);
-  const [selectedAction, setSelectedAction] = useState<{ group: string; action: string } | null>(null);
-  const [tabValue, setTabValue] = useState<number>(0);
-  const theme = useTheme();
-
-  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
-    setTabValue(newValue);
-
-    // Notify parent when Transaction Defaults tab is selected
-    if (newValue === 1) {
-      onSelect("TransactionDefaults", "TransactionDefaults");
-    }
-  }; // Memoize the transaction types processing
-  const transactionGroups = useMemo(() => {
-    let groups = txBuilderSpec.reduce<Record<string, TransactionGroup>>((acc, group) => {
-      acc[group.groupName] = {
-        name: group.groupName,
-        icon:
-          group.logo?.type === LogoType.URL ? (
-            <img
-              src={group.logo.value}
-              alt={group.groupName}
-              style={{ width: "24px", height: "24px", objectFit: "contain" }}
-            />
-          ) : (
-            <Box sx={{ fontSize: 24, color: "primary.main" }}>
-              {group.logo?.type === LogoType.CHARACTER ? group.logo.value[0] : <CodeIcon />}
-            </Box>
-          ),
-        types: group.actions.map((action) => action.name),
-        disabled: !(group.chainIds.includes(0) || group.chainIds.includes(chainId || 0)),
-        tags: group.tags || ["Other"],
-      };
-      return acc;
-    }, {});
-
-    // Add additional transaction types (excluding Import - it will be a separate button)
-    groups = {
-      ...groups,
-      EncodeFunctionCall: {
-        name: "Encode Function Call",
-        icon: <CodeIcon sx={{ fontSize: 24, color: "primary.main" }} />,
-        types: ["encodeFunctionCall"],
-        disabled: false,
-        tags: ["Other"],
-      },
-    };
-
-    return groups;
-  }, [txBuilderSpec, chainId]);
-
-  // Filter groups based on search and tag
-  const filteredGroups = useMemo(() => {
-    return Object.values(transactionGroups).filter((group) => {
-      const matchesSearch =
-        !searchQuery ||
-        group.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        group.types.some((type) => type.toLowerCase().includes(searchQuery.toLowerCase()));
-      const matchesTag = selectedTag === "All" || group.tags.includes(selectedTag);
-      return matchesSearch && matchesTag;
-    });
-  }, [transactionGroups, searchQuery, selectedTag]);
-
-  const handleGroupToggle = (groupName: string) => {
-    if (transactionGroups[groupName]?.disabled) return;
-
-    setExpandedGroups((prev) =>
-      prev.includes(groupName) ? prev.filter((name) => name !== groupName) : [...prev, groupName],
-    );
-  };
-
-  const handleActionSelect = (groupName: string, actionName: string) => {
-    setSelectedAction({ group: groupName, action: actionName });
-    onSelect(groupName, actionName);
-  };
-
-  const handleImportSelect = () => {
-    setSelectedAction({ group: "Import", action: "Import" });
-    onSelect("Import", "Import");
-  };
-
-  const handleFilterMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setFilterMenuAnchor(event.currentTarget);
-  };
-
-  const handleFilterMenuClose = () => {
-    setFilterMenuAnchor(null);
-  };
-
-  const handleTagSelect = (tag: string) => {
-    setSelectedTag(tag);
-    handleFilterMenuClose();
-  };
+  const [query, setQuery] = useState("");
+  const selected = useSelectedAction();
+  const sections = useMemo(() => buildActionCatalog(txBuilderSpec, chainId, query), [txBuilderSpec, chainId, query]);
+  const isSelected = (group: string, action: string) => selected.group === group && selected.action === action;
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column" }} id="transaction-type-panel">
-      {/* Tabs */}
-      <Box sx={{ width: "100%" }}>
-        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-          <Tabs value={tabValue} onChange={handleTabChange} aria-label="transaction builder tabs">
-            <Tab label="Actions" {...a11yProps(0)} />
-            <Tab label="Advanced" {...a11yProps(1)} />
-          </Tabs>
-        </Box>
-
-        <CustomTabPanel value={tabValue} index={0}>
-          {/* Actions Tab Content */}
-          {/* Search and Filter */}
-          <Box sx={{ display: "flex", gap: 1, alignItems: "center", mb: 1 }} id="transaction-type-toolbar">
-            <TextField
-              id="transaction-search-input"
-              size="small"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search actions"
-              aria-label="Search actions"
-              fullWidth
-              slotProps={{
-                input: {
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon />
-                    </InputAdornment>
-                  ),
-                },
-              }}
-            />
-            <Tooltip title="Import a shared transaction">
-              <IconButton
-                id="import-transaction-button"
-                aria-label="Import a shared transaction"
-                onClick={handleImportSelect}
-                sx={{
-                  bgcolor: selectedAction?.group === "Import" ? alpha(theme.palette.success.main, 0.1) : "transparent",
-                  color: selectedAction?.group === "Import" ? "success.main" : "inherit",
-                  "&:hover": {
-                    bgcolor: alpha(theme.palette.success.main, 0.1),
-                  },
-                }}
-              >
-                <UploadIcon />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title="Filter by category">
-              <IconButton
-                id="filter-menu-button"
-                aria-label="Filter by category"
-                onClick={handleFilterMenuOpen}
-                sx={{
-                  bgcolor: selectedTag !== "All" ? alpha(theme.palette.primary.main, 0.1) : "transparent",
-                  color: selectedTag !== "All" ? "primary.main" : "inherit",
-                }}
-              >
-                <FilterListIcon />
-              </IconButton>
-            </Tooltip>
-          </Box>
-
-          {/* Filter Menu */}
-          <Menu
-            id="filter-category-menu"
-            anchorEl={filterMenuAnchor}
-            open={Boolean(filterMenuAnchor)}
-            onClose={handleFilterMenuClose}
-            slotProps={{
-              paper: {
-                sx: {
-                  mt: 1,
-                  minWidth: 200,
-                },
-              },
-            }}
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }} id="transaction-type-panel">
+      <TextField
+        id="transaction-search-input"
+        size="small"
+        value={query}
+        onChange={(event) => setQuery(event.target.value)}
+        placeholder="Search actions"
+        aria-label="Search actions"
+        slotProps={{
+          input: {
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon fontSize="small" />
+              </InputAdornment>
+            ),
+          },
+        }}
+      />
+      <Paper variant="outlined" sx={{ overflow: "hidden" }}>
+        <List id="transaction-types-list" dense disablePadding component="nav" aria-label="Transaction actions">
+          <ListItemButton
+            id="import-transaction-button"
+            selected={selected.group === IMPORT_GROUP}
+            onClick={() => onSelect(IMPORT_GROUP, IMPORT_GROUP)}
           >
-            {groupTagValues.map((tag) => (
-              <MenuItem
-                key={tag}
-                id={`filter-option-${tag.toLowerCase().replace(/\s+/g, "-")}`}
-                onClick={() => handleTagSelect(tag)}
-                selected={selectedTag === tag}
-                sx={{
-                  "&.Mui-selected": {
-                    bgcolor: alpha(theme.palette.primary.main, 0.12),
-                    "&:hover": {
-                      bgcolor: alpha(theme.palette.primary.main, 0.2),
-                    },
-                  },
-                }}
-              >
-                <Typography variant="body2">{tag}</Typography>
-              </MenuItem>
-            ))}
-          </Menu>
-
-          {/* Filter indicator */}
-          {selectedTag !== "All" && (
-            <Box sx={{ mb: 2 }} id="active-filter-indicator">
-              <Chip
-                id="active-filter-chip"
-                label={`Filter: ${selectedTag}`}
-                onDelete={() => setSelectedTag("All")}
-                size="small"
-                color="primary"
-                variant="outlined"
-              />
-            </Box>
-          )}
-
-          {/* Main Navigation List */}
-          <Paper id="transaction-types-panel" variant="outlined" sx={{ overflow: "hidden" }}>
-            <List id="transaction-types-list" disablePadding component="nav" aria-label="Transaction actions">
-              {filteredGroups.map((group, index) => (
-                <React.Fragment key={group.name}>
-                  {/* Group Header */}
+            <ListItemIcon sx={{ minWidth: 32 }}>
+              <FileDownloadOutlinedIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText primary="Import shared transaction" />
+          </ListItemButton>
+          {sections.map((section) => (
+            <li key={section.group}>
+              <List dense disablePadding>
+                <ListSubheader disableSticky sx={{ lineHeight: "32px", bgcolor: "transparent" }}>
+                  {section.group}
+                </ListSubheader>
+                {section.actions.map((action) => (
                   <ListItemButton
-                    id={`group-header-${group.name.toLowerCase().replace(/\s+/g, "-")}`}
-                    onClick={() => handleGroupToggle(group.name)}
-                    disabled={group.disabled}
-                    sx={{
-                      py: 0.75,
-                      "&:hover": {
-                        bgcolor: group.disabled ? "transparent" : alpha(theme.palette.primary.main, 0.08),
-                      },
-                      "&.Mui-disabled": {
-                        opacity: 0.6,
-                      },
-                    }}
+                    key={action}
+                    selected={isSelected(section.group, action)}
+                    onClick={() => onSelect(section.group, action)}
+                    sx={{ pl: 3 }}
                   >
-                    <ListItemIcon sx={{ minWidth: 40 }}>{group.icon}</ListItemIcon>
-                    <ListItemText
-                      primary={
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                          <Typography
-                            variant="body1"
-                            sx={{
-                              fontWeight: 500,
-                            }}
-                          >
-                            {group.name}
-                          </Typography>
-                          {group.disabled && <Chip label="Unavailable" size="small" color="error" variant="outlined" />}
-                        </Box>
-                      }
-                    />
-                    {!group.disabled && (
-                      <Box sx={{ ml: 1 }}>{expandedGroups.includes(group.name) ? <ExpandLess /> : <ExpandMore />}</Box>
-                    )}
+                    <ListItemText primary={action} />
                   </ListItemButton>
-
-                  {/* Nested Actions */}
-                  <Collapse
-                    id={`group-content-${group.name.toLowerCase().replace(/\s+/g, "-")}`}
-                    in={expandedGroups.includes(group.name)}
-                    timeout="auto"
-                    unmountOnExit
-                  >
-                    <List component="div" disablePadding>
-                      {group.types.map((action) => {
-                        const isSelected = selectedAction?.group === group.name && selectedAction?.action === action;
-                        return (
-                          <ListItemButton
-                            key={action}
-                            id={`action-item-${action.toLowerCase().replace(/\s+/g, "-")}`}
-                            sx={{
-                              pl: 4,
-                              bgcolor: isSelected ? alpha(theme.palette.primary.main, 0.12) : "transparent",
-                              "&:hover": {
-                                bgcolor: isSelected
-                                  ? alpha(theme.palette.primary.main, 0.2)
-                                  : alpha(theme.palette.primary.main, 0.08),
-                              },
-                              "&.Mui-selected": {
-                                bgcolor: alpha(theme.palette.primary.main, 0.12),
-                              },
-                            }}
-                            selected={isSelected}
-                            onClick={() => handleActionSelect(group.name, action)}
-                          >
-                            <ListItemText
-                              primary={action}
-                              slotProps={{
-                                primary: {
-                                  variant: "body2",
-                                  sx: {
-                                    fontWeight: isSelected ? 500 : 400,
-                                    color: isSelected ? "primary.main" : "inherit",
-                                  },
-                                },
-                              }}
-                            />
-                          </ListItemButton>
-                        );
-                      })}
-                    </List>
-                  </Collapse>
-
-                  {index < filteredGroups.length - 1 && <Divider />}
-                </React.Fragment>
-              ))}
-            </List>
-
-            {/* Empty state */}
-            {filteredGroups.length === 0 && (
-              <Box id="empty-state-message" sx={{ textAlign: "center", py: 6 }}>
-                <Typography
-                  variant="h6"
-                  gutterBottom
-                  sx={{
-                    color: "text.secondary",
-                  }}
-                >
-                  No transaction types found
-                </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: "text.secondary",
-                  }}
-                >
-                  Try adjusting your search or filter criteria
-                </Typography>
-              </Box>
-            )}
-          </Paper>
-        </CustomTabPanel>
-
-        <CustomTabPanel value={tabValue} index={1}>
-          <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>
-            Override the nonce, gas and refund parameters of the Safe transaction in the form beside this list.
+                ))}
+              </List>
+            </li>
+          ))}
+        </List>
+        {sections.length === 0 && (
+          <Typography variant="body2" color="text.secondary" sx={{ px: 2, py: 1.5 }} id="empty-state-message">
+            No action matches “{query.trim()}”. Encode Function Call can call any contract.
           </Typography>
-        </CustomTabPanel>
-      </Box>
+        )}
+      </Paper>
     </Box>
   );
 };
