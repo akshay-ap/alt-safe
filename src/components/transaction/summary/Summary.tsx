@@ -4,7 +4,6 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
-  Chip,
   IconButton,
   List,
   ListItemText,
@@ -38,7 +37,7 @@ const Summary: React.FC<SummaryProps> = ({
           fontStyle: "italic",
         }}
       >
-        No transactions added yet.
+        Actions you add appear here.
       </Typography>
     );
   }
@@ -84,7 +83,6 @@ const Summary: React.FC<SummaryProps> = ({
               }
               sx={{ mr: 1 }}
             />
-            <Chip size="small" label={transaction.type} sx={{ mr: 1 }} />
           </AccordionSummary>
 
           <AccordionDetails sx={{ px: 2, py: 1, position: "relative" }}>
@@ -92,7 +90,7 @@ const Summary: React.FC<SummaryProps> = ({
             {!viewOnly && (
               <IconButton
                 size="small"
-                aria-label="remove"
+                aria-label={`Remove ${transaction.actionName} from the batch`}
                 onClick={(e) => {
                   e.stopPropagation();
                   handleDeleteTransaction(index);

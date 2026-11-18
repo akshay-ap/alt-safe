@@ -23,6 +23,7 @@ import { useAccount } from "wagmi";
 import { STORAGE_KEY } from "../constants";
 import type { SafeAccount } from "../context/types";
 import { useSafeWalletContext } from "../context/WalletContext";
+import { notifySavedSafesChanged, useSavedSafe } from "../hooks/useSavedSafe";
 import AccountAddress from "./common/AccountAddress";
 import ViewSafeStorage from "./common/SafeStorage";
 import Title from "./common/Title";
@@ -36,25 +37,18 @@ const Settings: React.FC = () => {
   const [safeLabels, setSafeLabels] = useState<string[]>([]);
   const [newLabel, setNewLabel] = useState("");
 
+  const saved = useSavedSafe(safeAccount);
+
   useEffect(() => {
     if (safeAccount && isConnected && !isAddressEqual(safeAccount, zeroAddress)) {
       loadStorage(safeAccount);
-      loadSafeInfo();
     }
   }, [isConnected, safeAccount, loadStorage]);
 
-  const loadSafeInfo = async () => {
-    if (!safeAccount) return;
-
-    const safeAccounts = (await storage.getItem(STORAGE_KEY.SAFE_ACCOUNTS)) as SafeAccount[];
-    if (!safeAccounts) return;
-
-    const account = safeAccounts.find((acc) => acc.address === safeAccount);
-    if (account) {
-      setSafeName(account.name || "");
-      setSafeLabels(account.labels || []);
-    }
-  };
+  useEffect(() => {
+    setSafeName(saved?.name || "");
+    setSafeLabels(saved?.labels || []);
+  }, [saved]);
 
   const handleSaveNameAndLabels = async (newName?: string, newLabels?: string[]) => {
     if (!safeAccount) return;
@@ -63,7 +57,7 @@ const Settings: React.FC = () => {
     if (!safeAccounts) return;
 
     const updatedAccounts = safeAccounts.map((acc) => {
-      if (acc.address === safeAccount) {
+      if (isAddressEqual(acc.address, safeAccount)) {
         return {
           ...acc,
           name: newName !== undefined ? newName : acc.name,
@@ -74,6 +68,7 @@ const Settings: React.FC = () => {
     });
 
     await storage.setItem(STORAGE_KEY.SAFE_ACCOUNTS, updatedAccounts);
+    notifySavedSafesChanged();
 
     if (newName !== undefined) setSafeName(newName);
     if (newLabels !== undefined) setSafeLabels(newLabels);
@@ -97,19 +92,11 @@ const Settings: React.FC = () => {
   };
 
   return (
-    <Box sx={{ p: 2 }}>
-      <Box
-        sx={{
-          mb: 4,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          flexWrap: "wrap",
-          gap: 2,
-        }}
-      >
-        <Title text="Safe Settings" />
-      </Box>
+    <Box>
+      <Title
+        text="Safe settings"
+        description="This Safe's local name and labels, and the configuration read from chain. Settings for the whole app are under App settings."
+      />
 
       {!safeAccount || isAddressEqual(safeAccount, zeroAddress) ? (
         <Alert severity="info" sx={{ mb: 2 }}>
@@ -119,7 +106,7 @@ const Settings: React.FC = () => {
         <Box>
           <Grid container spacing={3}>
             {/* Safe Account Info Section */}
-            <Grid size={{ xs: 12, md: 12 }}>
+            <Grid size={{ xs: 12, md: 4 }}>
               <Paper elevation={0} variant="outlined" sx={{ p: 3 }}>
                 <Box
                   sx={{
@@ -208,18 +195,16 @@ const Settings: React.FC = () => {
                 </Box>
               </Paper>
             </Grid>
+            <Grid size={{ xs: 12, md: 8 }}>
+              <Paper elevation={0} variant="outlined" sx={{ p: 3 }}>
+                <Typography variant="h6" component="h2" gutterBottom>
+                  On-chain configuration
+                </Typography>
+                <Divider sx={{ mb: 2 }} />
+                {safeStorage && <ViewSafeStorage safeStorage={safeStorage} />}
+              </Paper>
+            </Grid>
           </Grid>
-
-          {/* Safe Storage Section */}
-          <Paper elevation={0} variant="outlined" sx={{ p: 3, mt: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Safe Storage
-            </Typography>
-
-            <Divider sx={{ mb: 2 }} />
-
-            {safeStorage && <ViewSafeStorage safeStorage={safeStorage} />}
-          </Paper>
         </Box>
       )}
 

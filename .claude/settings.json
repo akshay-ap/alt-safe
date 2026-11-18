@@ -27,5 +27,9 @@
         ]
       }
     ]
+  },
+  "enabledPlugins": {
+    "ponytail@ponytail": true,
+    "frontend-design@anthropic-plugin-directory": true
   }
 }

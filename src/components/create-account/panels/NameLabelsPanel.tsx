@@ -1,6 +1,5 @@
-import { Box, Typography } from "@mui/material";
+import { Autocomplete, Box, Chip, Stack, TextField, Typography } from "@mui/material";
 import type React from "react";
-import NameAndLabels from "../../common/NameAndLabels";
 
 interface NameLabelsPanelProps {
   safeName: string;
@@ -9,26 +8,43 @@ interface NameLabelsPanelProps {
   setSafeLabels: (labels: string[]) => void;
 }
 
-const NameLabelsPanel: React.FC<NameLabelsPanelProps> = ({ safeName, setSafeName, safeLabels, setSafeLabels }) => {
-  return (
-    <Box sx={{ p: { xs: 2, md: 3 } }}>
-      <Typography variant="h6" gutterBottom>
-        Name & Labels
-      </Typography>
-      <Typography
-        variant="body2"
-        sx={{
-          color: "text.secondary",
-          mb: 3,
-        }}
-      >
-        Give your Safe a recognizable name and optional labels for easy identification. This is stroed locally and not
-        on-chain. You can change it later.
-      </Typography>
+const uniqueTrimmed = (labels: string[]) => [...new Set(labels.map((label) => label.trim()).filter(Boolean))];
 
-      <NameAndLabels name={safeName} setName={setSafeName} labels={safeLabels} setLabels={setSafeLabels} />
-    </Box>
-  );
-};
+const NameLabelsPanel: React.FC<NameLabelsPanelProps> = ({ safeName, setSafeName, safeLabels, setSafeLabels }) => (
+  <Box sx={{ p: 2 }}>
+    <Typography variant="h6" component="h2">
+      Name
+    </Typography>
+    <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+      Saved only in this browser. You can change it later.
+    </Typography>
+    <Stack spacing={1.5}>
+      <TextField
+        label="Safe name"
+        placeholder="e.g. Treasury"
+        value={safeName}
+        onChange={(event) => setSafeName(event.target.value)}
+        size="small"
+        fullWidth
+      />
+      <Autocomplete
+        multiple
+        freeSolo
+        options={[]}
+        value={safeLabels}
+        onChange={(_, labels) => setSafeLabels(uniqueTrimmed(labels as string[]))}
+        renderValue={(labels, getItemProps) =>
+          labels.map((label, index) => {
+            const { key, ...itemProps } = getItemProps({ index });
+            return <Chip key={key} size="small" label={label} {...itemProps} />;
+          })
+        }
+        renderInput={(params) => (
+          <TextField {...params} size="small" label="Labels" placeholder="Type and press Enter" />
+        )}
+      />
+    </Stack>
+  </Box>
+);
 
 export default NameLabelsPanel;

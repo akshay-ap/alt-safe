@@ -1,125 +1,67 @@
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
-import ErrorIcon from "@mui/icons-material/Error";
-import { AppBar, Box, Button, IconButton, Toolbar, Tooltip, Typography } from "@mui/material";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutlineOutlined";
+import MenuIcon from "@mui/icons-material/Menu";
+import { AppBar, Box, Button, IconButton, Toolbar, Tooltip } from "@mui/material";
 import type React from "react";
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAccount, useChainId, usePublicClient, useSwitchChain } from "wagmi";
-import { checkRPCStatus, getChainId } from "../../api/api";
-import { useSafeWalletContext } from "../../context/WalletContext";
-import { config } from "../../wagmi";
+import { useState } from "react";
+import { Link as RouterLink } from "react-router-dom";
+import { useAccount } from "wagmi";
 import AccountAddress from "../common/AccountAddress";
-import ChainSelectionDialog from "../dialogs/ChainSelectionDialog";
-import ChangeAccountDialog from "../dialogs/ChangeAccountDialog";
+import WalletDialog from "../dialogs/WalletDialog";
+import Logo from "./Logo";
+import NetworkMenu from "./NetworkMenu";
 
-const NavigationBar: React.FC = () => {
-  const navigate = useNavigate();
-  const chainId = useChainId();
-  const { address, chain } = useAccount();
-  const { switchChain } = useSwitchChain({ config } as any);
-  const publicClient = usePublicClient();
-  const { rpc } = useSafeWalletContext();
-  const [chainDialogOpen, setChainDialogOpen] = useState(false); // State for chain selection dialog
-  const [disconnectDialogOpen, setDisconnectDialogOpen] = useState(false); // State for controlling the dialog
-  const [connected, setConnected] = useState(false);
+export const TOP_BAR_HEIGHT = 56;
+const HELP_URL = "https://github.com/akshay-ap/alt-safe/discussions/2";
 
-  useEffect(() => {
-    (async () => {
-      if (!publicClient || !rpc || !chain) {
-        setConnected(false);
-        return;
-      }
+interface NavigationBarProps {
+  /** Shown on small screens to open the Safe navigation drawer. */
+  onMenuClick?: () => void;
+}
 
-      if (chainId && rpc) {
-        const status = await checkRPCStatus(rpc);
-        const chainIdFromRPC = await getChainId(rpc);
-        if (chainIdFromRPC !== chainId) {
-          setConnected(false);
-          return;
-        }
-        setConnected(status);
-      } else {
-        setConnected(false);
-      }
-    })();
-  }, [publicClient, chain, chainId, rpc]);
-
-  // Handle chain dialog open/close
-  const handleChainDialogOpen = () => {
-    setChainDialogOpen(true);
-  };
-
-  const handleChainDialogClose = () => {
-    setChainDialogOpen(false);
-  };
-
-  const handleChainChange = (_: React.SyntheticEvent, value: any) => {
-    if (value) {
-      switchChain({ chainId: value.id });
-    }
-  };
-
-  const handleChangeClick = () => {
-    setDisconnectDialogOpen(true); // Open the dialog
-  };
-
-  const handleDisconnectConfirm = () => {
-    setDisconnectDialogOpen(false);
-  };
+const NavigationBar: React.FC<NavigationBarProps> = ({ onMenuClick }) => {
+  const { address } = useAccount();
+  const [accountDialogOpen, setAccountDialogOpen] = useState(false);
 
   return (
     <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
-      <Toolbar sx={{ justifyContent: "space-between" }}>
-        {/* Left Section: App Name and Buttons */}
-        <Box sx={{ display: "flex", alignItems: "center" }}>
-          <Typography
-            color="primary"
-            variant="h6"
-            onClick={() => navigate("/")}
-            sx={{
-              fontWeight: "bold",
-              marginRight: 4,
-              cursor: "pointer",
-            }}
+      <Toolbar sx={{ minHeight: `${TOP_BAR_HEIGHT}px !important`, gap: 1 }}>
+        {onMenuClick && (
+          <IconButton onClick={onMenuClick} aria-label="Open navigation" sx={{ display: { md: "none" } }}>
+            <MenuIcon />
+          </IconButton>
+        )}
+        <Box component={RouterLink} to="/home" aria-label="ALT Safe home" sx={{ color: "inherit", mr: "auto" }}>
+          <Logo />
+        </Box>
+        <NetworkMenu />
+        <Tooltip title="Help">
+          <IconButton
+            component="a"
+            href={HELP_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Help"
+            sx={{ display: { xs: "none", sm: "inline-flex" } }}
           >
-            &lt;ALT&gt; Safe
-          </Typography>
-        </Box>
-
-        <Box>
-          {address && (
-            <IconButton onClick={handleChainDialogOpen} color="inherit">
-              {connected ? (
-                <Tooltip title="connected">
-                  <CheckCircleOutlineIcon sx={{ marginRight: "5px" }} />
-                </Tooltip>
-              ) : (
-                <Tooltip title="Error connecting to RPC. Check RPC URL">
-                  <ErrorIcon color="error" sx={{ marginRight: "5px" }} />
-                </Tooltip>
-              )}
-              {chain?.name}
-            </IconButton>
-          )}
-          <ChainSelectionDialog open={chainDialogOpen} onClose={handleChainDialogClose} onChange={handleChainChange} />
-
-          {address ? (
-            <IconButton onClick={handleChangeClick} color="inherit">
-              <AccountAddress address={address} short showCopy={false} />
-            </IconButton>
-          ) : (
-            <Button variant="contained" onClick={handleChangeClick}>
-              Connect
-            </Button>
-          )}
-        </Box>
+            <HelpOutlineIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+        {address ? (
+          <Button
+            variant="outlined"
+            onClick={() => setAccountDialogOpen(true)}
+            aria-label="Wallet account"
+            sx={{ whiteSpace: "nowrap", flexShrink: 0 }}
+          >
+            <AccountAddress address={address} short showCopy={false} />
+          </Button>
+        ) : (
+          <Button variant="contained" onClick={() => setAccountDialogOpen(true)}>
+            Connect wallet
+          </Button>
+        )}
       </Toolbar>
-
-      <ChangeAccountDialog
-        open={disconnectDialogOpen}
-        onClose={() => setDisconnectDialogOpen(false)}
-        onConfirm={handleDisconnectConfirm}
-      />
+      <WalletDialog open={accountDialogOpen} onClose={() => setAccountDialogOpen(false)} />
     </AppBar>
   );
 };

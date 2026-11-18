@@ -8,11 +8,11 @@ export enum STORAGE_KEY {
   SAFE_INDEX = "safeIndex",
   LAST_SELECTED_SAFE_ACCOUNT = "lastSelectedSafeAccount",
   SAFE_TRANSACTIONS = "safeTransactions",
-  CUSTOM_DEPLOYMENTS = "customDeployments",
   TOKEN_LIST = "tokenList",
-  RPC = "rpc",
+  RPC_URLS = "rpcUrls",
   DRAFT_TRANSACTIONS = "draft_transactions",
   ADDRESS_BOOK = "addressBook",
+  ADDRESS_FORMAT = "addressFormat",
 }
 
 export const WALLET_STORAGE_KEY = "alt_wallet";

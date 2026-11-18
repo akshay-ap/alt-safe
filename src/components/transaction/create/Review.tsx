@@ -2,29 +2,21 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import FingerprintIcon from "@mui/icons-material/Fingerprint";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import { Alert, Box, Button, Paper, Typography, useMediaQuery, useTheme } from "@mui/material";
-import Grid from "@mui/material/Grid";
-import { readContract, signTypedData, simulateContract } from "@wagmi/core";
+import { Alert, Box, Button, Paper, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { signTypedData, simulateContract } from "@wagmi/core";
 import { useState } from "react";
-import type { Address } from "viem";
-import {
-  BaseError,
-  bytesToHex,
-  ContractFunctionRevertedError,
-  encodeFunctionData,
-  stringToBytes,
-  zeroAddress,
-} from "viem";
+import { BaseError, bytesToHex, ContractFunctionRevertedError, stringToBytes } from "viem";
 import { useAccount, usePublicClient, useWriteContract } from "wagmi";
-import multisendCallOnly from "../../../abis/MultiSendCallOnly.json";
 import safe from "../../../abis/Safe.json";
 import { STORAGE_KEY } from "../../../constants";
 import { useCreateTransactionContext } from "../../../context/CreateTransactionContext";
 import type { ImportData, Transaction } from "../../../context/types";
 import { type SafeTransactionInfo, useSafeWalletContext } from "../../../context/WalletContext";
-import { encodeMultiSend } from "../../../utils/multisend";
-import { EIP712_SAFE_TX_TYPE, SafeOperation, type SafeTransactionParams } from "../../../utils/utils";
+import { NONCE_LOADING_ERROR, nonceWarning, prepareSafeTransaction } from "../../../utils/safeTransaction";
+import { EIP712_SAFE_TX_TYPE, type SafeTransactionParams } from "../../../utils/utils";
 import { config } from "../../../wagmi";
+import AccountAddress from "../../common/AccountAddress";
+import TransactionHash from "../../common/TransactionHash";
 import ViewSafeTransactionDialog from "../../dialogs/ViewSafeTransactionDialog";
 import WaitForTransactionDialog from "../../dialogs/WaitForTransactionDialog";
 import TransactionSummaryPanel from "../summary/TransactionSummaryPanel";
@@ -32,6 +24,31 @@ import TransactionSummaryPanel from "../summary/TransactionSummaryPanel";
 interface ReviewProps {
   setActiveStep: (step: number) => void;
 }
+
+const ReviewRow: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
+  <Box sx={{ display: "grid", gridTemplateColumns: { sm: "180px 1fr" }, gap: { xs: 0.25, sm: 2 }, py: 1 }}>
+    <Typography variant="body2" color="text.secondary">
+      {label}
+    </Typography>
+    <Box sx={{ minWidth: 0 }}>{children}</Box>
+  </Box>
+);
+
+const SigningOption: React.FC<{ title: string; description: string; action: React.ReactNode }> = ({
+  title,
+  description,
+  action,
+}) => (
+  <Stack spacing={1.5} sx={{ p: 2, border: 1, borderColor: "divider", borderRadius: 1.5, alignItems: "flex-start" }}>
+    <Box>
+      <Typography variant="subtitle2">{title}</Typography>
+      <Typography variant="body2" color="text.secondary">
+        {description}
+      </Typography>
+    </Box>
+    {action}
+  </Stack>
+);
 
 const Review: React.FC<ReviewProps> = ({ setActiveStep }) => {
   const theme = useTheme();
@@ -46,6 +63,7 @@ const Review: React.FC<ReviewProps> = ({ setActiveStep }) => {
     safeTransactionHash,
     safeTransaction,
     nonce,
+    onChainNonce,
     gasPrice,
     safeTxGas,
     baseGas,
@@ -65,7 +83,6 @@ const Review: React.FC<ReviewProps> = ({ setActiveStep }) => {
   const [viewDialogOpen, setViewDialogOpen] = useState<boolean>(false);
 
   // Fixed height for consistent layout
-  const contentHeight = "calc(100vh - 250px)";
 
   const handleCloseWaitingDialog = () => {
     setWaitForTransactionDialogOpen(false);
@@ -173,72 +190,19 @@ const Review: React.FC<ReviewProps> = ({ setActiveStep }) => {
     console.log("Transaction successfully signed");
   };
 
-  const getSafeTransactionInfo = async (): Promise<{
-    safeTx: SafeTransactionParams;
-    safeTxHash: `0x${string}`;
-  }> => {
-    let safeTransactionHashFromContractCall: `0x${string}` = "0x";
-    let to: Address;
-    let value: bigint;
-    let callData: `0x${string}`;
-    let operation: SafeOperation;
-
-    if (safeAccount === undefined) {
-      throw new Error("Safe account is undefined");
-    }
-
-    if (transactions.length < 1) {
-      throw new Error("No transactions");
-    }
-
-    if (transactions.length === 1) {
-      to = transactions[0].to;
-      value = BigInt(transactions[0].value);
-      callData = transactions[0].data;
-      operation = SafeOperation.CALL;
-    } else {
-      const metaTransactions = transactions.map((transaction) => {
-        return {
-          to: transaction.to,
-          value: BigInt(transaction.value),
-          data: transaction.data,
-          operation: SafeOperation.CALL,
-        };
-      });
-
-      callData = encodeFunctionData({
-        abi: multisendCallOnly,
-        functionName: "multiSend",
-        args: [encodeMultiSend(metaTransactions)],
-      });
-
-      to = safeDeployment?.multiSendCallOnly ?? zeroAddress;
-      value = 0n;
-      operation = SafeOperation.DELEGATE_CALL;
-    }
-
-    safeTransactionHashFromContractCall = (await readContract(config, {
-      abi: safe,
-      address: safeAccount,
-      functionName: "getTransactionHash",
-      args: [to, value, callData, operation, safeTxGas, baseGas, gasPrice, refundTokenAddress, refundToAddress, nonce],
-    })) as `0x${string}`;
-
-    return {
-      safeTx: {
-        to,
-        value,
-        data: callData,
-        operation,
-        safeTxGas: safeTxGas,
-        baseGas: baseGas,
-        gasPrice: gasPrice,
-        gasToken: refundTokenAddress,
-        refundReceiver: refundToAddress,
-        nonce,
-      },
-      safeTxHash: safeTransactionHashFromContractCall,
+  const getSafeTransactionInfo = () => {
+    if (safeAccount === undefined) throw new Error("Safe account is undefined");
+    // nonce is a 0 placeholder until the Safe's nonce has loaded.
+    if (onChainNonce === undefined) throw new Error(NONCE_LOADING_ERROR);
+    const settings = {
+      nonce,
+      safeTxGas,
+      baseGas,
+      gasPrice,
+      gasToken: refundTokenAddress,
+      refundReceiver: refundToAddress,
     };
+    return prepareSafeTransaction(safeAccount, transactions, settings, safeDeployment?.multiSendCallOnly);
   };
 
   const handleApproveTransactionHash = async () => {
@@ -304,132 +268,85 @@ const Review: React.FC<ReviewProps> = ({ setActiveStep }) => {
   };
 
   return (
-    <Grid container spacing={2}>
-      <Grid size={{ xs: 12, md: 9 }}>
-        {/* Content container with fixed height and scrollable content */}
-        <Box
-          sx={{
-            height: contentHeight,
-            display: "flex",
-            flexDirection: "column",
-            overflow: "hidden", // Hide overflow so inner scrollable content works properly
-          }}
-        >
-          <Box sx={{ flex: 1, overflow: "auto" }}>
-            <Paper elevation={0} variant="outlined" sx={{ p: 2, mb: 2 }}>
-              <Typography variant="h5" gutterBottom>
-                Review Transactions
-              </Typography>
-
-              <Box sx={{ mb: 3 }}>
-                <Typography variant="subtitle1" gutterBottom>
-                  Transaction Details
-                </Typography>
-                <Box
-                  sx={{
-                    p: 2,
-                    bgcolor: "background.paper",
-                    borderRadius: 1,
-                    border: 1,
-                    borderColor: "divider",
-                  }}
-                >
-                  <Grid container spacing={2}>
-                    <Grid size={{ xs: 6 }}>
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          color: "text.secondary",
-                        }}
-                      >
-                        Number of transactions
-                      </Typography>
-                      <Typography variant="body1">{transactions.length}</Typography>
-                    </Grid>
-                    <Grid size={{ xs: 6 }}>
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          color: "text.secondary",
-                        }}
-                      >
-                        Safe account
-                      </Typography>
-                      <Typography variant="body1" sx={{ wordBreak: "break-all" }}>
-                        {safeAccount}
-                      </Typography>
-                    </Grid>
-                    <Grid size={{ xs: 12 }}>
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          color: "text.secondary",
-                        }}
-                      >
-                        Transaction hash
-                      </Typography>
-                      <Typography variant="body1" sx={{ wordBreak: "break-all" }}>
-                        {safeTransactionHash}
-                      </Typography>
-                    </Grid>
-                  </Grid>
-                </Box>
-              </Box>
-
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  mt: 2,
-                }}
-              >
-                <Button variant="outlined" startIcon={<VisibilityIcon />} onClick={handleViewSafeTransaction}>
-                  View Safe Transaction Details
-                </Button>
-
-                <Button
-                  variant="outlined"
-                  startIcon={<ContentCopyIcon />}
-                  onClick={handleCopyToClipboard}
-                  disabled={!copyUnsignedTxButtonEnabled}
-                >
-                  Copy Unsigned
-                </Button>
-              </Box>
-            </Paper>
-
-            <Paper elevation={0} variant="outlined" sx={{ p: 2 }}>
-              <Typography variant="h6" gutterBottom>
-                Signing Options
-              </Typography>
-
-              <Alert severity="info" sx={{ mb: 2 }}>
-                Sign this transaction to execute it, or approve the transaction hash.
-              </Alert>
-
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  startIcon={<FingerprintIcon />}
-                  onClick={handleSignTransaction}
-                  fullWidth
-                >
-                  Sign Transaction
-                </Button>
-
-                <Button
-                  variant="outlined"
-                  startIcon={<CheckCircleIcon />}
-                  onClick={handleApproveTransactionHash}
-                  fullWidth
-                >
-                  Approve Transaction Hash
-                </Button>
-              </Box>
-            </Paper>
+    <Box
+      sx={{
+        display: "grid",
+        gap: 3,
+        alignItems: "start",
+        gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 1fr) 320px" },
+      }}
+    >
+      <Stack spacing={2} sx={{ minWidth: 0 }}>
+        <Paper variant="outlined">
+          <Box sx={{ px: 2.5, pt: 2.5, pb: 1 }}>
+            <Typography variant="h5" component="h2">
+              Safe transaction
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Your wallet will ask you to sign this hash. Check that it matches before you confirm.
+            </Typography>
           </Box>
-        </Box>
+          <Box sx={{ px: 2.5, pb: 1.5 }}>
+            <ReviewRow label="Safe transaction hash">
+              <TransactionHash hash={safeTransactionHash} />
+            </ReviewRow>
+            <ReviewRow label="Safe">
+              <AccountAddress address={safeAccount} />
+            </ReviewRow>
+            <ReviewRow label="Nonce">
+              {safeTransaction?.nonce.toString() ?? "—"} (
+              {transactions.length === 1 ? "1 action" : `${transactions.length} actions, batched with MultiSend`})
+            </ReviewRow>
+            {safeTransaction && nonceWarning(safeTransaction.nonce, onChainNonce) && (
+              <Alert severity="warning" sx={{ mt: 1 }}>
+                {nonceWarning(safeTransaction.nonce, onChainNonce)}
+              </Alert>
+            )}
+          </Box>
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{ px: 2.5, py: 1.5, borderTop: 1, borderColor: "divider", flexWrap: "wrap", rowGap: 1 }}
+          >
+            <Button startIcon={<VisibilityIcon />} onClick={handleViewSafeTransaction}>
+              View all parameters
+            </Button>
+            <Button
+              startIcon={<ContentCopyIcon />}
+              onClick={handleCopyToClipboard}
+              disabled={!copyUnsignedTxButtonEnabled}
+            >
+              Copy for other signers
+            </Button>
+          </Stack>
+        </Paper>
+
+        <Paper variant="outlined" sx={{ p: 2.5 }}>
+          <Typography variant="h5" component="h2" sx={{ mb: 1.5 }}>
+            Sign
+          </Typography>
+          <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" } }}>
+            <SigningOption
+              title="Sign with your wallet"
+              description="Free and off-chain. Share it with the other owners if more signatures are needed."
+              action={
+                <Button variant="contained" startIcon={<FingerprintIcon />} onClick={handleSignTransaction}>
+                  Sign
+                </Button>
+              }
+            />
+            <SigningOption
+              title="Approve on chain"
+              description="Sends approveHash and costs gas. For wallets that cannot sign typed data."
+              action={
+                <Button variant="outlined" startIcon={<CheckCircleIcon />} onClick={handleApproveTransactionHash}>
+                  Approve
+                </Button>
+              }
+            />
+          </Box>
+        </Paper>
+
         {transactionHash && (
           <WaitForTransactionDialog
             open={waitForTransactionDialogOpen}
@@ -437,16 +354,16 @@ const Review: React.FC<ReviewProps> = ({ setActiveStep }) => {
             onClose={handleCloseWaitingDialog}
           />
         )}
-      </Grid>
+      </Stack>
 
-      <Grid size={{ xs: 12, md: 3 }}>
+      <Box sx={{ position: { lg: "sticky" }, top: { lg: 80 } }}>
         <TransactionSummaryPanel
           transactions={transactions}
           handleDeleteTransaction={() => {}}
           viewOnly={true}
           isMobile={isMobile}
         />
-      </Grid>
+      </Box>
 
       {/* Modal dialogs */}
       <ViewSafeTransactionDialog
@@ -455,7 +372,7 @@ const Review: React.FC<ReviewProps> = ({ setActiveStep }) => {
         safeTransaction={safeTransaction}
         safeTransactionHash={safeTransactionHash || "0x"}
       />
-    </Grid>
+    </Box>
   );
 };
 

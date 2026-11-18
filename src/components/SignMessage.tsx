@@ -30,6 +30,7 @@ import { useAccount } from "wagmi";
 import fallbackHandlerABI from "../abis/CompatibilityFallbackHandler.json";
 import { useSafeWalletContext } from "../context/WalletContext";
 import { config } from "../wagmi";
+import Title from "./common/Title";
 
 const SignMessage: React.FC = () => {
   const { safeAccount, safeStorage } = useSafeWalletContext();
@@ -233,114 +234,116 @@ const SignMessage: React.FC = () => {
   };
 
   return (
-    <Card variant="outlined" sx={{ mb: 4 }}>
-      <CardContent>
-        <Typography variant="h5" component="h1" gutterBottom>
-          Sign Message for Safe Account
-        </Typography>
-        {errors.length > 0 && (
-          <Box
-            sx={{
-              mb: 3,
-            }}
-          >
-            <Alert severity="error" onClose={clearErrors} sx={{ mb: 1 }}>
-              <Typography variant="subtitle2">There were some issues:</Typography>
-              <ul style={{ margin: 0, paddingLeft: "1rem" }}>
-                {errors.map((error, index) => (
-                  <li key={`${index}-${uuidv4()}`}>{error}</li>
-                ))}
-              </ul>
-            </Alert>
-          </Box>
-        )}
-
-        <Box sx={{ mb: 4 }}>
-          <TextField
-            fullWidth
-            multiline
-            rows={4}
-            onChange={handleChange}
-            value={message}
-            label="Message to sign"
-            placeholder="Enter your message here"
-            variant="outlined"
-          />
-          <Box
-            sx={{
-              mt: 2,
-            }}
-          >
-            <Button variant="contained" onClick={handleSignMessage} disabled={!message || !account.address}>
-              Sign with your wallet
-            </Button>
-          </Box>
-        </Box>
-
-        <Divider sx={{ my: 3 }} />
-
-        <Box sx={{ mb: 4 }}>
-          {renderSignatureFields()}
-          <Box
-            sx={{
-              mt: 2,
-            }}
-          >
-            <Button
-              variant="contained"
-              onClick={handleEncodeSignatures}
-              disabled={!canEncodeSignatures}
-              color="primary"
+    <>
+      <Title
+        text="Sign a message"
+        description="Sign a SafeMessage with your wallet as an owner of this Safe, and check a signature against the Safe's isValidSignature."
+      />
+      <Card variant="outlined" sx={{ mb: 4 }}>
+        <CardContent>
+          {errors.length > 0 && (
+            <Box
+              sx={{
+                mb: 3,
+              }}
             >
-              Encode signatures
-            </Button>
-          </Box>
-        </Box>
+              <Alert severity="error" onClose={clearErrors} sx={{ mb: 1 }}>
+                <Typography variant="subtitle2">There were some issues:</Typography>
+                <ul style={{ margin: 0, paddingLeft: "1rem" }}>
+                  {errors.map((error, index) => (
+                    <li key={`${index}-${uuidv4()}`}>{error}</li>
+                  ))}
+                </ul>
+              </Alert>
+            </Box>
+          )}
 
-        <Divider sx={{ my: 3 }} />
-
-        <Box>
-          <Stack
-            direction="row"
-            spacing={1}
-            sx={{
-              alignItems: "center",
-            }}
-          >
+          <Box sx={{ mb: 2 }}>
             <TextField
               fullWidth
-              placeholder="Encoded signature will appear here"
-              margin="normal"
-              value={encodedSignature || ""}
+              multiline
+              rows={2}
+              onChange={handleChange}
+              value={message}
+              label="Message to sign"
+              placeholder="Enter your message here"
               variant="outlined"
-              disabled
             />
-            <Tooltip title={copied ? "Copied!" : "Copy to clipboard"}>
-              <IconButton onClick={handleCopyToClipboard} disabled={!encodedSignature}>
-                <ContentCopyIcon />
-              </IconButton>
-            </Tooltip>
-          </Stack>
-          <Typography
-            variant="body2"
-            sx={{
-              color: "text.secondary",
-              mt: 1,
-            }}
-          >
-            This encoded signature can be verified by calling ERC-1271 isValidSignature function on the Safe account.
-          </Typography>
-          <Button variant="contained" onClick={handleCheckSignature}>
-            Verify
-          </Button>
-          {isValidSignature && (
-            <Alert severity="success" sx={{ mt: 2 }}>
-              The signature is valid!
-            </Alert>
-          )}
-        </Box>
-      </CardContent>
-    </Card>
+            <Box
+              sx={{
+                mt: 2,
+              }}
+            >
+              <Button variant="contained" onClick={handleSignMessage} disabled={!message || !account.address}>
+                Sign with your wallet
+              </Button>
+            </Box>
+          </Box>
+
+          <Divider sx={{ my: 2 }} />
+
+          <Box sx={{ mb: 2 }}>
+            {renderSignatureFields()}
+            <Box
+              sx={{
+                mt: 2,
+              }}
+            >
+              <Button
+                variant="contained"
+                onClick={handleEncodeSignatures}
+                disabled={!canEncodeSignatures}
+                color="primary"
+              >
+                Encode signatures
+              </Button>
+            </Box>
+          </Box>
+
+          <Divider sx={{ my: 2 }} />
+
+          <Box>
+            <Stack
+              direction="row"
+              spacing={1}
+              sx={{
+                alignItems: "center",
+              }}
+            >
+              <TextField
+                fullWidth
+                placeholder="Encoded signature will appear here"
+                value={encodedSignature || ""}
+                variant="outlined"
+                disabled
+              />
+              <Tooltip title={copied ? "Copied!" : "Copy to clipboard"}>
+                <IconButton onClick={handleCopyToClipboard} disabled={!encodedSignature}>
+                  <ContentCopyIcon />
+                </IconButton>
+              </Tooltip>
+            </Stack>
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+                mt: 1,
+              }}
+            >
+              This encoded signature can be verified by calling ERC-1271 isValidSignature function on the Safe account.
+            </Typography>
+            <Button variant="contained" onClick={handleCheckSignature} sx={{ mt: 1.5 }}>
+              Verify
+            </Button>
+            {isValidSignature && (
+              <Alert severity="success" sx={{ mt: 2 }}>
+                The signature is valid!
+              </Alert>
+            )}
+          </Box>
+        </CardContent>
+      </Card>
+    </>
   );
 };
 

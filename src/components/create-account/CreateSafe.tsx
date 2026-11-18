@@ -1,49 +1,32 @@
-import { Box } from "@mui/material";
+import { Grid, Stack } from "@mui/material";
 import type React from "react";
+import { useChainId, useChains } from "wagmi";
 import { CreateSafeProvider } from "../../context/CreateSafeContext";
-import ConfigurationPanels from "./ConfigurationPanels";
-import CreateSafeHeader from "./CreateSafeHeader";
+import PageHeader from "../common/PageHeader";
+import ConfigurationPanels, { NameSection } from "./ConfigurationPanels";
 import SafePreview from "./SafePreview";
 
-const CreateSafeContent: React.FC = () => {
-  return (
-    <Box sx={{ height: "100vh", display: "flex", flexDirection: "column" }}>
-      <CreateSafeHeader />
-
-      <Box
-        sx={{
-          display: "flex",
-          flex: 1,
-          gap: { xs: 2, md: 3 },
-          p: { xs: 2, md: 3 },
-          pt: 0,
-          flexDirection: { xs: "column", lg: "row" },
-        }}
-      >
-        {/* Left Configuration Panel */}
-        <Box sx={{ flex: { lg: 1 }, minWidth: 0 }}>
-          <ConfigurationPanels />
-        </Box>
-
-        {/* Right Preview Panel */}
-        <Box
-          sx={{
-            width: { xs: "100%", lg: 400 },
-            minWidth: { lg: 350 },
-            maxWidth: { lg: 450 },
-          }}
-        >
-          <SafePreview />
-        </Box>
-      </Box>
-    </Box>
-  );
-};
-
 const CreateSafe: React.FC = () => {
+  const chainId = useChainId();
+  const chainName = useChains().find((chain) => chain.id === chainId)?.name ?? "the selected network";
+
   return (
     <CreateSafeProvider>
-      <CreateSafeContent />
+      <PageHeader
+        title="Create a Safe"
+        description={`Deploys a new Safe on ${chainName} from your connected wallet.`}
+      />
+      <Grid container spacing={3} sx={{ alignItems: "flex-start" }}>
+        <Grid size={{ xs: 12, lg: 8 }}>
+          <ConfigurationPanels />
+        </Grid>
+        <Grid size={{ xs: 12, lg: 4 }} sx={{ position: { lg: "sticky" }, top: { lg: 80 } }}>
+          <Stack spacing={2}>
+            <NameSection />
+            <SafePreview />
+          </Stack>
+        </Grid>
+      </Grid>
     </CreateSafeProvider>
   );
 };

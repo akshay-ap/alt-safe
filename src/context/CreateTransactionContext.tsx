@@ -16,6 +16,8 @@ interface CreateTransactionContextType {
   signature?: `0x${string}`;
   safeTransactionHash?: `0x${string}`;
   nonce: bigint;
+  /** The Safe's current nonce, undefined while it loads. */
+  onChainNonce: bigint | undefined;
   gasPrice: bigint;
   safeTxGas: bigint;
   baseGas: bigint;
@@ -61,6 +63,9 @@ export const CreateTransactionProvider: React.FC<CreateTransactionProviderProps>
   const [signature, setSignature] = useState<`0x${string}` | undefined>();
   const [safeTransactionHash, setSafeTransactionHash] = useState<`0x${string}` | undefined>();
   const [nonce, setNonce] = useState<bigint>(0n);
+  const [onChainNonce, setOnChainNonce] = useState<bigint>();
+  // Bumped by resetContext so the next transaction starts from the Safe's then-current nonce.
+  const [nonceReload, setNonceReload] = useState(0);
   const [error, setError] = useState<string | undefined>();
   const [gasPrice, setGasPrice] = useState<bigint>(0n);
   const [safeTxGas, setSafeTxGas] = useState<bigint>(0n);
@@ -70,6 +75,8 @@ export const CreateTransactionProvider: React.FC<CreateTransactionProviderProps>
   const [refundToAddress, setRefundToAddress] = useState<Address>(zeroAddress);
 
   useEffect(() => {
+    let isCurrent = true;
+    setOnChainNonce(undefined);
     (async () => {
       if (safeAccount === undefined) return;
 
@@ -79,9 +86,14 @@ export const CreateTransactionProvider: React.FC<CreateTransactionProviderProps>
         functionName: "nonce",
       })) as bigint;
 
+      if (!isCurrent) return;
+      setOnChainNonce(fetchedNonce);
       setNonce(fetchedNonce);
     })();
-  }, [safeAccount]);
+    return () => {
+      isCurrent = false;
+    };
+  }, [safeAccount, nonceReload]);
 
   // Utility actions
   const addTransaction = (transaction: Transaction) => {
@@ -103,6 +115,7 @@ export const CreateTransactionProvider: React.FC<CreateTransactionProviderProps>
     setSignature(undefined);
     setSafeTransactionHash(undefined);
     setNonce(0n);
+    setNonceReload((count) => count + 1);
     setGasPrice(0n);
     setSafeTxGas(0n);
     setBaseGas(0n);
@@ -120,6 +133,7 @@ export const CreateTransactionProvider: React.FC<CreateTransactionProviderProps>
     signature,
     safeTransactionHash,
     nonce,
+    onChainNonce,
     gasPrice,
     safeTxGas,
     baseGas,

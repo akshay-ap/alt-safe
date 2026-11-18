@@ -20,6 +20,7 @@ import { useState } from "react";
 import type { Address } from "viem";
 import { isAddress } from "viem";
 import { useCreateSafeContext } from "../../../context/CreateSafeContext";
+import AccountAddress from "../../common/AccountAddress";
 import AddressInput from "../../common/AddressInput";
 
 const ModulesPanel: React.FC = () => {
@@ -81,71 +82,64 @@ const ModulesPanel: React.FC = () => {
         </Typography>
       </Alert>
 
-      {/* Default Modules Section */}
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="subtitle1" gutterBottom>
-          Default Modules
-        </Typography>
-        <Typography
-          variant="body2"
-          sx={{
-            color: "text.secondary",
-            mb: 2,
-          }}
-        >
-          Select from pre-configured trusted modules
-        </Typography>
-        <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
-          <FormGroup>
-            {defaultModules.map((module) => (
-              <FormControlLabel
-                key={module.address}
-                control={
-                  <Checkbox
-                    checked={selectedDefaultModules.includes(module.address)}
-                    onChange={() => handleDefaultModuleToggle(module.address)}
-                    disabled={modules.includes(module.address)}
-                  />
-                }
-                label={
-                  <Box>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        fontWeight: "medium",
-                      }}
-                    >
-                      {module.name}
-                    </Typography>
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        fontFamily: "monospace",
-                        color: "text.secondary",
-                      }}
-                    >
-                      {module.address}
-                    </Typography>
-                    {modules.includes(module.address) && (
-                      <Chip size="small" label="Already Added" color="success" sx={{ ml: 1 }} />
-                    )}
-                  </Box>
-                }
-              />
-            ))}
-          </FormGroup>
-          {selectedDefaultModules.length > 0 && (
-            <Button
-              variant="contained"
-              onClick={handleAddSelectedDefaultModules}
-              sx={{ mt: 2 }}
-              startIcon={<AddCircleOutlineIcon />}
-            >
-              Add Selected ({selectedDefaultModules.length})
-            </Button>
-          )}
-        </Paper>
-      </Box>
+      {defaultModules.length > 0 && (
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="subtitle1" gutterBottom>
+            Default Modules
+          </Typography>
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+              mb: 2,
+            }}
+          >
+            Select from pre-configured trusted modules
+          </Typography>
+          <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+            <FormGroup>
+              {defaultModules.map((module) => (
+                <FormControlLabel
+                  key={module.address}
+                  control={
+                    <Checkbox
+                      checked={selectedDefaultModules.includes(module.address)}
+                      onChange={() => handleDefaultModuleToggle(module.address)}
+                      disabled={modules.includes(module.address)}
+                    />
+                  }
+                  label={
+                    <Box>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontWeight: "medium",
+                        }}
+                      >
+                        {module.name}
+                      </Typography>
+                      <AccountAddress address={module.address} size="small" showCopy={false} />
+                      {modules.includes(module.address) && (
+                        <Chip size="small" label="Already Added" color="success" sx={{ ml: 1 }} />
+                      )}
+                    </Box>
+                  }
+                />
+              ))}
+            </FormGroup>
+            {selectedDefaultModules.length > 0 && (
+              <Button
+                variant="contained"
+                onClick={handleAddSelectedDefaultModules}
+                sx={{ mt: 2 }}
+                startIcon={<AddCircleOutlineIcon />}
+              >
+                Add Selected ({selectedDefaultModules.length})
+              </Button>
+            )}
+          </Paper>
+        </Box>
+      )}
 
       <Box sx={{ mb: 3 }}>
         <Typography variant="subtitle1" gutterBottom>
@@ -226,14 +220,7 @@ const ModulesPanel: React.FC = () => {
                   primary={
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                       <Chip label={`Module ${modules.indexOf(module) + 1}`} size="small" />
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          fontFamily: "monospace",
-                        }}
-                      >
-                        {module}
-                      </Typography>
+                      <AccountAddress address={module} size="small" />
                     </Box>
                   }
                 />

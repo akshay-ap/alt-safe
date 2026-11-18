@@ -1,115 +1,78 @@
-import { Button, TextField, Typography } from "@mui/material";
-import Grid from "@mui/material/Grid";
+import { Box, Typography } from "@mui/material";
 import type React from "react";
+import { useState } from "react";
 import { Route, Routes, useNavigate, useParams } from "react-router-dom";
 import type { Transaction, TransactionSpec } from "../../../context/types";
 import { useSafeWalletContext } from "../../../context/WalletContext";
+import { ENCODE_FUNCTION_CALL } from "../../../utils/actionCatalog";
 import ErrorBoundary from "../../common/ErrorBoundary";
 import EncodeFunctionCall from "./EncodeFunctionCall";
+import { ProtocolGrid, ProtocolHeader } from "./ProtocolPicker";
 import TransactionInputBuilder from "./TransactionInputBuilder";
-import TransactionParamsForm from "./TransactionParamsForm";
-import TransactionTypePanel from "./TransactionTypePanel";
 
 interface TransactionBuilderProps {
-  importHex: `0x${string}`;
-  setImportHex: (value: `0x${string}`) => void;
   handleAddTransaction: (newTransaction: Transaction) => void;
-  handleImportTransactions: () => void;
 }
 
-const TransactionBuilder: React.FC<TransactionBuilderProps> = ({
-  importHex,
-  setImportHex,
-  handleAddTransaction,
-  handleImportTransactions,
-}) => {
-  const navigate = useNavigate();
+// On wide screens each column scrolls on its own so the page never grows past the viewport.
+const COLUMN_SCROLL = { height: { lg: "100%" }, overflowY: { lg: "auto" }, minHeight: 0 } as const;
 
-  const handleTransactionTypeSelect = (group: string, type: string) => {
-    if (group === "TransactionDefaults" && type === "TransactionDefaults") {
-      navigate("/create-transaction/transaction-defaults");
-    } else {
-      navigate(`/create-transaction/${group}/${type}`);
-    }
+const TransactionBuilder: React.FC<TransactionBuilderProps> = ({ handleAddTransaction }) => {
+  const navigate = useNavigate();
+  // Bumped after each add so the form starts empty for the next action of the same protocol.
+  const [addedCount, setAddedCount] = useState(0);
+
+  const select = (group: string, action: string) => navigate(`/create-transaction/${group}/${action}`);
+  const addAndReset = (transaction: Transaction) => {
+    handleAddTransaction(transaction);
+    setAddedCount((count) => count + 1);
   };
 
   return (
-    <Grid container spacing={2} id="transaction-builder-container">
-      <Grid
-        size={4}
-        sx={{ overflowY: "scroll", height: "60vh", scrollbarWidth: "thin" }}
-        id="transaction-type-panel-container"
-      >
-        <TransactionTypePanel onSelect={handleTransactionTypeSelect} />
-      </Grid>
+    <Box id="transaction-builder-container" sx={{ minWidth: 0, ...COLUMN_SCROLL }}>
+      <Routes>
+        <Route index element={<ProtocolGrid onSelect={select} />} />
+        <Route
+          path="/:group/:type"
+          element={
+            <ActionView
+              onSelect={select}
+              onBack={() => navigate("/create-transaction")}
+              handleAddTransaction={addAndReset}
+              formKey={addedCount}
+            />
+          }
+        />
+      </Routes>
+    </Box>
+  );
+};
 
-      <Grid
-        size={8}
-        sx={{ overflowY: "scroll", height: "60vh", scrollbarWidth: "thin" }}
-        id="transaction-input-panel-container"
-      >
-        <Routes>
-          <Route
-            path="/transaction-defaults"
-            element={
-              <Grid id="tx-params-form" size={12}>
-                <TransactionParamsForm />
-              </Grid>
-            }
-          />
-          <Route
-            path="/:group/:type"
-            element={
-              <Grid id="tx-action-input-form" size={12}>
-                <TransactionInputForm
-                  importHex={importHex}
-                  setImportHex={setImportHex}
-                  handleAddTransaction={handleAddTransaction}
-                  handleImportTransactions={handleImportTransactions}
-                />
-              </Grid>
-            }
-          />
-        </Routes>
-      </Grid>
-    </Grid>
+const ActionView: React.FC<{
+  onSelect: (group: string, action: string) => void;
+  onBack: () => void;
+  handleAddTransaction: (transaction: Transaction) => void;
+  formKey: number;
+}> = ({ onSelect, onBack, handleAddTransaction, formKey }) => {
+  const { group = "", type = "" } = useParams();
+  return (
+    <Box id="tx-action-input-form">
+      <ProtocolHeader group={group} action={type} onSelect={onSelect} onBack={onBack} />
+      <TransactionInputForm key={formKey} handleAddTransaction={handleAddTransaction} />
+    </Box>
   );
 };
 
 const TransactionInputForm: React.FC<{
-  importHex: `0x${string}`;
-  setImportHex: (value: `0x${string}`) => void;
   handleAddTransaction: (newTransaction: Transaction) => void;
-  handleImportTransactions: () => void;
-}> = ({ importHex, setImportHex, handleAddTransaction, handleImportTransactions }) => {
+}> = ({ handleAddTransaction }) => {
   const { txBuilderSpec } = useSafeWalletContext();
   const { group, type } = useParams();
 
   const groupSpec = txBuilderSpec.find((spec) => spec.groupName === group);
   const transactionSpec = groupSpec?.actions.find((action) => action.name === type);
 
-  if (type === "Import") {
-    return (
-      <div id="import-transaction-form">
-        <Typography variant="h6" id="import-transaction-title">
-          Import Transactions
-        </Typography>
-        <TextField
-          id="import-hex-input"
-          label="Hex Encoded JSON"
-          value={importHex}
-          onChange={(e) => setImportHex(e.target.value as `0x${string}`)}
-          fullWidth
-          margin="normal"
-        />
-        <Button id="import-transaction-button" variant="contained" color="primary" onClick={handleImportTransactions}>
-          Import
-        </Button>
-      </div>
-    );
-  }
-
-  if (type === "encodeFunctionCall") {
+  if (group === ENCODE_FUNCTION_CALL.group && type === ENCODE_FUNCTION_CALL.actions[0]) {
     return (
       <div id="encode-function-call-form">
         <EncodeFunctionCall

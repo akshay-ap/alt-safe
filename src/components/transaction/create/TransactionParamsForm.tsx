@@ -3,10 +3,12 @@ import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import type { Address } from "viem";
 import { useCreateTransactionContext } from "../../../context/CreateTransactionContext";
+import { nonceWarning } from "../../../utils/safeTransaction";
 
-const TransactionParamsForm: React.FC = () => {
+const TransactionParamsForm: React.FC<{ onSaved?: () => void }> = ({ onSaved }) => {
   const {
     nonce,
+    onChainNonce,
     gasPrice,
     baseGas,
     safeTxGas,
@@ -79,6 +81,7 @@ const TransactionParamsForm: React.FC = () => {
     hasUserEditedGasPrice.current = false;
     hasUserEditedBaseGas.current = false;
     hasUserEditedSafeTxGas.current = false;
+    onSaved?.();
   };
 
   const handleNonceChange = (value: string) => {
@@ -104,7 +107,7 @@ const TransactionParamsForm: React.FC = () => {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2, p: 2 }} id="transaction-params-form">
       <Typography variant="h6" gutterBottom id="transaction-params-title">
-        Transaction Defaults
+        Nonce, gas and refund
       </Typography>
 
       <Typography
@@ -115,8 +118,8 @@ const TransactionParamsForm: React.FC = () => {
           mb: 2,
         }}
       >
-        Configure default parameters that will be applied to all transactions. Leave fields empty to use automatic
-        values.
+        Applied to the Safe transaction built from this batch. The nonce starts at the Safe's next one; set a higher one
+        to queue, or the same as a pending transaction to replace it.
       </Typography>
 
       <TextField
@@ -126,7 +129,10 @@ const TransactionParamsForm: React.FC = () => {
         value={newNonce.toString()}
         onChange={(e) => handleNonceChange(e.target.value)}
         size="small"
-        helperText="Set custom nonce."
+        helperText={nonceWarning(newNonce, onChainNonce) ?? "Set custom nonce."}
+        slotProps={{
+          formHelperText: { sx: nonceWarning(newNonce, onChainNonce) ? { color: "warning.main" } : undefined },
+        }}
       />
 
       <TextField

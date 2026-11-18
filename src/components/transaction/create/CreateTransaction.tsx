@@ -1,13 +1,9 @@
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import DoneIcon from "@mui/icons-material/Done";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import SaveIcon from "@mui/icons-material/Save";
-import VisibilityIcon from "@mui/icons-material/Visibility";
+import TuneIcon from "@mui/icons-material/Tune";
 import {
   Alert,
   Badge,
@@ -19,46 +15,39 @@ import {
   DialogContent,
   DialogTitle,
   Fab,
-  Paper,
   Snackbar,
-  Step,
-  StepLabel,
-  Stepper,
+  Stack,
   Typography,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import Grid from "@mui/material/Grid";
-import { readContract, simulateContract } from "@wagmi/core";
+import { simulateContract } from "@wagmi/core";
 import { useEffect, useState } from "react";
-import {
-  type Address,
-  BaseError,
-  bytesToHex,
-  ContractFunctionRevertedError,
-  encodeFunctionData,
-  hexToBytes,
-  stringToBytes,
-  zeroAddress,
-} from "viem";
+import { type Address, BaseError, ContractFunctionRevertedError, isAddressEqual } from "viem";
 import { useAccount, usePublicClient, useWriteContract } from "wagmi";
-import multisendCallOnly from "../../../abis/MultiSendCallOnly.json";
 import safe from "../../../abis/Safe.json";
-import { deleteDraftTransaction, getDraftTransactionById, updateDraftTransaction } from "../../../api/api";
+import {
+  deleteDraftTransaction,
+  exportSignedTransactionToHex,
+  getDraftTransactionById,
+  updateDraftTransaction,
+} from "../../../api/api";
 import { STORAGE_KEY } from "../../../constants";
 import { useCreateTransactionContext } from "../../../context/CreateTransactionContext";
-import type { ImportData, ImportSignedData, SafeTransactionDraft, Transaction } from "../../../context/types";
+import type { SafeTransactionDraft, Transaction } from "../../../context/types";
 import { type SafeTransactionInfo, useSafeWalletContext } from "../../../context/WalletContext";
-import { encodeMultiSend } from "../../../utils/multisend";
-import { SafeOperation, type SafeTransactionParams } from "../../../utils/utils";
+import { NONCE_LOADING_ERROR, prepareSafeTransaction } from "../../../utils/safeTransaction";
 import { config } from "../../../wagmi";
-import AccountAddress from "../../common/AccountAddress";
+import { TOP_BAR_HEIGHT } from "../../app/NavigationBar";
+import PageHeader from "../../common/PageHeader";
 import LoadTransactionDialog from "../../dialogs/LoadTransactionDialog";
 import SaveTransactionDialog from "../../dialogs/SaveTransactionDialog";
 import ViewSafeTransactionDialog from "../../dialogs/ViewSafeTransactionDialog";
 import TransactionSummaryPanel from "../summary/TransactionSummaryPanel";
+import { ExecuteCard, SignedTransactionCard } from "./ExecuteStep";
 import Review from "./Review";
 import TransactionBuilder from "./TransactionBuilder";
+import TransactionParamsForm from "./TransactionParamsForm";
 
 const CreateTransaction: React.FC = () => {
   const theme = useTheme();
@@ -81,14 +70,21 @@ const CreateTransaction: React.FC = () => {
     setSafeTransactionHash,
     error,
     setError,
+    nonce,
+    onChainNonce,
+    gasPrice,
+    safeTxGas,
+    baseGas,
+    refundToAddress,
+    refundTokenAddress,
   } = useCreateTransactionContext();
-  const [importHex, setImportHex] = useState<`0x${string}`>("0x");
   const [viewDialogOpen, setViewDialogOpen] = useState<boolean>(false);
   const [snackbarOpen, setSnackbarOpen] = useState<boolean>(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string>("");
   // Current step in the transaction process
   const [activeStep, setActiveStep] = useState<number>(0);
   const [isSummaryExpanded, setIsSummaryExpanded] = useState<boolean>(false);
+  const [paramsDialogOpen, setParamsDialogOpen] = useState<boolean>(false);
   const [saveDraftDialogOpen, setSaveDraftDialogOpen] = useState<boolean>(false);
   const [loadDraftDialogOpen, setLoadDraftDialogOpen] = useState<boolean>(false);
   const [currentDraftId, setCurrentDraftId] = useState<string | undefined>();
@@ -98,8 +94,17 @@ const CreateTransaction: React.FC = () => {
   const [unsavedChangesDialog, setUnsavedChangesDialog] = useState<boolean>(false);
   const [pendingAction, setPendingAction] = useState<string | null>(null);
 
+  const isConnectedOwner = Boolean(
+    account.address && safeStorage?.owners?.some((owner) => isAddressEqual(owner, account.address as Address)),
+  );
+
   // Steps in the transaction flow
-  const steps = ["Build Transactions", "Review & Sign", "Execute"];
+  // No stepper: the page heading names the current step instead.
+  const stepHeadings = [
+    { title: "New transaction", description: "Add one or more actions to a batch, then review it." },
+    { title: "Review and sign", description: "Check the Safe transaction, then sign it with your wallet." },
+    { title: "Execute", description: "Submit the signed transaction, or share it with the other owners." },
+  ];
 
   const handleAddTransaction = async (newTransaction: Transaction) => {
     const updatedTransactions = [...transactions, { ...newTransaction }];
@@ -121,84 +126,19 @@ const CreateTransaction: React.FC = () => {
     }
   };
 
-  const getSafeTransactionInfo = async (): Promise<{
-    safeTx: SafeTransactionParams;
-    safeTxHash: `0x${string}`;
-  }> => {
-    let safeTransactionHashFromContractCall: `0x${string}` = "0x";
-    let to: Address;
-    let value: bigint;
-    let callData: `0x${string}`;
-    let operation: SafeOperation;
-    const baseGas = 0n;
-    const safeTxGas = 0n;
-    const gasPrice = 0n;
-    const gasToken: Address = zeroAddress;
-    const refundReceiver: Address = zeroAddress;
-
-    const abi = safe;
-    if (safeAccount === undefined) {
-      throw new Error("Safe account is undefined");
-    }
-
-    if (transactions.length < 1) {
-      throw new Error("No transactions");
-    }
-
-    const nonce = (await readContract(config, {
-      abi,
-      address: safeAccount,
-      functionName: "nonce",
-    })) as bigint;
-
-    if (transactions.length === 1) {
-      to = transactions[0].to;
-      value = BigInt(transactions[0].value);
-      callData = transactions[0].data;
-      operation = SafeOperation.CALL;
-    } else {
-      const metaTransactions = transactions.map((transaction) => {
-        return {
-          to: transaction.to,
-          value: BigInt(transaction.value),
-          data: transaction.data,
-          operation: SafeOperation.CALL,
-        };
-      });
-
-      callData = encodeFunctionData({
-        abi: multisendCallOnly,
-        functionName: "multiSend",
-        args: [encodeMultiSend(metaTransactions)],
-      });
-
-      to = safeDeployment?.multiSendCallOnly ?? zeroAddress;
-      value = 0n;
-      operation = SafeOperation.DELEGATE_CALL;
-    }
-
-    safeTransactionHashFromContractCall = (await readContract(config, {
-      abi,
-      address: safeAccount,
-      functionName: "getTransactionHash",
-      args: [to, value, callData, operation, safeTxGas, baseGas, gasPrice, gasToken, refundReceiver, nonce],
-    })) as `0x${string}`;
-
-    return {
-      safeTx: {
-        to,
-        value,
-        data: callData,
-        operation,
-        safeTxGas: safeTxGas,
-        baseGas: baseGas,
-        gasPrice: gasPrice,
-        gasToken: gasToken,
-        refundReceiver: refundReceiver,
-        nonce,
-      },
-      safeTxHash: safeTransactionHashFromContractCall,
+  const getSafeTransactionInfo = () => {
+    if (safeAccount === undefined) throw new Error("Safe account is undefined");
+    // nonce is a 0 placeholder until the Safe's nonce has loaded.
+    if (onChainNonce === undefined) throw new Error(NONCE_LOADING_ERROR);
+    const settings = {
+      nonce,
+      safeTxGas,
+      baseGas,
+      gasPrice,
+      gasToken: refundTokenAddress,
+      refundReceiver: refundToAddress,
     };
+    return prepareSafeTransaction(safeAccount, transactions, settings, safeDeployment?.multiSendCallOnly);
   };
 
   const handleViewSafeTransaction = async () => {
@@ -225,35 +165,16 @@ const CreateTransaction: React.FC = () => {
     setViewDialogOpen(true);
   };
 
-  const getExportHexSigned = (): string => {
-    if (safeAccount && safeTransaction && account.address && signature && safeTransactionHash) {
-      const exportData: ImportSignedData = {
-        transactions: transactions,
-        safeAccount: safeAccount,
-        signature: { signer: account.address, data: signature },
-        safeTransaction: safeTransaction,
-        safeTransactionHash: safeTransactionHash,
-      };
-
-      const exportDataString = JSON.stringify(exportData, (_key, value) =>
-        typeof value === "bigint" ? value.toString() : value,
-      );
-      return bytesToHex(stringToBytes(exportDataString));
-    }
-    return "";
-  };
-
-  const handleCopyToClipboardSigned = async () => {
-    if (safeTransaction) {
-      const hexString = getExportHexSigned();
-      navigator.clipboard.writeText(hexString);
-
-      setSnackbarMessage("Signed transaction copied to clipboard");
-      setSnackbarOpen(true);
-    } else {
-      console.error("safeTransaction undefined");
-    }
-  };
+  const signedTransactionHex =
+    safeAccount && safeTransaction && account.address && signature && safeTransactionHash
+      ? exportSignedTransactionToHex({
+          transactions,
+          safeAccount,
+          signature: { signer: account.address, data: signature },
+          safeTransaction,
+          safeTransactionHash,
+        })
+      : "";
 
   const handleDeleteTransaction = async (id: number) => {
     const updatedTransactions = transactions.filter((_, index) => index !== id);
@@ -318,22 +239,6 @@ const CreateTransaction: React.FC = () => {
           setError("Transaction failed");
         }
       }
-    }
-  };
-
-  const handleImportTransactions = () => {
-    try {
-      if (importHex) {
-        const jsonString = new TextDecoder().decode(hexToBytes(importHex));
-        const importedData = JSON.parse(jsonString) as ImportData;
-        setTransactions(importedData.transactions);
-
-        setSnackbarMessage("Transactions imported successfully");
-        setSnackbarOpen(true);
-      }
-    } catch (error) {
-      console.error("Invalid hex input");
-      setError("Invalid hex input. Please check the format and try again.");
     }
   };
 
@@ -525,54 +430,52 @@ const CreateTransaction: React.FC = () => {
   // Update the renderStepContent method for consistent heights across all steps
 
   const renderStepContent = () => {
-    const contentHeight = "calc(100vh - 250px)";
-
     switch (activeStep) {
       case 0:
         return (
-          <Grid container spacing={2}>
-            <Grid
-              size={{ xs: 12, md: isSummaryExpanded ? 12 : 9 }}
-              sx={{ display: isMobile && isSummaryExpanded ? "none" : "block" }}
+          <Box
+            sx={{
+              display: "grid",
+              gap: 3,
+              alignItems: "start",
+              gridTemplateColumns: isSummaryExpanded ? "1fr" : { xs: "1fr", lg: "minmax(0, 1fr) 320px" },
+              height: { lg: "100%" },
+              gridTemplateRows: { lg: "minmax(0, 1fr)" },
+            }}
+          >
+            <Box
+              sx={{ display: isMobile && isSummaryExpanded ? "none" : "block", minWidth: 0, height: { lg: "100%" } }}
             >
-              <Paper
-                elevation={0}
-                variant="outlined"
-                sx={{
-                  p: 2,
-                  mb: isMobile ? 2 : 0,
-                  height: contentHeight,
-                  display: "flex",
-                  flexDirection: "column",
-                  overflow: "hidden", // Hide overflow so inner scrollable content works properly
-                }}
-              >
-                <Box sx={{ flex: 1, overflow: "auto" }}>
-                  <TransactionBuilder
-                    importHex={importHex}
-                    setImportHex={setImportHex}
-                    handleAddTransaction={handleAddTransaction}
-                    handleImportTransactions={handleImportTransactions}
-                  />
-                </Box>
-              </Paper>
-            </Grid>
-
-            <Grid
-              size={{ xs: 12, md: isSummaryExpanded ? 12 : 3 }}
+              <TransactionBuilder handleAddTransaction={handleAddTransaction} />
+            </Box>
+            <Box
               sx={{
-                display: isMobile && !isSummaryExpanded ? "none" : "block",
+                display: isMobile && !isSummaryExpanded ? "none" : "flex",
+                flexDirection: "column",
+                height: { lg: "100%" },
               }}
             >
-              <TransactionSummaryPanel
-                transactions={transactions}
-                handleDeleteTransaction={handleDeleteTransaction}
-                isMobile={isMobile}
-                isSummaryExpanded={isSummaryExpanded}
-                toggleSummaryExpanded={toggleSummaryExpanded}
-              />
-            </Grid>
-          </Grid>
+              <Box sx={{ flex: { lg: 1 }, minHeight: 0, overflowY: { lg: "auto" } }}>
+                <TransactionSummaryPanel
+                  transactions={transactions}
+                  handleDeleteTransaction={handleDeleteTransaction}
+                  isMobile={isMobile}
+                  isSummaryExpanded={isSummaryExpanded}
+                  toggleSummaryExpanded={toggleSummaryExpanded}
+                />
+              </Box>
+              <Button
+                variant="contained"
+                fullWidth
+                onClick={handleNextStep}
+                endIcon={<KeyboardArrowRightIcon />}
+                disabled={transactions.length === 0}
+                sx={{ mt: 2 }}
+              >
+                Review batch
+              </Button>
+            </Box>
+          </Box>
         );
 
       case 1:
@@ -580,166 +483,37 @@ const CreateTransaction: React.FC = () => {
 
       case 2:
         return (
-          <Grid container spacing={2}>
-            <Grid size={{ xs: 12, md: 9 }}>
-              {/* Content container with fixed height and scrollable content */}
-              <Box
-                sx={{
-                  height: contentHeight,
-                  display: "flex",
-                  flexDirection: "column",
-                  overflow: "hidden", // Hide overflow so inner scrollable content works properly
-                }}
-              >
-                <Box sx={{ flex: 1, overflow: "auto" }}>
-                  <Paper elevation={0} variant="outlined" sx={{ p: 2, mb: 2 }}>
-                    <Typography variant="h5" gutterBottom>
-                      Execute Transaction
-                    </Typography>
-
-                    <Box sx={{ mb: 3 }}>
-                      <Alert severity="success" sx={{ mb: 2 }} icon={<CheckCircleIcon fontSize="inherit" />}>
-                        Transaction successfully signed! You can now execute it or share it with other owners.
-                      </Alert>
-
-                      <Box
-                        sx={{
-                          mb: 2,
-                          p: 2,
-                          bgcolor: "background.paper",
-                          borderRadius: 1,
-                          border: 1,
-                          borderColor: "divider",
-                        }}
-                      >
-                        <Grid container spacing={2}>
-                          <Grid size={{ xs: 12 }}>
-                            <Typography
-                              variant="body2"
-                              sx={{
-                                color: "text.secondary",
-                              }}
-                            >
-                              Safe Transaction Hash
-                            </Typography>
-                            <Typography variant="body1" sx={{ wordBreak: "break-all" }}>
-                              {safeTransactionHash}
-                            </Typography>
-                          </Grid>
-                        </Grid>
-                      </Box>
-
-                      <Box
-                        sx={{
-                          p: 2,
-                          bgcolor: "background.paper",
-                          borderRadius: 1,
-                          border: 1,
-                          borderColor: "divider",
-                        }}
-                      >
-                        <Grid container spacing={2}>
-                          <Grid size={{ xs: 12 }}>
-                            <Typography
-                              variant="body2"
-                              sx={{
-                                color: "text.secondary",
-                              }}
-                            >
-                              Signature
-                            </Typography>
-                            <Typography variant="body1" sx={{ wordBreak: "break-all" }}>
-                              {signature}
-                            </Typography>
-                          </Grid>
-                        </Grid>
-                      </Box>
-                    </Box>
-
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        mt: 2,
-                        flexWrap: "wrap",
-                        gap: 1,
-                      }}
-                    >
-                      <Button variant="outlined" startIcon={<VisibilityIcon />} onClick={handleViewSafeTransaction}>
-                        View Safe Transaction Details
-                      </Button>
-
-                      <Box sx={{ display: "flex", gap: 1 }}>
-                        <Button
-                          variant="outlined"
-                          startIcon={<ContentCopyIcon />}
-                          onClick={() => {
-                            if (signature) {
-                              navigator.clipboard.writeText(signature);
-                              setSnackbarMessage("Signature copied to clipboard");
-                              setSnackbarOpen(true);
-                            }
-                          }}
-                        >
-                          Copy Signature
-                        </Button>
-
-                        <Button
-                          variant="outlined"
-                          startIcon={<ContentCopyIcon />}
-                          onClick={handleCopyToClipboardSigned}
-                        >
-                          Copy Signed Tx
-                        </Button>
-                      </Box>
-                    </Box>
-                  </Paper>
-
-                  <Paper elevation={0} variant="outlined" sx={{ p: 2 }}>
-                    <Typography variant="h6" gutterBottom>
-                      Execute Options
-                    </Typography>
-
-                    {account && safeStorage?.owners?.find((owner) => owner === account.address) === undefined ? (
-                      <Alert severity="warning" sx={{ mb: 2 }}>
-                        You are not an owner of this Safe. You can still create and sign transactions, but they must be
-                        executed by a Safe owner.
-                      </Alert>
-                    ) : (
-                      <Box sx={{ mb: 2 }}>
-                        <Alert severity="info" icon={<InfoOutlinedIcon />}>
-                          Execute this transaction to submit it to the blockchain. Make sure you have enough ETH for gas
-                          fees.
-                        </Alert>
-                      </Box>
-                    )}
-
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      startIcon={<PlayArrowIcon />}
-                      onClick={handleExecuteTransaction}
-                      fullWidth
-                      disabled={
-                        account && safeStorage?.owners?.find((owner) => owner === account.address) === undefined
-                      }
-                    >
-                      Execute Transaction
-                    </Button>
-                  </Paper>
-                </Box>
-              </Box>
-            </Grid>
-
-            <Grid size={{ xs: 12, md: 3 }}>
+          <Box
+            sx={{
+              display: "grid",
+              gap: 3,
+              alignItems: "start",
+              gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 1fr) 320px" },
+            }}
+          >
+            <Stack spacing={3} sx={{ minWidth: 0 }}>
+              <SignedTransactionCard
+                safeTransactionHash={safeTransactionHash}
+                signature={signature}
+                onViewDetails={handleViewSafeTransaction}
+                signedTransactionHex={signedTransactionHex}
+              />
+              <ExecuteCard
+                isOwner={isConnectedOwner}
+                threshold={safeStorage?.threshold}
+                executionHash={transactionHash}
+                onExecute={handleExecuteTransaction}
+              />
+            </Stack>
+            <Box sx={{ position: { lg: "sticky" }, top: { lg: 80 } }}>
               <TransactionSummaryPanel
                 transactions={transactions}
                 handleDeleteTransaction={handleDeleteTransaction}
                 viewOnly={true}
                 isMobile={isMobile}
               />
-            </Grid>
-          </Grid>
+            </Box>
+          </Box>
         );
 
       default:
@@ -778,43 +552,60 @@ const CreateTransaction: React.FC = () => {
   }, [safeAccount, storage, setTransactions, setError]);
 
   return (
-    <Box sx={{ p: { xs: 1, md: 3 }, maxWidth: "xl", mx: "auto" }}>
-      {/* Header with stepper */}
-      <Box
-        sx={{
-          p: { xs: 2, md: 3 },
-        }}
-      >
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            mb: 1,
-          }}
-        >
-          <Typography variant="h4" gutterBottom>
-            Create Transaction
-          </Typography>
-
-          <AccountAddress address={safeAccount} />
-
-          {isEditingDraft && <Chip label="Draft" color="primary" icon={<SaveIcon />} size="small" />}
-        </Box>
-
-        <Stepper
-          activeStep={activeStep}
-          alternativeLabel={!isMobile}
-          orientation={isMobile ? "vertical" : "horizontal"}
-          sx={{ mt: 2 }}
-        >
-          {steps.map((label) => (
-            <Step key={label}>
-              <StepLabel>{label}</StepLabel>
-            </Step>
-          ))}
-        </Stepper>
-      </Box>
+    // While building, the page is exactly the viewport (minus the shell's top bar and padding); columns scroll inside.
+    <Box
+      sx={
+        activeStep === 0
+          ? {
+              display: { lg: "flex" },
+              flexDirection: "column",
+              height: { lg: `calc(100vh - ${TOP_BAR_HEIGHT + 48}px)` },
+            }
+          : undefined
+      }
+    >
+      <PageHeader
+        title={stepHeadings[activeStep].title}
+        description={stepHeadings[activeStep].description}
+        actions={
+          activeStep > 0 && !transactionHash ? (
+            // Once executed the nonce is spent, so going back to re-sign would only produce a dead transaction.
+            <Button variant="outlined" onClick={handleBackStep} startIcon={<KeyboardArrowLeftIcon />}>
+              Back
+            </Button>
+          ) : (
+            activeStep === 0 && (
+              <>
+                {isEditingDraft && (
+                  <Chip
+                    label={hasUnsavedChanges ? "Unsaved draft changes" : "Editing draft"}
+                    color={hasUnsavedChanges ? "warning" : "default"}
+                    variant="outlined"
+                  />
+                )}
+                <Button startIcon={<TuneIcon />} onClick={() => setParamsDialogOpen(true)}>
+                  Nonce & gas
+                </Button>
+                <Button startIcon={<FolderOpenIcon />} onClick={handleOpenLoadDraftDialog}>
+                  Open draft
+                </Button>
+                <Button
+                  variant="outlined"
+                  startIcon={<SaveIcon />}
+                  onClick={handleOpenSaveDraftDialog}
+                  disabled={transactions.length === 0}
+                >
+                  {isEditingDraft && hasUnsavedChanges
+                    ? "Update draft"
+                    : isEditingDraft
+                      ? "Save as new draft"
+                      : "Save draft"}
+                </Button>
+              </>
+            )
+          )
+        }
+      />
 
       {/* Error display */}
       {error && (
@@ -824,87 +615,33 @@ const CreateTransaction: React.FC = () => {
       )}
 
       {/* Transaction hash success message */}
-      {transactionHash && (
-        <Alert severity="success" sx={{ mb: 3 }}>
-          Transaction submitted successfully with hash: {transactionHash}
-        </Alert>
-      )}
 
       {/* Main content area based on step */}
-      {renderStepContent()}
-
-      {/* Navigation buttons */}
-      <Box
-        sx={{
-          mt: 3,
-          display: "flex",
-          justifyContent: "space-between",
-          flexWrap: "wrap",
-          gap: 2,
-        }}
-      >
-        <Box sx={{ display: "flex", gap: 1 }}>
-          <Button
-            variant="outlined"
-            onClick={handleBackStep}
-            disabled={activeStep === 0}
-            startIcon={<KeyboardArrowLeftIcon />}
-          >
-            Back
-          </Button>
-
-          {activeStep === 0 && (
-            <>
-              <Button variant="outlined" startIcon={<FolderOpenIcon />} onClick={handleOpenLoadDraftDialog}>
-                Load
-              </Button>
-              <Button
-                variant="outlined"
-                startIcon={<SaveIcon />}
-                onClick={handleOpenSaveDraftDialog}
-                disabled={transactions.length === 0}
-                color={isEditingDraft && hasUnsavedChanges ? "primary" : "inherit"}
-              >
-                {isEditingDraft && hasUnsavedChanges ? "Update Draft" : isEditingDraft ? "Save As New" : "Save Draft"}
-              </Button>
-            </>
-          )}
-        </Box>
-
-        <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-          {isEditingDraft && activeStep === 0 && (
-            <Chip
-              label={`${hasUnsavedChanges ? "Unsaved Changes" : "Editing Draft"}${
-                currentDraftId ? ` #${currentDraftId.substring(6, 11)}` : ""
-              }`}
-              color={hasUnsavedChanges ? "warning" : "primary"}
-              variant="outlined"
-              sx={{ mr: 1 }}
-            />
-          )}
-
-          {activeStep === 0 && (
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleNextStep}
-              endIcon={<KeyboardArrowRightIcon />}
-              disabled={transactions.length === 0}
-            >
-              {"Review"}
-            </Button>
-          )}
-        </Box>
-      </Box>
+      <Box sx={{ flex: 1, minHeight: 0 }}>{renderStepContent()}</Box>
 
       {/* Floating action button on mobile for step 0 */}
       {isMobile && activeStep === 0 && !isSummaryExpanded && (
-        <Fab color="primary" sx={{ position: "fixed", bottom: 16, right: 16 }} onClick={toggleSummaryExpanded}>
+        <Fab
+          color="primary"
+          sx={{ position: "fixed", bottom: 16, right: 16 }}
+          onClick={toggleSummaryExpanded}
+          aria-label={`View batch (${transactions.length})`}
+        >
           <Badge badgeContent={transactions.length} color="error" invisible={transactions.length === 0}>
-            <DoneIcon />
+            <FormatListBulletedIcon />
           </Badge>
         </Fab>
       )}
+
+      <Dialog
+        open={paramsDialogOpen}
+        onClose={() => setParamsDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        aria-labelledby="transaction-params-title"
+      >
+        <TransactionParamsForm onSaved={() => setParamsDialogOpen(false)} />
+      </Dialog>
 
       {/* Modal dialogs */}
       <ViewSafeTransactionDialog

@@ -1,6 +1,7 @@
 import { Box, TextField, type TextFieldProps } from "@mui/material";
 import React from "react";
 import { isAddress } from "viem";
+import { font } from "../../theme/tokens";
 import { useAddressBookSelector } from "./AddressBookSelector";
 
 interface AddressInputProps extends Omit<TextFieldProps, "error" | "helperText" | "onChange"> {
@@ -12,17 +13,20 @@ interface AddressInputProps extends Omit<TextFieldProps, "error" | "helperText" 
   allowEmpty?: boolean;
   onValidationChange?: (isValid: boolean) => void;
   showAddressBook?: boolean;
+  /** Extra controls shown after the address book button, e.g. a remove button. */
+  endActions?: React.ReactNode;
 }
 
 const AddressInput: React.FC<AddressInputProps> = ({
   value,
   onChange,
   validateOnChange = true,
-  helperText = "Enter a valid Ethereum address",
+  helperText,
   errorText = "Invalid address format",
   allowEmpty = true,
   onValidationChange,
   showAddressBook = true,
+  endActions,
   ...textFieldProps
 }) => {
   const isEmpty = !value || value.trim() === "";
@@ -60,9 +64,16 @@ const AddressInput: React.FC<AddressInputProps> = ({
         fullWidth
         variant="outlined"
         slotProps={{
+          ...textFieldProps.slotProps,
           input: {
-            endAdornment: iconButton,
+            endAdornment: (
+              <>
+                {iconButton}
+                {endActions}
+              </>
+            ),
           },
+          htmlInput: { spellCheck: false, autoComplete: "off", style: { fontFamily: font.mono } },
         }}
       />
       {menuComponent}

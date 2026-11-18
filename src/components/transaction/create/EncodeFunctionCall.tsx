@@ -119,21 +119,18 @@ const EncodeFunctionCall: React.FC<EncodeFunctionCallProps> = ({ onAdd, groupInf
   };
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h6" gutterBottom>
-        Encode Function Call
-      </Typography>
-      <Typography
-        variant="body2"
-        sx={{
-          color: "text.secondary",
-          marginBottom: "16px",
-        }}
-      >
-        Enter a Solidity function signature to dynamically generate input fields and encode the function call.
-      </Typography>
+    // Same card as the template forms: header, fields, then the action in a footer.
+    <Paper variant="outlined">
+      <Box sx={{ p: 3, borderBottom: 1, borderColor: "divider" }}>
+        <Typography variant="h5" component="h2">
+          Call any contract function
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+          Paste a Solidity function signature; a field appears for each of its parameters.
+        </Typography>
+      </Box>
 
-      <Grid container spacing={3}>
+      <Grid container spacing={3} sx={{ p: 3 }}>
         <Grid size={{ xs: 12, md: 6 }}>
           <TextField
             fullWidth
@@ -147,7 +144,8 @@ const EncodeFunctionCall: React.FC<EncodeFunctionCallProps> = ({ onAdd, groupInf
         <Grid size={{ xs: 12, md: 6 }}>
           <TextField
             fullWidth
-            label="Amount of ETH to send with the transaction"
+            label="Value (wei)"
+            helperText="Native token sent with the call, in wei."
             type="number"
             value={formData.value}
             onChange={(e) => handleInputChange("value", e.target.value)}
@@ -189,15 +187,13 @@ const EncodeFunctionCall: React.FC<EncodeFunctionCallProps> = ({ onAdd, groupInf
             </Paper>
           </Grid>
         )}
-
-        {/* Submit Button */}
-        <Grid size={12}>
-          <Button variant="contained" onClick={handleSubmit} disabled={!parsedAbiItem} fullWidth sx={{ mt: 2 }}>
-            Add Function Call to Batch
-          </Button>
-        </Grid>
       </Grid>
-    </Box>
+      <Box sx={{ px: 3, py: 2, borderTop: 1, borderColor: "divider", display: "flex", justifyContent: "flex-end" }}>
+        <Button variant="contained" onClick={handleSubmit} disabled={!parsedAbiItem}>
+          Add to batch
+        </Button>
+      </Box>
+    </Paper>
   );
 };
 

@@ -1,5 +1,5 @@
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutlineOutlined";
-import { Alert, Box, Button, Card, CardContent, Typography } from "@mui/material";
+import { Alert, Box, Button, Typography } from "@mui/material";
 import type React from "react";
 import { useCallback, useEffect, useState } from "react";
 import type { Address } from "viem";
@@ -23,7 +23,7 @@ const OwnersPanel: React.FC<OwnersPanelProps> = ({ owners, setOwners, threshold,
     // Check for zero addresses
     const hasZeroAddress = newOwners.some((owner) => owner === zeroAddress);
     if (hasZeroAddress) {
-      errors.push("Zero address (0x000...000) is not allowed as an owner");
+      errors.push("The zero address cannot be an owner.");
     }
 
     // Check for duplicates (only among valid addresses)
@@ -32,7 +32,7 @@ const OwnersPanel: React.FC<OwnersPanelProps> = ({ owners, setOwners, threshold,
       (owner, index) => validAddresses.findIndex((o) => o.toLowerCase() === owner.toLowerCase()) !== index,
     );
     if (duplicates.length > 0) {
-      errors.push("Duplicate owner addresses are not allowed");
+      errors.push("Each owner can only be listed once.");
     }
 
     setValidationErrors(errors);
@@ -69,71 +69,25 @@ const OwnersPanel: React.FC<OwnersPanelProps> = ({ owners, setOwners, threshold,
 
   return (
     <Box sx={{ p: { xs: 2, md: 3 } }}>
-      <Typography variant="h6" gutterBottom>
-        Owners & Threshold Configuration
+      <Typography variant="h6" component="h2">
+        Owners and signatures
       </Typography>
-      <Typography
-        variant="body2"
-        sx={{
-          color: "text.secondary",
-          mb: 3,
-        }}
-      >
-        Add the owners who will manage this Safe and set the number of confirmations required
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+        Owners can propose and sign transactions. A transaction runs once it has the required number of signatures.
       </Typography>
 
-      <Card variant="outlined" sx={{ mb: 3 }}>
-        <CardContent>
-          <Typography variant="subtitle1" sx={{ mb: 1 }}>
-            Owners
-          </Typography>
-          <Typography
-            variant="body2"
-            sx={{
-              color: "text.secondary",
-              mb: 2,
-            }}
-          >
-            Each owner can propose and confirm transactions
-          </Typography>
+      <OwnerList owners={owners} onOwnerChange={handleOwnerChange} onRemoveOwner={handleRemoveOwner} />
+      <Button startIcon={<AddCircleOutlineIcon />} onClick={handleAddOwner} sx={{ mt: 1.5, mb: 3 }}>
+        Add owner
+      </Button>
 
-          <OwnerList owners={owners} onOwnerChange={handleOwnerChange} onRemoveOwner={handleRemoveOwner} />
-
-          <Button variant="outlined" startIcon={<AddCircleOutlineIcon />} onClick={handleAddOwner} sx={{ mt: 2 }}>
-            Add Owner
-          </Button>
-        </CardContent>
-      </Card>
-
-      <Card variant="outlined">
-        <CardContent>
-          <Typography variant="subtitle1" sx={{ mb: 1 }}>
-            Threshold
-          </Typography>
-          <Typography
-            variant="body2"
-            sx={{
-              color: "text.secondary",
-              mb: 2,
-            }}
-          >
-            Set how many owner confirmations are required for transactions
-          </Typography>
-
-          <Threshold threshold={threshold} setThreshold={setThreshold} ownersCount={owners.length} />
-        </CardContent>
-      </Card>
+      <Threshold threshold={threshold} setThreshold={setThreshold} ownersCount={owners.length} />
 
       {validationErrors.length > 0 && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          <Typography variant="subtitle2" gutterBottom>
-            Owner validation errors:
-          </Typography>
-          <ul style={{ margin: 0, paddingLeft: "1rem" }}>
-            {validationErrors.map((error, index) => (
-              <li key={index}>{error}</li>
-            ))}
-          </ul>
+        <Alert severity="error" sx={{ mt: 3 }}>
+          {validationErrors.map((error) => (
+            <div key={error}>{error}</div>
+          ))}
         </Alert>
       )}
     </Box>

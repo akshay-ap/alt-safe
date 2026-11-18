@@ -1,9 +1,7 @@
 import DeveloperModeIcon from "@mui/icons-material/DeveloperMode";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import {
   Alert,
   Autocomplete,
-  alpha,
   Box,
   Button,
   Container,
@@ -279,89 +277,27 @@ const TransactionInputBuilder: React.FC<TransactionInputBuilderProps> = ({ onAdd
   return (
     <Container
       id={`transaction-input-${spec.name?.toLowerCase().replace(/\s+/g, "-")}`}
-      sx={{ overflowY: "auto", height: "100%", position: "relative", p: 0 }}
+      sx={{ position: "relative", p: "0 !important" }}
     >
       {/* Single Unified Card */}
-      <Paper
-        elevation={2}
-        sx={{
-          borderRadius: 3,
-          overflow: "hidden",
-          height: "100%",
-          display: "flex",
-          flexDirection: "column",
-          border: `1px solid ${alpha(theme.palette.divider, 0.12)}`,
-        }}
-      >
+      <Paper variant="outlined" sx={{ overflow: "hidden", display: "flex", flexDirection: "column" }}>
         {/* Header Section */}
-        <Box
-          sx={{
-            background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.08)} 0%, ${alpha(theme.palette.primary.main, 0.02)} 100%)`,
-            borderBottom: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
-            p: 3,
-          }}
-        >
-          {/* Breadcrumb */}
-          <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-            <Typography
-              variant="caption"
-              sx={{
-                color: theme.palette.text.secondary,
-                fontWeight: 500,
-                textTransform: "uppercase",
-                letterSpacing: 0.5,
-              }}
-            >
-              {groupInfo.name}
+        <Box sx={{ borderBottom: `1px solid ${theme.palette.divider}`, p: 3 }}>
+          {/* Protocol and action are in the breadcrumb above the card, so the title row carries only the description. */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Typography variant="h5" component="h2" sx={{ flex: 1 }}>
+              {spec.display.description}
             </Typography>
-            <PlayArrowIcon sx={{ mx: 1, color: theme.palette.text.disabled, fontSize: 14 }} />
-            <Typography
-              variant="caption"
-              sx={{
-                color: theme.palette.text.secondary,
-                fontWeight: 500,
-                textTransform: "uppercase",
-                letterSpacing: 0.5,
-              }}
-            >
-              {spec.name}
-            </Typography>
-            <Box sx={{ ml: "auto" }}>
-              <Tooltip title="Show Debug Information">
-                <IconButton onClick={() => setDebugDialogOpen(true)} size="small">
-                  <DeveloperModeIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            </Box>
+            <Tooltip title="Inspect how this action is built">
+              <IconButton onClick={() => setDebugDialogOpen(true)} size="small" aria-label="Inspect action">
+                <DeveloperModeIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
           </Box>
-
-          {/* Title */}
-          <Typography
-            variant="h5"
-            sx={{
-              fontWeight: 600,
-              color: theme.palette.text.primary,
-              mb: 1,
-              lineHeight: 1.3,
-            }}
-          >
-            {spec.display.description}
-          </Typography>
-
-          <Typography
-            variant="body2"
-            sx={{
-              color: theme.palette.text.secondary,
-              lineHeight: 1.5,
-              opacity: 0.8,
-            }}
-          >
-            Configure the parameters for this {spec.name.toLowerCase()} transaction
-          </Typography>
         </Box>
 
         {/* Content Section */}
-        <Box sx={{ flex: 1, p: 3, overflow: "auto" }}>
+        <Box sx={{ flex: 1, p: 3 }}>
           {/* Input Fields */}
           {spec.inputs.length > 0 && (
             <Box sx={{ mb: 3 }}>
@@ -562,24 +498,14 @@ const TransactionInputBuilder: React.FC<TransactionInputBuilderProps> = ({ onAdd
                 Context
               </Typography>
 
-              <Box
-                sx={{
-                  bgcolor: alpha(theme.palette.info.main, 0.02),
-                  border: `1px solid ${alpha(theme.palette.info.main, 0.1)}`,
-                  borderRadius: 2,
-                  p: 2,
-                }}
-              >
+              <Box sx={{ border: `1px solid ${theme.palette.divider}`, borderRadius: 1.5, px: 2, py: 0.5 }}>
                 {spec.detailsView.map((detail, index) => (
                   <Box
                     key={`${index}-${detail.label}`}
                     sx={{
                       display: "flex",
                       py: 1,
-                      borderBottom:
-                        index < spec.detailsView.length - 1
-                          ? `1px solid ${alpha(theme.palette.divider, 0.05)}`
-                          : "none",
+                      borderBottom: index < spec.detailsView.length - 1 ? `1px solid ${theme.palette.divider}` : "none",
                     }}
                   >
                     <Typography
@@ -591,7 +517,7 @@ const TransactionInputBuilder: React.FC<TransactionInputBuilderProps> = ({ onAdd
                         flexShrink: 0,
                       }}
                     >
-                      {detail.label}:
+                      {detail.label}
                     </Typography>
                     <Box sx={{ ml: 2, flex: 1 }}>{getDetailValue(detail.type, detail.value)}</Box>
                   </Box>
@@ -639,32 +565,15 @@ const TransactionInputBuilder: React.FC<TransactionInputBuilderProps> = ({ onAdd
         {/* Footer with Submit Button */}
         <Box
           sx={{
-            borderTop: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
-            p: 3,
-            bgcolor: alpha(theme.palette.background.default, 0.3),
+            borderTop: `1px solid ${theme.palette.divider}`,
+            px: 3,
+            py: 2,
+            display: "flex",
+            justifyContent: "flex-end",
           }}
         >
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleSubmit}
-            fullWidth
-            sx={{
-              py: 1.5,
-              fontSize: "1rem",
-              fontWeight: 600,
-              borderRadius: 2,
-              boxShadow: "none",
-              "&:hover": {
-                boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.3)}`,
-              },
-              "&:disabled": {
-                bgcolor: alpha(theme.palette.action.disabled, 0.12),
-                color: theme.palette.action.disabled,
-              },
-            }}
-          >
-            Add to Batch
+          <Button variant="contained" onClick={handleSubmit}>
+            Add to batch
           </Button>
         </Box>
       </Paper>
