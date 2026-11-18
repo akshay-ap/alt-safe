@@ -24,7 +24,10 @@ const Mark: React.FC<{ size?: number }> = ({ size = 24 }) => (
 const Logo: React.FC = () => (
   <Box sx={{ display: "inline-flex", alignItems: "center", gap: 1 }}>
     <Mark />
-    <Typography component="span" sx={{ fontWeight: 600, fontSize: "1rem", letterSpacing: "-0.01em" }}>
+    <Typography
+      component="span"
+      sx={{ fontWeight: 600, fontSize: "1rem", letterSpacing: "-0.01em", display: { xs: "none", sm: "inline" } }}
+    >
       ALT Safe
     </Typography>
   </Box>

@@ -1,252 +1,127 @@
-import { Box, Button, Chip, Container, Divider, Link, Paper, Typography, useTheme } from "@mui/material";
-import Grid from "@mui/material/Grid";
-import { useNavigate } from "react-router-dom";
-import FeatureBox from "./common/Features";
-import "../index.css";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import ContactsIcon from "@mui/icons-material/Contacts";
-import FeaturedPlayListIcon from "@mui/icons-material/FeaturedPlayList";
-import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
-import ShieldIcon from "@mui/icons-material/Shield";
+import { Box, Button, Container, Divider, Grid, Link, Stack, Typography } from "@mui/material";
+import { Link as RouterLink } from "react-router-dom";
+import { color, font } from "../theme/tokens";
+import { chunkHex } from "../utils/address";
 import { supportedChains } from "../wagmi";
+import Logo from "./app/Logo";
 
-const Welcome: React.FC = () => {
-  const navigate = useNavigate();
-  const theme = useTheme();
+const SOURCE_URL = "https://github.com/akshay-ap/alt-safe";
+const SAMPLE_HASH = "0x6baa30ecc6d4c75212e844455e74c2c16beb8834b7bb905e5f437fac22040578";
 
-  return (
-    <Container maxWidth="lg">
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          minHeight: "100vh",
-          textAlign: "center",
-          padding: { xs: 2, md: 4 },
-        }}
-      >
-        <Paper
-          elevation={0}
-          sx={{
-            width: "100%",
-            padding: { xs: 4, md: 8 },
-            marginBottom: 8,
-            background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${theme.palette.background.default} 100%)`,
-            borderRadius: 3,
-            border: `1px solid ${theme.palette.divider}`,
-            position: "relative",
-            overflow: "hidden",
-            boxShadow: "0 20px 60px rgba(0, 0, 0, 0.3)",
-            "&::before": {
-              content: '""',
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "100%",
-              height: "6px",
-              background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-              boxShadow: "0 0 20px rgba(95, 221, 255, 0.5)",
-            },
-            "&::after": {
-              content: '""',
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              width: "200%",
-              height: "200%",
-              background: "radial-gradient(circle, rgba(95, 221, 255, 0.03) 0%, transparent 70%)",
-              pointerEvents: "none",
-            },
-          }}
-        >
-          <Typography
-            variant="h1"
-            color="primary"
-            sx={{
-              fontWeight: "bold",
-              background: `linear-gradient(45deg, ${theme.palette.primary.main} 30%, ${theme.palette.secondary.main} 90%)`,
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              marginBottom: 3,
-              fontSize: "3rem",
-              lineHeight: 0.9,
-              letterSpacing: "-0.02em",
-              textShadow: "0 0 40px rgba(95, 221, 255, 0.3)",
-              position: "relative",
+const STEPS = [
+  { title: "Build", text: "Combine transfers and contract calls into one batch, from templates or any ABI." },
+  { title: "Sign", text: "Each owner signs the same Safe transaction hash with their own wallet." },
+  {
+    title: "Execute",
+    text: "With enough signatures it goes on chain in one transaction. All actions succeed or none do.",
+  },
+];
 
-              "&::after": {
-                content: '""',
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100%",
-                background: `linear-gradient(45deg, ${theme.palette.primary.main} 30%, ${theme.palette.secondary.main} 90%)`,
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                filter: "blur(20px)",
-                opacity: 0.6,
-                zIndex: -1,
-              },
-            }}
-          >
-            &lt;ALT&gt; Safe
-          </Typography>
-          <Typography
-            variant="h4"
-            gutterBottom
-            sx={{
-              maxWidth: "900px",
-              margin: "0 auto",
-              marginBottom: 5,
-              fontSize: "1.5rem",
-              fontWeight: 300,
-              lineHeight: 1.3,
-              letterSpacing: "0.01em",
-              color: theme.palette.text.primary,
-              textShadow: "0 2px 10px rgba(0, 0, 0, 0.5)",
-              background: `linear-gradient(135deg, ${theme.palette.text.primary} 0%, rgba(255, 255, 255, 0.8) 100%)`,
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}
-          >
-            Interact with Safe Smart Account contracts with ease.
-          </Typography>
-          <Button
-            onClick={() => navigate("/home")}
-            variant="contained"
-            size="large"
-            endIcon={<ArrowForwardIcon />}
-            sx={{
-              padding: "16px 40px",
-              fontSize: "1.2rem",
-              fontWeight: 600,
-              borderRadius: 3,
-              background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
-              color: "#000000",
-              textTransform: "none",
-              boxShadow: "0 8px 25px rgba(95, 221, 255, 0.4)",
-              transition: "all 0.3s ease",
-              "&:hover": {
-                transform: "translateY(-2px)",
-                boxShadow: "0 12px 35px rgba(95, 221, 255, 0.6)",
-                background: `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.secondary.light} 100%)`,
-              },
-            }}
-          >
-            Get Started
-          </Button>
-        </Paper>
+const FACTS = [
+  { title: "No backend", text: "Reads and writes go straight to the RPC you choose. Nothing is stored on a server." },
+  { title: "No tracking", text: "No analytics and no accounts. Your Safes and drafts stay in this browser." },
+  { title: "Your contracts", text: "Deploy Safe v1.3.0, v1.4.1 or v1.5.0, or point at your own deployment." },
+];
 
-        {/* Features Section */}
-        <Typography
-          variant="h3"
-          sx={{
-            marginBottom: 5,
-            marginTop: 4,
-            fontSize: { xs: "2rem", md: "2.5rem" },
-            fontWeight: 400,
-            color: theme.palette.text.secondary,
-            opacity: 0.9,
-            position: "relative",
-            "&::after": {
-              content: '""',
-              position: "absolute",
-              bottom: -15,
-              left: "50%",
-              transform: "translateX(-50%)",
-              width: "80px",
-              height: "3px",
-              background: `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-              borderRadius: "2px",
-            },
-          }}
-        >
-          Key Features
-        </Typography>
-
-        <Grid container spacing={4} sx={{ marginBottom: 6 }}>
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <FeatureBox
-              icon={<ContactsIcon sx={{ fontSize: 40, color: theme.palette.primary.main }} />}
-              title="Address book"
-              description="Easily manage your go-to addresses, fully Safe Wallet compatible"
-            />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <FeatureBox
-              icon={<ShieldIcon sx={{ fontSize: 40, color: theme.palette.primary.main }} />}
-              title="Privacy"
-              description="No trackers or data collection"
-            />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <FeatureBox
-              icon={<FeaturedPlayListIcon sx={{ fontSize: 40, color: theme.palette.primary.main }} />}
-              title="All-inclusive"
-              description="Execute multi-signature and batched transactions"
-            />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-            <FeatureBox
-              icon={<RemoveCircleIcon sx={{ fontSize: 40, color: theme.palette.primary.main }} />}
-              title="No Backend"
-              description="Lightweight and easy to deploy with no backend requirements"
-            />
-          </Grid>
-        </Grid>
-
-        {/* Supported Chains Section */}
-        <Paper
-          elevation={0}
-          sx={{
-            width: "100%",
-            padding: 4,
-            marginBottom: 4,
-            background: "linear-gradient(135deg, rgba(38, 38, 64, 0.7) 0%, rgba(26, 26, 46, 0.7) 100%)",
-            backdropFilter: "blur(10px)",
-            borderRadius: 2,
-            border: `1px solid ${theme.palette.divider}`,
-          }}
-        >
-          <Typography variant="h4" sx={{ marginBottom: 3 }}>
-            Supported Chains
-          </Typography>
-          <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 1 }}>
-            {supportedChains.map((chain) => (
-              <Chip
-                key={chain.id}
-                label={chain.name}
-                sx={{
-                  margin: 0.5,
-                  background: `linear-gradient(45deg, ${theme.palette.background.paper} 30%, ${theme.palette.background.default} 90%)`,
-                  border: `1px solid ${theme.palette.divider}`,
-                  fontWeight: 500,
-                }}
-              />
-            ))}
-          </Box>
-        </Paper>
-
-        {/* Footer */}
-        <Divider sx={{ width: "100%", marginY: 4 }} />
-        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 4, flexWrap: "wrap" }}>
-          <Button
-            variant="outlined"
-            component={Link}
-            href="https://github.com/akshay-ap/alt-safe"
-            target="_blank"
-            sx={{ borderRadius: 4 }}
-          >
-            View Source Code
-          </Button>
+const HashSpecimen: React.FC = () => (
+  <Box
+    aria-label="A Safe transaction hash shown in groups of four characters"
+    sx={{ border: `1px solid ${color.hairline}`, borderRadius: 2, p: { xs: 2.5, md: 3.5 }, bgcolor: color.surface }}
+  >
+    <Typography variant="caption" component="p" sx={{ mb: 2 }}>
+      Safe transaction hash, as you sign it
+    </Typography>
+    <Box
+      sx={{
+        display: "grid",
+        gridTemplateColumns: "repeat(4, auto)",
+        justifyContent: "start",
+        columnGap: 2,
+        rowGap: 1,
+        fontFamily: font.mono,
+        fontSize: { xs: "1.0625rem", md: "1.375rem" },
+      }}
+    >
+      {chunkHex(SAMPLE_HASH).map((group, index) => (
+        <Box key={`${index}-${group}`} component="span" sx={{ color: index === 0 ? color.accent : color.text }}>
+          {group}
         </Box>
-      </Box>
-    </Container>
-  );
-};
+      ))}
+    </Box>
+    <Typography variant="body2" color="text.secondary" sx={{ mt: 2.5, maxWidth: 420 }}>
+      Every address and hash is printed in groups of four, so you can check it against your wallet chunk by chunk.
+    </Typography>
+  </Box>
+);
+
+const Welcome: React.FC = () => (
+  <Container maxWidth="lg" sx={{ py: { xs: 4, md: 6 } }}>
+    <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between", mb: { xs: 6, md: 10 } }}>
+      <Logo />
+      <Link href={SOURCE_URL} target="_blank" rel="noopener noreferrer" sx={{ color: "text.secondary" }}>
+        Source code
+      </Link>
+    </Stack>
+
+    <Grid container spacing={{ xs: 5, md: 8 }} sx={{ alignItems: "center", mb: { xs: 8, md: 12 } }}>
+      <Grid size={{ xs: 12, md: 6 }}>
+        <Typography variant="h1" sx={{ fontSize: { xs: "2.25rem", md: "3rem" }, lineHeight: 1.1, mb: 2.5 }}>
+          Run your Safe without anyone in the middle.
+        </Typography>
+        <Typography variant="body1" color="text.secondary" sx={{ fontSize: "1.0625rem", mb: 4, maxWidth: 520 }}>
+          ALT Safe builds, signs and executes Safe multisig transactions directly against the chain. Open source, no
+          backend, no account.
+        </Typography>
+        <Stack direction="row" spacing={1.5}>
+          <Button component={RouterLink} to="/home" variant="contained" size="large">
+            Open ALT Safe
+          </Button>
+          <Button href={SOURCE_URL} target="_blank" rel="noopener noreferrer" variant="outlined" size="large">
+            View on GitHub
+          </Button>
+        </Stack>
+      </Grid>
+      <Grid size={{ xs: 12, md: 6 }}>
+        <HashSpecimen />
+      </Grid>
+    </Grid>
+
+    <Typography variant="h2" sx={{ mb: 3 }}>
+      How a transaction moves
+    </Typography>
+    <Grid container spacing={3} component="ol" sx={{ listStyle: "none", p: 0, m: 0, mb: { xs: 8, md: 10 } }}>
+      {STEPS.map((step, index) => (
+        <Grid key={step.title} size={{ xs: 12, md: 4 }} component="li">
+          <Typography sx={{ fontFamily: font.mono, color: color.accent, mb: 1 }}>{index + 1}</Typography>
+          <Typography variant="h5" component="h3" gutterBottom>
+            {step.title}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {step.text}
+          </Typography>
+        </Grid>
+      ))}
+    </Grid>
+
+    <Divider sx={{ mb: { xs: 6, md: 8 } }} />
+
+    <Grid container spacing={3} sx={{ mb: { xs: 6, md: 8 } }}>
+      {FACTS.map((fact) => (
+        <Grid key={fact.title} size={{ xs: 12, md: 4 }}>
+          <Typography variant="h6" component="h3" gutterBottom>
+            {fact.title}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {fact.text}
+          </Typography>
+        </Grid>
+      ))}
+    </Grid>
+
+    <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 820 }}>
+      Works on {supportedChains.map((chain) => chain.name).join(", ")}.
+    </Typography>
+  </Container>
+);
 
 export default Welcome;

@@ -86,7 +86,10 @@ const ApproveTransactionHash: React.FC = () => {
 
   return (
     <Box>
-      <Title text="Approve Transaction Hash" />
+      <Title
+        text="Approve a hash"
+        description="Approve a Safe transaction hash on chain from your wallet, and see which owners have approved it already."
+      />
       <Grid container>
         <Grid size={12}>
           <TransactionHashInput

@@ -38,7 +38,14 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ onMenuClick }) => {
         </Box>
         <NetworkMenu />
         <Tooltip title="Help">
-          <IconButton component="a" href={HELP_URL} target="_blank" rel="noopener noreferrer" aria-label="Help">
+          <IconButton
+            component="a"
+            href={HELP_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Help"
+            sx={{ display: { xs: "none", sm: "inline-flex" } }}
+          >
             <HelpOutlineIcon fontSize="small" />
           </IconButton>
         </Tooltip>
@@ -48,7 +55,12 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ onMenuClick }) => {
           </IconButton>
         </Tooltip>
         {address ? (
-          <Button variant="outlined" onClick={() => setAccountDialogOpen(true)} aria-label="Wallet account">
+          <Button
+            variant="outlined"
+            onClick={() => setAccountDialogOpen(true)}
+            aria-label="Wallet account"
+            sx={{ whiteSpace: "nowrap", flexShrink: 0 }}
+          >
             <AccountAddress address={address} short showCopy={false} />
           </Button>
         ) : (
