@@ -41,7 +41,7 @@ import { STORAGE_KEY } from "../../../constants";
 import { useCreateTransactionContext } from "../../../context/CreateTransactionContext";
 import type { ImportData, ImportSignedData, SafeTransactionDraft, Transaction } from "../../../context/types";
 import { type SafeTransactionInfo, useSafeWalletContext } from "../../../context/WalletContext";
-import { prepareSafeTransaction } from "../../../utils/safeTransaction";
+import { NONCE_LOADING_ERROR, prepareSafeTransaction } from "../../../utils/safeTransaction";
 import { config } from "../../../wagmi";
 import PageHeader from "../../common/PageHeader";
 import LoadTransactionDialog from "../../dialogs/LoadTransactionDialog";
@@ -74,6 +74,7 @@ const CreateTransaction: React.FC = () => {
     error,
     setError,
     nonce,
+    onChainNonce,
     gasPrice,
     safeTxGas,
     baseGas,
@@ -125,6 +126,8 @@ const CreateTransaction: React.FC = () => {
 
   const getSafeTransactionInfo = () => {
     if (safeAccount === undefined) throw new Error("Safe account is undefined");
+    // nonce is a 0 placeholder until the Safe's nonce has loaded.
+    if (onChainNonce === undefined) throw new Error(NONCE_LOADING_ERROR);
     const settings = {
       nonce,
       safeTxGas,

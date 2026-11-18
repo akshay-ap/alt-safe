@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import multiSendCallOnlyAbi from "../abis/MultiSendCallOnly.json";
 import { type Transaction, TransactionType } from "../context/types";
 import { encodeMultiSend } from "./multisend";
-import { buildSafeTransaction, resolveNonce, type SafeTxSettings } from "./safeTransaction";
+import { buildSafeTransaction, nonceWarning, type SafeTxSettings } from "./safeTransaction";
 import { SafeOperation } from "./utils";
 
 const address = (seed: string) => getAddress(keccak256(toHex(seed)).slice(0, 42));
@@ -61,13 +61,20 @@ describe("buildSafeTransaction", () => {
   });
 });
 
-describe("resolveNonce", () => {
-  it("keeps a chosen nonce at or above the on-chain nonce, e.g. to queue or replace", () => {
-    expect(resolveNonce(5n, 5n)).toBe(5n);
-    expect(resolveNonce(9n, 5n)).toBe(9n);
+describe("buildSafeTransaction nonce", () => {
+  it("keeps a chosen nonce below the on-chain one instead of replacing it", () => {
+    expect(buildSafeTransaction([action("a")], { ...settings, nonce: 2n }, undefined).nonce).toBe(2n);
+  });
+});
+
+describe("nonceWarning", () => {
+  it("warns only when the chosen nonce is below the on-chain nonce", () => {
+    expect(nonceWarning(4n, 5n)).toContain("below the Safe's current nonce 5");
+    expect(nonceWarning(5n, 5n)).toBeUndefined();
+    expect(nonceWarning(9n, 5n)).toBeUndefined();
   });
 
-  it("uses the on-chain nonce when the chosen one is already spent or not loaded yet", () => {
-    expect(resolveNonce(0n, 5n)).toBe(5n);
+  it("stays quiet while the on-chain nonce is unknown", () => {
+    expect(nonceWarning(0n, undefined)).toBeUndefined();
   });
 });

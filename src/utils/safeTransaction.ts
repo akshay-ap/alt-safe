@@ -39,11 +39,16 @@ export const buildSafeTransaction = (
   return { to: multiSendCallOnly, value: 0n, data, operation: SafeOperation.DELEGATE_CALL, ...settings };
 };
 
-/** A nonce below the Safe's current one can never execute; it also covers a nonce still loading as 0. */
-export const resolveNonce = (chosen: bigint, onChain: bigint) => (chosen < onChain ? onChain : chosen);
+export const NONCE_LOADING_ERROR = "The Safe's current nonce is still loading. Try again in a moment.";
 
-export const readSafeNonce = async (safeAccount: Address) =>
-  (await readContract(config, { abi: safeAbi, address: safeAccount, functionName: "nonce" })) as bigint;
+/**
+ * The chosen nonce is always used as is. One below the Safe's current nonce can still be signed but can never
+ * execute, so it only gets a warning.
+ */
+export const nonceWarning = (chosen: bigint, onChain: bigint | undefined): string | undefined =>
+  onChain !== undefined && chosen < onChain
+    ? `Nonce ${chosen} is below the Safe's current nonce ${onChain}. You can sign this transaction, but it will fail to execute.`
+    : undefined;
 
 export const readSafeTransactionHash = async (safeAccount: Address, tx: SafeTransactionParams) =>
   (await readContract(config, {
@@ -64,14 +69,13 @@ export const readSafeTransactionHash = async (safeAccount: Address, tx: SafeTran
     ],
   })) as `0x${string}`;
 
-/** Builds the batch's Safe transaction with a usable nonce and asks the Safe for its hash. */
+/** Builds the batch's Safe transaction with the chosen settings and asks the Safe for its hash. */
 export const prepareSafeTransaction = async (
   safeAccount: Address,
   transactions: Transaction[],
   settings: SafeTxSettings,
   multiSendCallOnly: Address | undefined,
 ) => {
-  const nonce = resolveNonce(settings.nonce, await readSafeNonce(safeAccount));
-  const safeTx = buildSafeTransaction(transactions, { ...settings, nonce }, multiSendCallOnly);
+  const safeTx = buildSafeTransaction(transactions, settings, multiSendCallOnly);
   return { safeTx, safeTxHash: await readSafeTransactionHash(safeAccount, safeTx) };
 };

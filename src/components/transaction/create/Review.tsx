@@ -2,7 +2,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import FingerprintIcon from "@mui/icons-material/Fingerprint";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import { Box, Button, Paper, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { Alert, Box, Button, Paper, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { signTypedData, simulateContract } from "@wagmi/core";
 import { useState } from "react";
 import { BaseError, bytesToHex, ContractFunctionRevertedError, stringToBytes } from "viem";
@@ -12,7 +12,7 @@ import { STORAGE_KEY } from "../../../constants";
 import { useCreateTransactionContext } from "../../../context/CreateTransactionContext";
 import type { ImportData, Transaction } from "../../../context/types";
 import { type SafeTransactionInfo, useSafeWalletContext } from "../../../context/WalletContext";
-import { prepareSafeTransaction } from "../../../utils/safeTransaction";
+import { NONCE_LOADING_ERROR, nonceWarning, prepareSafeTransaction } from "../../../utils/safeTransaction";
 import { EIP712_SAFE_TX_TYPE, type SafeTransactionParams } from "../../../utils/utils";
 import { config } from "../../../wagmi";
 import AccountAddress from "../../common/AccountAddress";
@@ -63,6 +63,7 @@ const Review: React.FC<ReviewProps> = ({ setActiveStep }) => {
     safeTransactionHash,
     safeTransaction,
     nonce,
+    onChainNonce,
     gasPrice,
     safeTxGas,
     baseGas,
@@ -191,6 +192,8 @@ const Review: React.FC<ReviewProps> = ({ setActiveStep }) => {
 
   const getSafeTransactionInfo = () => {
     if (safeAccount === undefined) throw new Error("Safe account is undefined");
+    // nonce is a 0 placeholder until the Safe's nonce has loaded.
+    if (onChainNonce === undefined) throw new Error(NONCE_LOADING_ERROR);
     const settings = {
       nonce,
       safeTxGas,
@@ -294,6 +297,11 @@ const Review: React.FC<ReviewProps> = ({ setActiveStep }) => {
               {safeTransaction?.nonce.toString() ?? "—"} (
               {transactions.length === 1 ? "1 action" : `${transactions.length} actions, batched with MultiSend`})
             </ReviewRow>
+            {safeTransaction && nonceWarning(safeTransaction.nonce, onChainNonce) && (
+              <Alert severity="warning" sx={{ mt: 1 }}>
+                {nonceWarning(safeTransaction.nonce, onChainNonce)}
+              </Alert>
+            )}
           </Box>
           <Stack
             direction="row"
