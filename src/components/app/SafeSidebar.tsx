@@ -7,6 +7,7 @@ import HistoryIcon from "@mui/icons-material/History";
 import PlaylistAddCheckIcon from "@mui/icons-material/PlaylistAddCheck";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import TagIcon from "@mui/icons-material/Tag";
+import TuneIcon from "@mui/icons-material/Tune";
 import {
   Box,
   Button,
@@ -27,7 +28,8 @@ import { useSafeWalletContext } from "../../context/WalletContext";
 import { useSavedSafe } from "../../hooks/useSavedSafe";
 import AccountAddress from "../common/AccountAddress";
 
-type NavItem = { label: string; path: string; icon: React.ReactNode };
+// `exact` stops /settings from also lighting up on /settings/app.
+type NavItem = { label: string; path: string; icon: React.ReactNode; exact?: boolean };
 
 const NAV_GROUPS: { title?: string; items: NavItem[] }[] = [
   {
@@ -47,9 +49,13 @@ const NAV_GROUPS: { title?: string; items: NavItem[] }[] = [
   },
   {
     title: "Safe",
+    items: [{ label: "History", path: "/history", icon: <HistoryIcon /> }],
+  },
+  {
+    title: "Settings",
     items: [
-      { label: "History", path: "/history", icon: <HistoryIcon /> },
-      { label: "Settings", path: "/settings", icon: <SettingsOutlinedIcon /> },
+      { label: "Safe settings", path: "/settings", icon: <SettingsOutlinedIcon />, exact: true },
+      { label: "App settings", path: "/settings/app", icon: <TuneIcon />, exact: true },
     ],
   },
 ];
@@ -95,7 +101,7 @@ const SafeSidebar: React.FC<{ onNavigate?: () => void }> = ({ onNavigate }) => {
                 key={item.path}
                 component={RouterLink}
                 to={item.path}
-                selected={pathname === item.path || pathname.startsWith(`${item.path}/`)}
+                selected={pathname === item.path || (!item.exact && pathname.startsWith(`${item.path}/`))}
                 onClick={onNavigate}
                 sx={{ mx: 1, borderRadius: 1.5 }}
               >

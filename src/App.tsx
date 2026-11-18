@@ -1,4 +1,5 @@
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import AppSettings from "./components/AppSettings.tsx";
 import { AppLayout, SafeLayout } from "./components/app/Layouts.tsx";
 import CreateSafe from "./components/create-account/CreateSafe.tsx";
 import SafeInfo from "./components/dashboard/index.tsx";
@@ -33,6 +34,8 @@ function App() {
                   <Route path="/home" element={<Home />} />
                   <Route path="/import" element={<ImportSafe />} />
                   <Route path="/create" element={<CreateSafe />} />
+                  {/* Same page for when no Safe is open, so app settings never need a Safe. */}
+                  <Route path="/app-settings" element={<AppSettings />} />
                 </Route>
                 <Route element={<SafeLayout />}>
                   <Route path="/safe-info" element={<SafeInfo />} />
@@ -50,6 +53,7 @@ function App() {
                   <Route path="/sign-message" element={<SignMessage />} />
                   <Route path="/history" element={<SafeTransactionHistory />} />
                   <Route path="/settings" element={<Settings />} />
+                  <Route path="/settings/app" element={<AppSettings />} />
                 </Route>
               </Routes>
             </Router>
