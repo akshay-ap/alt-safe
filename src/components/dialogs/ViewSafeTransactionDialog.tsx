@@ -8,10 +8,13 @@ import {
   DialogTitle,
   Divider,
   Paper,
+  Snackbar,
   Typography,
   useTheme,
 } from "@mui/material";
 import type React from "react";
+import { useState } from "react";
+import { safeTransactionToJson } from "../../utils/safeTransaction";
 import type { SafeTransactionParams } from "../../utils/utils";
 import SafeTransactionForm from "../common/SafeTransactionForm";
 import TransactionHash from "../common/TransactionHash";
@@ -31,21 +34,12 @@ const ViewSafeTransactionDialog: React.FC<ViewSafeTransactionDialogProps> = ({
 }) => {
   const theme = useTheme();
 
-  const handleCopyToClipboard = () => {
-    const transactionDetails = {
-      to: safeTransaction?.to,
-      value: safeTransaction?.value.toString(),
-      data: safeTransaction?.data,
-      operation: safeTransaction?.operation.toString(),
-      safeTxGas: safeTransaction?.safeTxGas.toString(),
-      baseGas: safeTransaction?.baseGas.toString(),
-      gasPrice: safeTransaction?.gasPrice.toString(),
-      gasToken: safeTransaction?.gasToken,
-      refundReceiver: safeTransaction?.refundReceiver,
-      nonce: safeTransaction?.nonce.toString(),
-      safeTransactionHash: safeTransactionHash,
-    };
-    navigator.clipboard.writeText(JSON.stringify(transactionDetails, null, 2));
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyJson = async () => {
+    if (!safeTransaction || !safeTransactionHash) return;
+    await navigator.clipboard.writeText(safeTransactionToJson(safeTransaction, safeTransactionHash));
+    setCopied(true);
   };
 
   return (
@@ -100,16 +94,22 @@ const ViewSafeTransactionDialog: React.FC<ViewSafeTransactionDialogProps> = ({
       <DialogActions>
         <Button
           disabled={!safeTransaction || !safeTransactionHash}
-          onClick={handleCopyToClipboard}
+          onClick={handleCopyJson}
           startIcon={<ContentCopyIcon />}
           variant="contained"
         >
-          Copy to clipboard
+          Copy JSON
         </Button>
         <Button onClick={onClose} variant="outlined">
           Close
         </Button>
       </DialogActions>
+      <Snackbar
+        open={copied}
+        autoHideDuration={3000}
+        onClose={() => setCopied(false)}
+        message="Transaction JSON copied"
+      />
     </Dialog>
   );
 };

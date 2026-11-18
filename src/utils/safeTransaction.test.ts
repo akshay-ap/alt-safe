@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import multiSendCallOnlyAbi from "../abis/MultiSendCallOnly.json";
 import { type Transaction, TransactionType } from "../context/types";
 import { encodeMultiSend } from "./multisend";
-import { buildSafeTransaction, nonceWarning, type SafeTxSettings } from "./safeTransaction";
+import { buildSafeTransaction, nonceWarning, type SafeTxSettings, safeTransactionToJson } from "./safeTransaction";
 import { SafeOperation } from "./utils";
 
 const address = (seed: string) => getAddress(keccak256(toHex(seed)).slice(0, 42));
@@ -76,5 +76,27 @@ describe("nonceWarning", () => {
 
   it("stays quiet while the on-chain nonce is unknown", () => {
     expect(nonceWarning(0n, undefined)).toBeUndefined();
+  });
+});
+
+describe("safeTransactionToJson", () => {
+  it("keeps every Safe transaction field, with large numbers as exact decimal strings", () => {
+    const tx = { ...buildSafeTransaction([action("a", "123456789012345678901234567890")], settings, MULTI_SEND) };
+    const hash = keccak256(toHex("hash"));
+    const parsed = JSON.parse(safeTransactionToJson(tx, hash));
+
+    expect(parsed).toEqual({
+      to: tx.to,
+      value: "123456789012345678901234567890",
+      data: "0x",
+      operation: SafeOperation.CALL,
+      safeTxGas: "1",
+      baseGas: "2",
+      gasPrice: "3",
+      gasToken: zeroAddress,
+      refundReceiver: settings.refundReceiver,
+      nonce: "7",
+      safeTransactionHash: hash,
+    });
   });
 });
