@@ -7,7 +7,7 @@ import type { DeploymentOption, DeploymentOptionId } from "../../../safe-contrac
 import { useDeploymentAvailability } from "../../../safe-contracts/useDeploymentAvailability";
 
 const OptionLabel: React.FC<{ option: DeploymentOption; available: boolean | undefined; chainName: string }> = ({
-  option
+  option,
 }) => (
   <Box sx={{ py: 1 }}>
     <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap", rowGap: 0.5 }}>

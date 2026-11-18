@@ -3,10 +3,12 @@ import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import type { Address } from "viem";
 import { useCreateTransactionContext } from "../../../context/CreateTransactionContext";
+import { nonceWarning } from "../../../utils/safeTransaction";
 
 const TransactionParamsForm: React.FC = () => {
   const {
     nonce,
+    onChainNonce,
     gasPrice,
     baseGas,
     safeTxGas,
@@ -126,7 +128,10 @@ const TransactionParamsForm: React.FC = () => {
         value={newNonce.toString()}
         onChange={(e) => handleNonceChange(e.target.value)}
         size="small"
-        helperText="Set custom nonce."
+        helperText={nonceWarning(newNonce, onChainNonce) ?? "Set custom nonce."}
+        slotProps={{
+          formHelperText: { sx: nonceWarning(newNonce, onChainNonce) ? { color: "warning.main" } : undefined },
+        }}
       />
 
       <TextField

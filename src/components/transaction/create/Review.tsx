@@ -2,27 +2,18 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import FingerprintIcon from "@mui/icons-material/Fingerprint";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import { Box, Button, Paper, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
-import { readContract, signTypedData, simulateContract } from "@wagmi/core";
+import { Alert, Box, Button, Paper, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { signTypedData, simulateContract } from "@wagmi/core";
 import { useState } from "react";
-import type { Address } from "viem";
-import {
-  BaseError,
-  bytesToHex,
-  ContractFunctionRevertedError,
-  encodeFunctionData,
-  stringToBytes,
-  zeroAddress,
-} from "viem";
+import { BaseError, bytesToHex, ContractFunctionRevertedError, stringToBytes } from "viem";
 import { useAccount, usePublicClient, useWriteContract } from "wagmi";
-import multisendCallOnly from "../../../abis/MultiSendCallOnly.json";
 import safe from "../../../abis/Safe.json";
 import { STORAGE_KEY } from "../../../constants";
 import { useCreateTransactionContext } from "../../../context/CreateTransactionContext";
 import type { ImportData, Transaction } from "../../../context/types";
 import { type SafeTransactionInfo, useSafeWalletContext } from "../../../context/WalletContext";
-import { encodeMultiSend } from "../../../utils/multisend";
-import { EIP712_SAFE_TX_TYPE, SafeOperation, type SafeTransactionParams } from "../../../utils/utils";
+import { NONCE_LOADING_ERROR, nonceWarning, prepareSafeTransaction } from "../../../utils/safeTransaction";
+import { EIP712_SAFE_TX_TYPE, type SafeTransactionParams } from "../../../utils/utils";
 import { config } from "../../../wagmi";
 import AccountAddress from "../../common/AccountAddress";
 import TransactionHash from "../../common/TransactionHash";
@@ -72,6 +63,7 @@ const Review: React.FC<ReviewProps> = ({ setActiveStep }) => {
     safeTransactionHash,
     safeTransaction,
     nonce,
+    onChainNonce,
     gasPrice,
     safeTxGas,
     baseGas,
@@ -198,72 +190,19 @@ const Review: React.FC<ReviewProps> = ({ setActiveStep }) => {
     console.log("Transaction successfully signed");
   };
 
-  const getSafeTransactionInfo = async (): Promise<{
-    safeTx: SafeTransactionParams;
-    safeTxHash: `0x${string}`;
-  }> => {
-    let safeTransactionHashFromContractCall: `0x${string}` = "0x";
-    let to: Address;
-    let value: bigint;
-    let callData: `0x${string}`;
-    let operation: SafeOperation;
-
-    if (safeAccount === undefined) {
-      throw new Error("Safe account is undefined");
-    }
-
-    if (transactions.length < 1) {
-      throw new Error("No transactions");
-    }
-
-    if (transactions.length === 1) {
-      to = transactions[0].to;
-      value = BigInt(transactions[0].value);
-      callData = transactions[0].data;
-      operation = SafeOperation.CALL;
-    } else {
-      const metaTransactions = transactions.map((transaction) => {
-        return {
-          to: transaction.to,
-          value: BigInt(transaction.value),
-          data: transaction.data,
-          operation: SafeOperation.CALL,
-        };
-      });
-
-      callData = encodeFunctionData({
-        abi: multisendCallOnly,
-        functionName: "multiSend",
-        args: [encodeMultiSend(metaTransactions)],
-      });
-
-      to = safeDeployment?.multiSendCallOnly ?? zeroAddress;
-      value = 0n;
-      operation = SafeOperation.DELEGATE_CALL;
-    }
-
-    safeTransactionHashFromContractCall = (await readContract(config, {
-      abi: safe,
-      address: safeAccount,
-      functionName: "getTransactionHash",
-      args: [to, value, callData, operation, safeTxGas, baseGas, gasPrice, refundTokenAddress, refundToAddress, nonce],
-    })) as `0x${string}`;
-
-    return {
-      safeTx: {
-        to,
-        value,
-        data: callData,
-        operation,
-        safeTxGas: safeTxGas,
-        baseGas: baseGas,
-        gasPrice: gasPrice,
-        gasToken: refundTokenAddress,
-        refundReceiver: refundToAddress,
-        nonce,
-      },
-      safeTxHash: safeTransactionHashFromContractCall,
+  const getSafeTransactionInfo = () => {
+    if (safeAccount === undefined) throw new Error("Safe account is undefined");
+    // nonce is a 0 placeholder until the Safe's nonce has loaded.
+    if (onChainNonce === undefined) throw new Error(NONCE_LOADING_ERROR);
+    const settings = {
+      nonce,
+      safeTxGas,
+      baseGas,
+      gasPrice,
+      gasToken: refundTokenAddress,
+      refundReceiver: refundToAddress,
     };
+    return prepareSafeTransaction(safeAccount, transactions, settings, safeDeployment?.multiSendCallOnly);
   };
 
   const handleApproveTransactionHash = async () => {
@@ -358,6 +297,11 @@ const Review: React.FC<ReviewProps> = ({ setActiveStep }) => {
               {safeTransaction?.nonce.toString() ?? "—"} (
               {transactions.length === 1 ? "1 action" : `${transactions.length} actions, batched with MultiSend`})
             </ReviewRow>
+            {safeTransaction && nonceWarning(safeTransaction.nonce, onChainNonce) && (
+              <Alert severity="warning" sx={{ mt: 1 }}>
+                {nonceWarning(safeTransaction.nonce, onChainNonce)}
+              </Alert>
+            )}
           </Box>
           <Stack
             direction="row"
