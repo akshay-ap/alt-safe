@@ -1,6 +1,6 @@
 import { Alert, Box, Button, CircularProgress, Dialog, DialogContent, DialogTitle } from "@mui/material";
 import Grid from "@mui/material/Grid";
-import { simulateContract } from "@wagmi/core";
+import { simulateContract, waitForTransactionReceipt } from "@wagmi/core";
 import type React from "react";
 import { useCallback, useEffect, useState } from "react";
 import { BaseError, ContractFunctionRevertedError } from "viem";
@@ -45,6 +45,9 @@ const ApproveTransactionHash: React.FC = () => {
 
       const hash = await writeContractAsync(request);
       setTransactionHash(hash);
+      // The status list only reflects the approval once it is mined.
+      await waitForTransactionReceipt(config, { hash });
+      await checkApprovals();
     } catch (err) {
       console.error(err);
       if (err instanceof BaseError) {
