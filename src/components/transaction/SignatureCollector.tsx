@@ -15,7 +15,7 @@ import {
 } from "viem";
 import { useAccount } from "wagmi";
 import safe from "../../abis/Safe.json";
-import { exportSignedTransactionToHex } from "../../api/api";
+import { exportSignedTransactionToHex, exportTransactionsToHex } from "../../api/api";
 import type { Transaction } from "../../context/types";
 import { useSafeWalletContext } from "../../context/WalletContext";
 import { mergeSignatures, parseSignatures } from "../../utils/signatures";
@@ -171,6 +171,15 @@ const SignatureCollector: React.FC<{
       : []),
     ...(mySignature
       ? [{ label: "Copy my signature only", value: mySignature.data, copiedMessage: "Signature copied" }]
+      : []),
+    ...(safeAccount
+      ? [
+          {
+            label: "Copy transaction only",
+            value: exportTransactionsToHex(transactions, safeAccount, safeTransaction, safeTransactionHash),
+            copiedMessage: "Transaction copied without signatures",
+          },
+        ]
       : []),
   ];
 
