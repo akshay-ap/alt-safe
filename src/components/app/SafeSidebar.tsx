@@ -36,12 +36,12 @@ const NAV_GROUPS: { title?: string; items: NavItem[] }[] = [
     items: [
       { label: "Overview", path: "/safe-info", icon: <DashboardOutlinedIcon /> },
       { label: "New transaction", path: "/create-transaction", icon: <AddIcon /> },
+      { label: "Shared transaction", path: "/aggregate-signatures", icon: <PlaylistAddCheckIcon /> },
     ],
   },
   {
     title: "Sign & execute",
     items: [
-      { label: "Collect signatures", path: "/aggregate-signatures", icon: <PlaylistAddCheckIcon /> },
       { label: "Approve transaction", path: "/approve-transaction", icon: <FactCheckOutlinedIcon /> },
       { label: "Approve hash", path: "/approve-transaction-hash", icon: <TagIcon /> },
       { label: "Sign message", path: "/sign-message", icon: <DrawOutlinedIcon /> },

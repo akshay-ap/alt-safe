@@ -24,7 +24,10 @@ export type ImportData = {
 };
 
 export type ImportSignedData = ImportData & {
+  /** The sharer's own signature; kept for versions that read only this field. */
   signature: SafeSignature;
+  /** Every signature collected so far, including `signature`. */
+  signatures?: SafeSignature[];
 };
 
 export enum LogoType {
@@ -108,18 +111,4 @@ export interface SafeTransactionDraft {
   transactions: Transaction[];
   createdAt: string;
   updatedAt: string;
-}
-
-export interface ImportedTransactionData {
-  transactions: Transaction[];
-  safeAccount: `0x${string}`;
-  safeTransaction: SafeTransactionParams;
-  safeTransactionHash: `0x${string}`;
-}
-
-export interface SignatureImportState {
-  owner: `0x${string}`;
-  signature?: `0x${string}`;
-  importHex: string;
-  isApproved: boolean;
 }

@@ -21,28 +21,20 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { simulateContract } from "@wagmi/core";
 import { useEffect, useState } from "react";
-import { type Address, BaseError, ContractFunctionRevertedError, isAddressEqual } from "viem";
-import { useAccount, usePublicClient, useWriteContract } from "wagmi";
-import safe from "../../../abis/Safe.json";
-import {
-  deleteDraftTransaction,
-  exportSignedTransactionToHex,
-  getDraftTransactionById,
-  updateDraftTransaction,
-} from "../../../api/api";
+import { useAccount, usePublicClient } from "wagmi";
+import { deleteDraftTransaction, getDraftTransactionById, updateDraftTransaction } from "../../../api/api";
 import { STORAGE_KEY } from "../../../constants";
 import { useCreateTransactionContext } from "../../../context/CreateTransactionContext";
 import type { SafeTransactionDraft, Transaction } from "../../../context/types";
 import { type SafeTransactionInfo, useSafeWalletContext } from "../../../context/WalletContext";
 import { NONCE_LOADING_ERROR, prepareSafeTransaction } from "../../../utils/safeTransaction";
-import { config } from "../../../wagmi";
 import { TOP_BAR_HEIGHT } from "../../app/NavigationBar";
 import PageHeader from "../../common/PageHeader";
 import LoadTransactionDialog from "../../dialogs/LoadTransactionDialog";
 import SaveTransactionDialog from "../../dialogs/SaveTransactionDialog";
 import ViewSafeTransactionDialog from "../../dialogs/ViewSafeTransactionDialog";
+import SignatureCollector from "../SignatureCollector";
 import TransactionSummaryPanel from "../summary/TransactionSummaryPanel";
 import { ExecuteCard, SignedTransactionCard } from "./ExecuteStep";
 import Review from "./Review";
@@ -54,9 +46,8 @@ const CreateTransaction: React.FC = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const publicClient = usePublicClient();
   const account = useAccount();
-  const { writeContractAsync } = useWriteContract();
 
-  const { safeAccount, safeStorage, storage, safeDeployment } = useSafeWalletContext();
+  const { safeAccount, storage, safeDeployment } = useSafeWalletContext();
   const {
     transactions,
     setTransactions,
@@ -93,10 +84,6 @@ const CreateTransaction: React.FC = () => {
   // Add this state for the unsaved changes warning dialog
   const [unsavedChangesDialog, setUnsavedChangesDialog] = useState<boolean>(false);
   const [pendingAction, setPendingAction] = useState<string | null>(null);
-
-  const isConnectedOwner = Boolean(
-    account.address && safeStorage?.owners?.some((owner) => isAddressEqual(owner, account.address as Address)),
-  );
 
   // Steps in the transaction flow
   // No stepper: the page heading names the current step instead.
@@ -165,17 +152,6 @@ const CreateTransaction: React.FC = () => {
     setViewDialogOpen(true);
   };
 
-  const signedTransactionHex =
-    safeAccount && safeTransaction && account.address && signature && safeTransactionHash
-      ? exportSignedTransactionToHex({
-          transactions,
-          safeAccount,
-          signature: { signer: account.address, data: signature },
-          safeTransaction,
-          safeTransactionHash,
-        })
-      : "";
-
   const handleDeleteTransaction = async (id: number) => {
     const updatedTransactions = transactions.filter((_, index) => index !== id);
 
@@ -194,51 +170,14 @@ const CreateTransaction: React.FC = () => {
     setSnackbarOpen(true);
   };
 
-  const handleExecuteTransaction = async () => {
-    if (signature && safeTransaction && safeAccount) {
-      try {
-        const { request } = await simulateContract(config, {
-          abi: safe,
-          address: safeAccount,
-          functionName: "execTransaction",
-          args: [
-            safeTransaction.to,
-            safeTransaction.value,
-            safeTransaction.data,
-            safeTransaction.operation,
-            safeTransaction.safeTxGas,
-            safeTransaction.baseGas,
-            safeTransaction.gasPrice,
-            safeTransaction.gasToken,
-            safeTransaction.refundReceiver,
-            signature,
-          ],
-        });
-        // Dialog is now handled in Review component
-
-        const hash = await writeContractAsync(request);
-        setTransactionHash(hash);
-        await updateStorage(hash);
-
-        // Clean up draft if it was saved
-        if (isEditingDraft && currentDraftId) {
-          await deleteDraftTransaction(storage, currentDraftId);
-          setCurrentDraftId(undefined);
-          setIsEditingDraft(false);
-        }
-      } catch (err) {
-        console.error(err);
-        // Dialog is now handled in Review component
-        if (err instanceof BaseError) {
-          const revertError = err.walk((err) => err instanceof ContractFunctionRevertedError);
-          if (revertError instanceof ContractFunctionRevertedError) {
-            const errorName = revertError.data?.errorName ?? "";
-            setError(`${errorName} ${revertError.reason}`);
-          }
-        } else {
-          setError("Transaction failed");
-        }
-      }
+  const handleExecuted = async (hash: `0x${string}`) => {
+    setTransactionHash(hash);
+    await updateStorage(hash);
+    // Clean up draft if it was saved
+    if (isEditingDraft && currentDraftId) {
+      await deleteDraftTransaction(storage, currentDraftId);
+      setCurrentDraftId(undefined);
+      setIsEditingDraft(false);
     }
   };
 
@@ -496,14 +435,23 @@ const CreateTransaction: React.FC = () => {
                 safeTransactionHash={safeTransactionHash}
                 signature={signature}
                 onViewDetails={handleViewSafeTransaction}
-                signedTransactionHex={signedTransactionHex}
               />
-              <ExecuteCard
-                isOwner={isConnectedOwner}
-                threshold={safeStorage?.threshold}
-                executionHash={transactionHash}
-                onExecute={handleExecuteTransaction}
-              />
+              {transactionHash ? (
+                <ExecuteCard executionHash={transactionHash} />
+              ) : (
+                safeTransaction &&
+                safeTransactionHash && (
+                  <SignatureCollector
+                    transactions={transactions}
+                    safeTransaction={safeTransaction}
+                    safeTransactionHash={safeTransactionHash}
+                    initialSignatures={
+                      account.address && signature ? [{ signer: account.address, data: signature }] : []
+                    }
+                    onExecuted={handleExecuted}
+                  />
+                )
+              )}
             </Stack>
             <Box sx={{ position: { lg: "sticky" }, top: { lg: 80 } }}>
               <TransactionSummaryPanel

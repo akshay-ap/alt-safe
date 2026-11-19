@@ -1,194 +1,63 @@
-import { Box, Paper, Step, StepLabel, Stepper } from "@mui/material";
-import { simulateContract, writeContract } from "@wagmi/core";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import { Box, Button, Paper, Stack, Step, StepLabel, Stepper } from "@mui/material";
 import type React from "react";
-import { useEffect, useState } from "react";
-import { BaseError, ContractFunctionRevertedError, encodePacked, hexToBytes, pad, zeroHash } from "viem";
-import safe from "../../abis/Safe.json";
-import type { ImportedTransactionData, ImportSignedData, SignatureImportState } from "../../context/types";
+import { useState } from "react";
+import { useAccount } from "wagmi";
+import type { ImportData } from "../../context/types";
 import { useSafeWalletContext } from "../../context/WalletContext";
-import { buildSignatureBytes, fetchApprovals } from "../../utils/utils";
-import { config } from "../../wagmi";
+import { parseSharedTransaction, parseSignatures } from "../../utils/signatures";
+import type { SafeSignature } from "../../utils/utils";
 import Title from "../common/Title";
-import CollectSignaturesStep from "./aggregate-signature-steps/CollectSignaturesStep";
+import ViewSafeTransactionDialog from "../dialogs/ViewSafeTransactionDialog";
 import ExecutionCompleteStep from "./aggregate-signature-steps/ExecutionCompleteStep";
 import ImportTransactionStep from "./aggregate-signature-steps/ImportTransactionStep";
+import SignatureCollector from "./SignatureCollector";
+import TransactionSummaryPanel from "./summary/TransactionSummaryPanel";
 
 const AggregateSignaturesAndExecute: React.FC = () => {
   const { safeAccount, safeStorage } = useSafeWalletContext();
+  const { chainId } = useAccount();
 
-  // State for transaction data
   const [transactionImportHex, setTransactionImportHex] = useState<string>("");
-  const [importedTransaction, setImportedTransaction] = useState<ImportedTransactionData>();
+  const [importedTransaction, setImportedTransaction] = useState<ImportData>();
+  const [importedSignatures, setImportedSignatures] = useState<SafeSignature[]>([]);
   const [transactionImportError, setTransactionImportError] = useState<string>();
-
-  // State for signatures
-  const [signatureStates, setSignatureStates] = useState<SignatureImportState[]>([]);
-  const [signatureImportError, setSignatureImportError] = useState<string>();
-
-  // Execution state
-  const [executionError, setExecutionError] = useState<string>();
-  const [isLoading, setIsLoading] = useState(false);
   const [transactionHash, setTransactionHash] = useState<`0x${string}`>();
-  const [activeStep, setActiveStep] = useState(0);
+  const [detailsOpen, setDetailsOpen] = useState(false);
 
-  const steps = ["Import Transaction", "Collect Signatures", "Execute"];
+  const steps = ["Paste transaction", "Sign or execute", "Executed"];
+  const activeStep = transactionHash ? 2 : importedTransaction ? 1 : 0;
 
-  // Load initial data and check approvals
-  useEffect(() => {
-    if (safeStorage?.owners && safeStorage.owners.length > 0) {
-      setSignatureStates(
-        safeStorage.owners.map((owner) => ({
-          owner,
-          importHex: "",
-          isApproved: false,
-        })),
-      );
-    }
-  }, [safeStorage]);
-
-  // Check on-chain approvals whenever transaction hash changes
-  useEffect(() => {
-    if (importedTransaction?.safeTransactionHash && safeAccount) {
-      checkOnChainApprovals();
-    }
-  }, [importedTransaction?.safeTransactionHash, safeAccount]);
-
-  const checkOnChainApprovals = async () => {
-    if (!importedTransaction?.safeTransactionHash || !safeAccount || !signatureStates.length) return;
-
-    const approvals = await fetchApprovals(
-      signatureStates.map((state) => state.owner),
-      importedTransaction.safeTransactionHash,
-      safeAccount,
-    );
-
-    setSignatureStates((prevStates) =>
-      prevStates.map((state) => ({
-        ...state,
-        isApproved: approvals[state.owner] || false,
-      })),
-    );
-  };
-
-  const handleImportTransaction = () => {
+  const handleImportTransaction = async () => {
     setTransactionImportError(undefined);
-    try {
-      if (!transactionImportHex || transactionImportHex === "0x") {
-        throw new Error("Empty transaction data");
-      }
-
-      const jsonString = new TextDecoder().decode(hexToBytes(transactionImportHex as `0x${string}`));
-      const importedData = JSON.parse(jsonString) as ImportedTransactionData;
-
-      // Validate imported data
-      if (!importedData.safeTransaction || !importedData.safeTransactionHash) {
-        throw new Error("Invalid transaction data format");
-      }
-
-      setImportedTransaction(importedData);
-      setActiveStep(1); // Move to signature collection
-    } catch (error) {
-      console.error("Invalid transaction import:", error);
-      setTransactionImportError("Invalid transaction data. Please check your input and try again.");
-    }
-  };
-
-  const handleImportSignature = (index: number, value: string) => {
-    setSignatureImportError(undefined);
-    try {
-      if (!value || value === "0x") return;
-
-      const jsonString = new TextDecoder().decode(hexToBytes(value as `0x${string}`));
-      const importedData = JSON.parse(jsonString) as ImportSignedData;
-
-      // Validate that the signature matches our transaction
-      if (importedData.safeTransactionHash !== importedTransaction?.safeTransactionHash) {
-        throw new Error("Signature does not match the imported transaction");
-      }
-
-      setSignatureStates((prevStates) =>
-        prevStates.map((state, i) =>
-          i === index
-            ? {
-                ...state,
-                signature: importedData.signature.data as `0x${string}`,
-                importHex: value,
-              }
-            : state,
-        ),
-      );
-    } catch (error) {
-      console.error("Invalid signature import:", error);
-      setSignatureImportError("Invalid signature data. Please check your input and try again.");
-    }
-  };
-
-  const handleExecute = async () => {
-    if (!importedTransaction?.safeTransaction || !safeAccount) {
-      setExecutionError("Missing transaction data or safe account");
+    if (!safeAccount || !chainId || !safeStorage) {
+      setTransactionImportError("Still loading the Safe. Try again in a moment.");
       return;
     }
-
-    setIsLoading(true);
-    setExecutionError(undefined);
-
     try {
-      // Collect all signatures (both imported and on-chain approved)
-      const signatures = signatureStates
-        .filter((state) => state.signature || state.isApproved)
-        .map((state) => ({
-          signer: state.owner,
-          data: state.signature || encodePacked(["bytes32", "bytes32", "bytes1"], [pad(state.owner), zeroHash, "0x01"]), // Signature for on-chain approvals
-        }));
-
-      const signatureBytes = buildSignatureBytes(signatures);
-
-      const { request } = await simulateContract(config, {
-        abi: safe,
+      const data = parseSharedTransaction(transactionImportHex, {
         address: safeAccount,
-        functionName: "execTransaction",
-        args: [
-          importedTransaction.safeTransaction.to,
-          importedTransaction.safeTransaction.value,
-          importedTransaction.safeTransaction.data,
-          importedTransaction.safeTransaction.operation,
-          importedTransaction.safeTransaction.safeTxGas,
-          importedTransaction.safeTransaction.baseGas,
-          importedTransaction.safeTransaction.gasPrice,
-          importedTransaction.safeTransaction.gasToken,
-          importedTransaction.safeTransaction.refundReceiver,
-          signatureBytes,
-        ],
+        chainId,
+        nonce: safeStorage.nonce,
       });
-
-      const hash = await writeContract(config, request);
-      setTransactionHash(hash as `0x${string}`);
-      setActiveStep(2);
-    } catch (err) {
-      handleExecutionError(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleExecutionError = (err: unknown) => {
-    console.error(err);
-    if (err instanceof BaseError) {
-      const revertError = err.walk((e) => e instanceof ContractFunctionRevertedError);
-      if (revertError instanceof ContractFunctionRevertedError) {
-        const errorName = revertError.data?.errorName ?? "";
-        setExecutionError(`Transaction failed: ${errorName} ${revertError.reason}`);
-      }
-    } else {
-      setExecutionError("Failed to execute transaction. Please try again.");
+      const hasSignatures = "signature" in data || "signatures" in data;
+      setImportedSignatures(
+        hasSignatures
+          ? await parseSignatures(transactionImportHex, data.safeTransactionHash, safeStorage.owners ?? [])
+          : [],
+      );
+      setImportedTransaction(data);
+    } catch (error) {
+      // Both parsers throw only messages written for the user.
+      setTransactionImportError(error instanceof Error ? error.message : "Invalid transaction data.");
     }
   };
 
   return (
     <Box>
       <Title
-        text="Collect signatures and execute"
-        description="Paste a transaction another owner shared, add each owner's signature, then execute it once enough owners have signed."
+        text="Shared transaction"
+        description="Paste a transaction another owner shared. Sign it and send your signature back, or execute it once enough owners have signed."
       />
 
       <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
@@ -199,44 +68,66 @@ const AggregateSignaturesAndExecute: React.FC = () => {
         ))}
       </Stepper>
 
-      <Paper elevation={0} variant="outlined" sx={{ p: 3 }}>
-        {activeStep === 0 && (
+      {activeStep === 0 && (
+        <Paper elevation={0} variant="outlined" sx={{ p: 3 }}>
           <ImportTransactionStep
             transactionImportHex={transactionImportHex}
             setTransactionImportHex={setTransactionImportHex}
             onImport={handleImportTransaction}
             error={transactionImportError}
           />
-        )}
+        </Paper>
+      )}
 
-        {activeStep === 1 && importedTransaction && (
-          <CollectSignaturesStep
-            signatureStates={signatureStates}
-            onImportSignature={handleImportSignature}
-            onRefreshApprovals={checkOnChainApprovals}
+      {activeStep === 1 && importedTransaction && (
+        <Box
+          sx={{
+            display: "grid",
+            gap: 3,
+            alignItems: "start",
+            gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 1fr) 320px" },
+          }}
+        >
+          <SignatureCollector
             transactions={importedTransaction.transactions}
-            threshold={safeStorage?.threshold || 0n}
-            error={signatureImportError}
-            onExecute={handleExecute}
-            onBack={() => setActiveStep(0)}
-            isLoading={isLoading}
-            executionError={executionError}
+            safeTransaction={importedTransaction.safeTransaction}
+            safeTransactionHash={importedTransaction.safeTransactionHash}
+            initialSignatures={importedSignatures}
+            onExecuted={setTransactionHash}
           />
-        )}
+          <Stack spacing={1}>
+            <TransactionSummaryPanel
+              transactions={importedTransaction.transactions}
+              handleDeleteTransaction={() => {}}
+              viewOnly
+              isMobile={false}
+            />
+            {/* The batch above is the sharer's description; the parameters are what gets signed. */}
+            <Button startIcon={<VisibilityIcon />} onClick={() => setDetailsOpen(true)}>
+              View all parameters
+            </Button>
+          </Stack>
+          <ViewSafeTransactionDialog
+            open={detailsOpen}
+            onClose={() => setDetailsOpen(false)}
+            safeTransaction={importedTransaction.safeTransaction}
+            safeTransactionHash={importedTransaction.safeTransactionHash}
+          />
+        </Box>
+      )}
 
-        {activeStep === 2 && transactionHash && (
+      {activeStep === 2 && transactionHash && (
+        <Paper elevation={0} variant="outlined" sx={{ p: 3 }}>
           <ExecutionCompleteStep
             transactionHash={transactionHash}
             onReset={() => {
-              setActiveStep(0);
+              setTransactionHash(undefined);
               setImportedTransaction(undefined);
-              setSignatureStates((prevStates) =>
-                prevStates.map((state) => ({ ...state, signature: undefined, importHex: "", isApproved: false })),
-              );
+              setTransactionImportHex("");
             }}
           />
-        )}
-      </Paper>
+        </Paper>
+      )}
     </Box>
   );
 };
