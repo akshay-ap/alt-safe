@@ -2,13 +2,11 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import { Box, Button, Paper, Stack, Step, StepLabel, Stepper } from "@mui/material";
 import type React from "react";
 import { useState } from "react";
-import { isAddressEqual } from "viem";
 import { useAccount } from "wagmi";
-import { importTransactionsFromHex } from "../../api/api";
 import type { ImportData } from "../../context/types";
 import { useSafeWalletContext } from "../../context/WalletContext";
-import { parseSignatures } from "../../utils/signatures";
-import { calculateSafeTransactionHash, type SafeSignature } from "../../utils/utils";
+import { parseSharedTransaction, parseSignatures } from "../../utils/signatures";
+import type { SafeSignature } from "../../utils/utils";
 import Title from "../common/Title";
 import ViewSafeTransactionDialog from "../dialogs/ViewSafeTransactionDialog";
 import ExecutionCompleteStep from "./aggregate-signature-steps/ExecutionCompleteStep";
@@ -32,46 +30,26 @@ const AggregateSignaturesAndExecute: React.FC = () => {
 
   const handleImportTransaction = async () => {
     setTransactionImportError(undefined);
+    if (!safeAccount || !chainId || !safeStorage) {
+      setTransactionImportError("Still loading the Safe. Try again in a moment.");
+      return;
+    }
     try {
-      const data = importTransactionsFromHex(transactionImportHex.trim() as `0x${string}`);
-      if (!data.safeTransaction || !data.safeTransactionHash) throw new Error("Invalid transaction data format");
-      if (!safeAccount || !chainId || !isAddressEqual(data.safeAccount, safeAccount)) {
-        setTransactionImportError("This transaction is for a different Safe.");
-        return;
-      }
-      // The JSON carries amounts as strings; signing and executing need bigints.
-      const tx = data.safeTransaction;
-      const safeTransaction = {
-        ...tx,
-        value: BigInt(tx.value),
-        safeTxGas: BigInt(tx.safeTxGas),
-        baseGas: BigInt(tx.baseGas),
-        gasPrice: BigInt(tx.gasPrice),
-        nonce: BigInt(tx.nonce),
-      };
-      // Never trust the shared hash: it is what owners sign.
-      if (calculateSafeTransactionHash(safeTransaction, safeAccount, chainId) !== data.safeTransactionHash) {
-        setTransactionImportError("The transaction details do not match its hash, or it was made for another network.");
-        return;
-      }
-      if (safeTransaction.nonce < (safeStorage?.nonce ?? 0n)) {
-        setTransactionImportError("This transaction's nonce has already been used by the Safe.");
-        return;
-      }
+      const data = parseSharedTransaction(transactionImportHex, {
+        address: safeAccount,
+        chainId,
+        nonce: safeStorage.nonce,
+      });
       const hasSignatures = "signature" in data || "signatures" in data;
       setImportedSignatures(
         hasSignatures
-          ? await parseSignatures(transactionImportHex, data.safeTransactionHash, safeStorage?.owners ?? [])
+          ? await parseSignatures(transactionImportHex, data.safeTransactionHash, safeStorage.owners ?? [])
           : [],
       );
-      setImportedTransaction({ ...data, safeTransaction });
+      setImportedTransaction(data);
     } catch (error) {
-      console.error("Invalid transaction import:", error);
-      setTransactionImportError(
-        error instanceof Error && error.message.includes("signature")
-          ? error.message
-          : "Invalid transaction data. Please check your input and try again.",
-      );
+      // Both parsers throw only messages written for the user.
+      setTransactionImportError(error instanceof Error ? error.message : "Invalid transaction data.");
     }
   };
 
