@@ -145,7 +145,7 @@ const toHexJson = (data: unknown): string =>
     stringToBytes(JSON.stringify(data, (_key, value) => (typeof value === "bigint" ? value.toString() : value))),
   );
 
-/** What one owner shares after signing; Collect signatures imports it with importTransactionsFromHex. */
+/** What owners share after signing; the Shared transaction page reads it with importTransactionsFromHex. */
 export const exportSignedTransactionToHex = (data: ImportSignedData): string => toHexJson(data);
 
 export const importTransactionsFromHex = (hexData: `0x${string}`): ImportData => {

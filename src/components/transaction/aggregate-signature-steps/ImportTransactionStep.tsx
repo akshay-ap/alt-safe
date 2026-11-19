@@ -10,7 +10,7 @@ const ImportTransactionStep: React.FC<{
     <>
       <Box sx={{ mb: 3 }}>
         <Typography variant="h6" gutterBottom>
-          Import Transaction
+          Paste the shared transaction
         </Typography>
         <Typography
           variant="body2"
@@ -18,7 +18,7 @@ const ImportTransactionStep: React.FC<{
             color: "text.secondary",
           }}
         >
-          Paste the unsigned transaction data to begin the execution process.
+          Paste what another owner sent you. If you signed it yourself earlier, paste your own copy to continue.
         </Typography>
       </Box>
 
