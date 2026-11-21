@@ -13,6 +13,7 @@ export enum STORAGE_KEY {
   DRAFT_TRANSACTIONS = "draft_transactions",
   ADDRESS_BOOK = "addressBook",
   ADDRESS_FORMAT = "addressFormat",
+  SHOW_DEBUG_VIEW = "showDebugView",
 }
 
 export const WALLET_STORAGE_KEY = "alt_wallet";

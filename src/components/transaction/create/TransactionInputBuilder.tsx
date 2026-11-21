@@ -30,6 +30,7 @@ import {
   ValueFetchType,
 } from "../../../context/types";
 import { useSafeWalletContext } from "../../../context/WalletContext";
+import { useShowDebugView } from "../../../settings/debugView";
 import { createBigIntParser } from "../../../utils/parser";
 import { config } from "../../../wagmi";
 import AccountAddress from "../../common/AccountAddress";
@@ -75,6 +76,7 @@ const TransactionInputBuilder: React.FC<TransactionInputBuilderProps> = ({ onAdd
     Object.fromEntries(spec.inputs.map((input) => [input.name, false])),
   );
   const [debugDialogOpen, setDebugDialogOpen] = useState<boolean>(false);
+  const showDebugView = useShowDebugView();
 
   const inputValidations = spec.onUpdateValidations.reduce((acc: Record<string, any[]>, validation) => {
     const { variable, ...rest } = validation;
@@ -288,11 +290,13 @@ const TransactionInputBuilder: React.FC<TransactionInputBuilderProps> = ({ onAdd
             <Typography variant="h5" component="h2" sx={{ flex: 1 }}>
               {spec.display.description}
             </Typography>
-            <Tooltip title="Inspect how this action is built">
-              <IconButton onClick={() => setDebugDialogOpen(true)} size="small" aria-label="Inspect action">
-                <DeveloperModeIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
+            {showDebugView && (
+              <Tooltip title="Inspect how this action is built">
+                <IconButton onClick={() => setDebugDialogOpen(true)} size="small" aria-label="Inspect action">
+                  <DeveloperModeIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            )}
           </Box>
         </Box>
 
@@ -578,15 +582,16 @@ const TransactionInputBuilder: React.FC<TransactionInputBuilderProps> = ({ onAdd
         </Box>
       </Paper>
 
-      {/* Debug dialog */}
-      <TransactionDebugDialog
-        open={debugDialogOpen}
-        onClose={() => setDebugDialogOpen(false)}
-        spec={spec}
-        context={context}
-        inputs={inputs}
-        errors={errors}
-      />
+      {showDebugView && (
+        <TransactionDebugDialog
+          open={debugDialogOpen}
+          onClose={() => setDebugDialogOpen(false)}
+          spec={spec}
+          context={context}
+          inputs={inputs}
+          errors={errors}
+        />
+      )}
     </Container>
   );
 };

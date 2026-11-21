@@ -3,6 +3,7 @@ import { useState } from "react";
 import { STORAGE_KEY } from "../constants";
 import { useSafeWalletContext } from "../context/WalletContext";
 import { useAddressFormat, writeAddressFormat } from "../settings/addressFormat";
+import { useShowDebugView, writeShowDebugView } from "../settings/debugView";
 import AccountAddress from "./common/AccountAddress";
 import PageHeader from "./common/PageHeader";
 import AddressBookDialog from "./dialogs/AddressBookDialog";
@@ -41,6 +42,16 @@ const AddressFormatToggle: React.FC = () => {
       />
       <AccountAddress address={PREVIEW_ADDRESS} showCopy={false} />
     </Stack>
+  );
+};
+
+const DebugViewToggle: React.FC = () => {
+  const show = useShowDebugView();
+  return (
+    <FormControlLabel
+      control={<Switch checked={show} onChange={(event) => writeShowDebugView(event.target.checked)} />}
+      label="Show the Inspect button when building actions"
+    />
   );
 };
 
@@ -108,6 +119,12 @@ const AppSettings: React.FC = () => {
           description="How full addresses, hashes and signatures are shown everywhere in the app. Copying always gives the exact value."
         >
           <AddressFormatToggle />
+        </Section>
+        <Section
+          title="Debug view"
+          description="Shows how each action's calldata is built from its template. For template authors and troubleshooting."
+        >
+          <DebugViewToggle />
         </Section>
         <Section title="App data" description="Everything ALT Safe stores lives only in this browser.">
           <ClearDataButton />
