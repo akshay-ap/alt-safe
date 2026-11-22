@@ -18,7 +18,7 @@ interface AddressBookState {
 
 interface AddressBookActions {
   addEntry: (entry: AddressBookEntry) => Promise<void>;
-  updateEntry: (address: Address, updates: Partial<Omit<AddressBookEntry, "address">>) => Promise<void>;
+  updateEntry: (address: Address, chainId: number, name: string) => Promise<void>;
   removeEntry: (address: Address, chainId: number) => Promise<void>;
   importEntries: (entries: AddressBookEntry[]) => Promise<void>;
   getEntriesByChain: (chainId: number) => AddressBookEntry[];
@@ -121,9 +121,9 @@ export const AddressBookProvider: React.FC<AddressBookProviderProps> = ({ childr
     await saveToStorage(newAddressBook);
   };
 
-  const updateEntry = async (address: Address, updates: Partial<Omit<AddressBookEntry, "address">>) => {
+  const updateEntry = async (address: Address, chainId: number, name: string) => {
     const entryIndex = addressBook.findIndex(
-      (entry) => entry.address.toLowerCase() === address.toLowerCase() && entry.chainId === updates.chainId,
+      (entry) => entry.address.toLowerCase() === address.toLowerCase() && entry.chainId === chainId,
     );
 
     if (entryIndex === -1) {
@@ -131,7 +131,7 @@ export const AddressBookProvider: React.FC<AddressBookProviderProps> = ({ childr
     }
 
     const newAddressBook = [...addressBook];
-    newAddressBook[entryIndex] = { ...newAddressBook[entryIndex], ...updates };
+    newAddressBook[entryIndex] = { ...newAddressBook[entryIndex], name };
 
     setAddressBook(newAddressBook);
     await saveToStorage(newAddressBook);

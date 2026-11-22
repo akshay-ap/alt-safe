@@ -83,10 +83,7 @@ const AddressBookDialog: React.FC<AddressBookDialogProps> = ({ open, onClose }) 
     }
 
     try {
-      await updateEntry(editingEntry.address, {
-        name: editingEntry.name,
-        chainId: editingEntry.chainId,
-      });
+      await updateEntry(editingEntry.address, editingEntry.chainId, editingEntry.name);
       setEditingEntry(null);
       setError("");
     } catch (err) {
@@ -225,10 +222,10 @@ const AddressBookDialog: React.FC<AddressBookDialogProps> = ({ open, onClose }) 
                     color: "text.secondary",
                   }}
                 >
-                  <AccountAddress address={editingEntry.address} size="small" />
+                  <AccountAddress address={editingEntry.address} size="small" /> · Chain {editingEntry.chainId}
                 </Typography>
               </Grid>
-              <Grid size={8}>
+              <Grid size={12}>
                 <FormControl fullWidth>
                   <InputLabel htmlFor="edit-name">Name</InputLabel>
                   <OutlinedInput
@@ -236,21 +233,6 @@ const AddressBookDialog: React.FC<AddressBookDialogProps> = ({ open, onClose }) 
                     value={editingEntry.name}
                     onChange={(e) => setEditingEntry((prev) => (prev ? { ...prev, name: e.target.value } : null))}
                     label="Name"
-                  />
-                </FormControl>
-              </Grid>
-              <Grid size={4}>
-                <FormControl fullWidth>
-                  <InputLabel htmlFor="edit-chainid">Chain ID</InputLabel>
-                  <OutlinedInput
-                    id="edit-chainid"
-                    type="number"
-                    value={editingEntry.chainId}
-                    onChange={(e) =>
-                      setEditingEntry((prev) => (prev ? { ...prev, chainId: Number(e.target.value) || 1 } : null))
-                    }
-                    label="Chain ID"
-                    placeholder="1"
                   />
                 </FormControl>
               </Grid>
