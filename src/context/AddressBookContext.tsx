@@ -52,31 +52,7 @@ export const AddressBookProvider: React.FC<AddressBookProviderProps> = ({ childr
       try {
         setIsLoading(true);
         const storedAddressBook = (await storage.getItem(STORAGE_KEY.ADDRESS_BOOK)) as AddressBookEntry[] | null;
-
-        // If no stored data, add some sample entries for testing
-        if (!storedAddressBook || storedAddressBook.length === 0) {
-          const sampleEntries: AddressBookEntry[] = [
-            {
-              address: "0x1234567890123456789012345678901234567890" as Address,
-              name: "Sample Address 1",
-              chainId: 1,
-            },
-            {
-              address: "0x0987654321098765432109876543210987654321" as Address,
-              name: "Test Wallet",
-              chainId: 1,
-            },
-            {
-              address: "0xAbCdEf1234567890123456789012345678901234" as Address,
-              name: "Demo Safe",
-              chainId: 137,
-            },
-          ];
-          setAddressBook(sampleEntries);
-          await storage.setItem(STORAGE_KEY.ADDRESS_BOOK, sampleEntries);
-        } else {
-          setAddressBook(storedAddressBook);
-        }
+        setAddressBook(storedAddressBook ?? []);
       } catch (error) {
         console.error("Failed to load address book from storage:", error);
         setAddressBook([]);
