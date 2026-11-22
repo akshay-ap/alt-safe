@@ -51,8 +51,8 @@
           "variable": "inputs.data",
           "type": "regex",
           "id": "validate_data",
-          "value": "^0x[a-fA-F0-9]*$",
-          "errorMessage": "Invalid calldata (must be hex encoded)"
+          "value": "^0x([a-fA-F0-9]{2})*$",
+          "errorMessage": "Invalid calldata (must be hex encoded, whole bytes)"
         }
       ],
       "onInputUpdate": [

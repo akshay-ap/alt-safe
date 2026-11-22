@@ -30,8 +30,8 @@ const TransactionDebugView: React.FC<TransactionDebugViewProps> = ({ spec, conte
 
       if ("data" in spec.onFinalize) {
         calldata = parser.parse(spec.onFinalize.data).evaluate({ context, inputs });
-        if (!calldata.startsWith("0x")) {
-          throw new Error("Data must start with 0x");
+        if (!/^0x([0-9a-fA-F]{2})*$/.test(calldata)) {
+          throw new Error("Data must be 0x-prefixed hex of whole bytes");
         }
       } else if (spec.functionSignature && "calldataArgs" in spec.onFinalize) {
         const abiItem = parseAbiItem(spec.functionSignature) as AbiFunction;
