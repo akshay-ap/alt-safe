@@ -17,7 +17,8 @@ interface FormData {
   functionSignature: string;
   to: string;
   value: string;
-  parameters: Record<string, string>;
+  /** Keyed by position: unnamed parameters all have name "" and would share one value. */
+  parameters: Record<number, string>;
 }
 
 const EncodeFunctionCall: React.FC<EncodeFunctionCallProps> = ({ onAdd, groupInfo }) => {
@@ -52,10 +53,10 @@ const EncodeFunctionCall: React.FC<EncodeFunctionCallProps> = ({ onAdd, groupInf
   };
 
   // Handle parameter changes - follows DRY principle
-  const handleParameterChange = (paramName: string, value: string) => {
+  const handleParameterChange = (index: number, value: string) => {
     setFormData((prev) => ({
       ...prev,
-      parameters: { ...prev.parameters, [paramName]: value },
+      parameters: { ...prev.parameters, [index]: value },
     }));
   };
 
@@ -78,8 +79,8 @@ const EncodeFunctionCall: React.FC<EncodeFunctionCallProps> = ({ onAdd, groupInf
     if (!parsedAbiItem) return null;
 
     try {
-      const args = parsedAbiItem.inputs.map((input) => {
-        const value = formData.parameters[input.name || ""];
+      const args = parsedAbiItem.inputs.map((input, index) => {
+        const value = formData.parameters[index];
         return convertParameterValue(input, value);
       });
 
@@ -177,8 +178,8 @@ const EncodeFunctionCall: React.FC<EncodeFunctionCallProps> = ({ onAdd, groupInf
                       fullWidth
                       label={input.name || `Parameter ${index}`}
                       placeholder={`Enter ${input.type} value`}
-                      value={formData.parameters[input.name || ""] || ""}
-                      onChange={(e) => handleParameterChange(input.name || "", e.target.value)}
+                      value={formData.parameters[index] || ""}
+                      onChange={(e) => handleParameterChange(index, e.target.value)}
                       helperText={`Type: ${input.type}`}
                     />
                   </Grid>
