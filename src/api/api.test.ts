@@ -1,8 +1,8 @@
 import { getAddress, keccak256, toHex, zeroAddress } from "viem";
 import { describe, expect, it } from "vitest";
-import { type ImportSignedData, TransactionType } from "../context/types";
+import { type ImportSignedData, type SafeTransactionDraft, TransactionType } from "../context/types";
 import { SafeOperation } from "../utils/utils";
-import { exportSignedTransactionToHex, importTransactionsFromHex } from "./api";
+import { exportSignedTransactionToHex, importTransactionsFromHex, isDraftFor } from "./api";
 
 const address = (seed: string) => getAddress(keccak256(toHex(seed)).slice(0, 42));
 
@@ -49,5 +49,21 @@ describe("exportSignedTransactionToHex", () => {
     const imported = importTransactionsFromHex(exportSignedTransactionToHex(signed) as `0x${string}`);
     expect(imported.safeTransaction.value).toBe("123456789012345678901234567890");
     expect(imported.safeTransaction.nonce).toBe("2");
+  });
+});
+
+describe("isDraftFor", () => {
+  const safe = address("safe");
+  const draft = { safeAccount: safe, chainId: 1 } as SafeTransactionDraft;
+
+  it("matches the same Safe (any address case) on the same chain only", () => {
+    expect(isDraftFor(draft, safe.toLowerCase() as `0x${string}`, 1)).toBe(true);
+    expect(isDraftFor(draft, safe, 11155111)).toBe(false);
+    expect(isDraftFor(draft, address("other"), 1)).toBe(false);
+    expect(isDraftFor(draft, undefined, 1)).toBe(false);
+  });
+
+  it("keeps drafts saved without a chain id loadable", () => {
+    expect(isDraftFor({ ...draft, chainId: undefined }, safe, 11155111)).toBe(true);
   });
 });

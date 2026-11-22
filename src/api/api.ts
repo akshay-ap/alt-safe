@@ -1,6 +1,12 @@
-import { bytesToHex, hexToBytes, stringToBytes } from "viem";
+import { type Address, bytesToHex, hexToBytes, stringToBytes } from "viem";
 import { STORAGE_KEY } from "../constants";
 import type { ImportData, ImportSignedData, SafeTransactionDraft, Transaction } from "../context/types";
+
+/** A draft belongs to one Safe on one chain; drafts saved without a chain id predate that and match any chain. */
+export const isDraftFor = (draft: SafeTransactionDraft, safeAccount: Address | undefined, chainId: number) =>
+  safeAccount !== undefined &&
+  draft.safeAccount.toLowerCase() === safeAccount.toLowerCase() && // not isAddressEqual: it throws on a bad stored address
+  (draft.chainId === undefined || draft.chainId === chainId);
 
 // New functions for saved transaction drafts
 export const saveDraftTransaction = async (

@@ -22,7 +22,8 @@ import {
 } from "@mui/material";
 import { formatDistanceToNow } from "date-fns";
 import { useEffect, useState } from "react";
-import { deleteDraftTransaction, getDraftTransactions } from "../../api/api";
+import { useChainId } from "wagmi";
+import { deleteDraftTransaction, getDraftTransactions, isDraftFor } from "../../api/api";
 import type { SafeTransactionDraft } from "../../context/types";
 
 interface LoadTransactionDialogProps {
@@ -40,6 +41,7 @@ const LoadTransactionDialog: React.FC<LoadTransactionDialogProps> = ({
   storage,
   currentSafeAccount,
 }) => {
+  const chainId = useChainId();
   const [drafts, setDrafts] = useState<SafeTransactionDraft[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | undefined>();
@@ -83,9 +85,9 @@ const LoadTransactionDialog: React.FC<LoadTransactionDialogProps> = ({
     onClose();
   };
 
-  const currentSafeDrafts = drafts.filter((draft) => draft.safeAccount === currentSafeAccount);
+  const currentSafeDrafts = drafts.filter((draft) => isDraftFor(draft, currentSafeAccount, chainId));
 
-  const otherSafeDrafts = drafts.filter((draft) => draft.safeAccount !== currentSafeAccount);
+  const otherSafeDrafts = drafts.filter((draft) => !isDraftFor(draft, currentSafeAccount, chainId));
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
@@ -136,7 +138,7 @@ const LoadTransactionDialog: React.FC<LoadTransactionDialogProps> = ({
             {otherSafeDrafts.length > 0 && (
               <>
                 <Typography variant="subtitle1" gutterBottom sx={{ mt: 2 }}>
-                  Other Safes
+                  Other Safes or networks
                 </Typography>
                 <List>
                   {otherSafeDrafts.map((draft) => (

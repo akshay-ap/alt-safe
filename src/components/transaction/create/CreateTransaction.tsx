@@ -22,8 +22,8 @@ import {
   useTheme,
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import { useAccount, usePublicClient } from "wagmi";
-import { deleteDraftTransaction, getDraftTransactionById, updateDraftTransaction } from "../../../api/api";
+import { useAccount, useChainId, usePublicClient } from "wagmi";
+import { deleteDraftTransaction, getDraftTransactionById, isDraftFor, updateDraftTransaction } from "../../../api/api";
 import { STORAGE_KEY } from "../../../constants";
 import { useCreateTransactionContext } from "../../../context/CreateTransactionContext";
 import type { SafeTransactionDraft, Transaction } from "../../../context/types";
@@ -46,6 +46,7 @@ const CreateTransaction: React.FC = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const publicClient = usePublicClient();
   const account = useAccount();
+  const chainId = useChainId();
 
   const { safeAccount, storage, safeDeployment } = useSafeWalletContext();
   const {
@@ -479,13 +480,15 @@ const CreateTransaction: React.FC = () => {
 
         try {
           const draft = await getDraftTransactionById(storage, draftId);
-          if (draft && draft.safeAccount === safeAccount) {
+          if (draft && isDraftFor(draft, safeAccount, chainId)) {
             setTransactions(draft.transactions);
             setCurrentDraftId(draft.id);
             setIsEditingDraft(true);
 
             setSnackbarMessage("Draft loaded successfully");
             setSnackbarOpen(true);
+          } else if (draft) {
+            setError("This draft belongs to another Safe or network. Switch to it to open the draft.");
           }
         } catch (err) {
           console.error("Error loading draft:", err);
@@ -497,7 +500,7 @@ const CreateTransaction: React.FC = () => {
     if (safeAccount) {
       loadDraftFromParam();
     }
-  }, [safeAccount, storage, setTransactions, setError]);
+  }, [safeAccount, chainId, storage, setTransactions, setError]);
 
   return (
     // While building, the page is exactly the viewport (minus the shell's top bar and padding); columns scroll inside.
@@ -604,7 +607,7 @@ const CreateTransaction: React.FC = () => {
         onClose={() => setSaveDraftDialogOpen(false)}
         transactions={transactions}
         safeAccount={safeAccount}
-        chainId={account.chainId}
+        chainId={chainId}
         storage={storage}
         onSaved={handleDraftSaved}
       />
