@@ -2,6 +2,7 @@ import { readContract } from "@wagmi/core";
 import type React from "react";
 import { createContext, type ReactNode, useContext, useEffect, useState } from "react";
 import { type Address, zeroAddress } from "viem";
+import { useChainId } from "wagmi";
 import safe from "../abis/Safe.json";
 import type { SafeTransactionParams } from "../utils/utils";
 import { config } from "./../wagmi";
@@ -56,6 +57,7 @@ interface CreateTransactionProviderProps {
 
 export const CreateTransactionProvider: React.FC<CreateTransactionProviderProps> = ({ children }) => {
   const { safeAccount } = useSafeWalletContext();
+  const chainId = useChainId();
 
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [transactionHash, setTransactionHash] = useState<`0x${string}` | undefined>();
@@ -84,16 +86,21 @@ export const CreateTransactionProvider: React.FC<CreateTransactionProviderProps>
         abi: safe,
         address: safeAccount,
         functionName: "nonce",
+        chainId,
       })) as bigint;
 
       if (!isCurrent) return;
       setOnChainNonce(fetchedNonce);
       setNonce(fetchedNonce);
-    })();
+    })().catch((err) => {
+      if (!isCurrent) return;
+      console.error(err);
+      setError("Could not read the Safe's nonce on this network. Check that the Safe is deployed here.");
+    });
     return () => {
       isCurrent = false;
     };
-  }, [safeAccount, nonceReload]);
+  }, [safeAccount, chainId, nonceReload]);
 
   // Utility actions
   const addTransaction = (transaction: Transaction) => {
