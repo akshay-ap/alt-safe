@@ -112,7 +112,7 @@ const SafePreview: React.FC = () => {
             variant="contained"
             size="large"
             onClick={handleCreateSafe}
-            disabled={!hasValidInitData || isAlreadyDeployed || isCreating}
+            disabled={!hasValidInitData || !proxyAddress || isAlreadyDeployed || isCreating}
             startIcon={isCreating ? <CircularProgress size={18} color="inherit" /> : undefined}
           >
             {isCreating ? "Confirm in your wallet…" : "Create Safe"}

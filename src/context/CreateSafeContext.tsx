@@ -206,13 +206,12 @@ export const CreateSafeProvider: React.FC<CreateSafeProviderProps> = ({ children
 
   // Update proxyAddress when configuration changes
   useEffect(() => {
-    if (proxyFactory && initData !== "0x") {
-      const safeSingleton = (useSingletonL2 ? singletonL2 : singleton) as `0x${string}`;
-      if (safeSingleton) {
-        setProxyAddress(
-          getProxyAddress(proxyFactory as `0x${string}`, safeSingleton, initData, salt, proxyCreationCode),
-        );
-      }
+    const safeSingleton = useSingletonL2 ? singletonL2 : singleton;
+    // getProxyAddress throws on a malformed singleton, which would unmount the whole app.
+    if (proxyFactory && initData !== "0x" && isAddress(safeSingleton)) {
+      setProxyAddress(getProxyAddress(proxyFactory, safeSingleton, initData, salt, proxyCreationCode));
+    } else {
+      setProxyAddress(undefined);
     }
   }, [initData, proxyFactory, singleton, singletonL2, salt, useSingletonL2, proxyCreationCode]);
 
