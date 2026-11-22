@@ -3,6 +3,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import type { Address } from "viem";
 import { isAddress } from "viem";
 import { STORAGE_KEY } from "../constants";
+import { entriesForChain } from "../utils/addressBookChain";
 import { useSafeWalletContext } from "./WalletContext";
 
 export interface AddressBookEntry {
@@ -18,7 +19,12 @@ interface AddressBookState {
 
 interface AddressBookActions {
   addEntry: (entry: AddressBookEntry) => Promise<void>;
-  updateEntry: (address: Address, updates: Partial<Omit<AddressBookEntry, "address">>) => Promise<void>;
+  /** `chainId` is the entry's current chain; `updates.chainId` may move it to another one. */
+  updateEntry: (
+    address: Address,
+    chainId: number,
+    updates: Partial<Omit<AddressBookEntry, "address">>,
+  ) => Promise<void>;
   removeEntry: (address: Address, chainId: number) => Promise<void>;
   importEntries: (entries: AddressBookEntry[]) => Promise<void>;
   getEntriesByChain: (chainId: number) => AddressBookEntry[];
@@ -121,13 +127,20 @@ export const AddressBookProvider: React.FC<AddressBookProviderProps> = ({ childr
     await saveToStorage(newAddressBook);
   };
 
-  const updateEntry = async (address: Address, updates: Partial<Omit<AddressBookEntry, "address">>) => {
-    const entryIndex = addressBook.findIndex(
-      (entry) => entry.address.toLowerCase() === address.toLowerCase() && entry.chainId === updates.chainId,
-    );
+  const updateEntry = async (
+    address: Address,
+    chainId: number,
+    updates: Partial<Omit<AddressBookEntry, "address">>,
+  ) => {
+    const indexOf = (id: number) =>
+      addressBook.findIndex((entry) => entry.address.toLowerCase() === address.toLowerCase() && entry.chainId === id);
+    const entryIndex = indexOf(chainId);
 
     if (entryIndex === -1) {
       throw new Error("Entry not found");
+    }
+    if (updates.chainId !== undefined && updates.chainId !== chainId && indexOf(updates.chainId) !== -1) {
+      throw new Error("This address is already saved for that chain");
     }
 
     const newAddressBook = [...addressBook];
@@ -174,13 +187,11 @@ export const AddressBookProvider: React.FC<AddressBookProviderProps> = ({ childr
   };
 
   const getEntriesByChain = (chainId: number): AddressBookEntry[] => {
-    return addressBook.filter((entry) => entry.chainId === chainId);
+    return entriesForChain(addressBook, chainId);
   };
 
   const findEntry = (address: Address, chainId: number): AddressBookEntry | undefined => {
-    return addressBook.find(
-      (entry) => entry.address.toLowerCase() === address.toLowerCase() && entry.chainId === chainId,
-    );
+    return entriesForChain(addressBook, chainId).find((entry) => entry.address.toLowerCase() === address.toLowerCase());
   };
 
   const contextValue: AddressBookContextValue = {

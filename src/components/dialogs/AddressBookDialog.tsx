@@ -5,12 +5,15 @@ import EditIcon from "@mui/icons-material/Edit";
 import {
   Alert,
   Button,
+  Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   Divider,
   FormControl,
+  FormControlLabel,
+  FormHelperText,
   IconButton,
   InputLabel,
   List,
@@ -28,7 +31,45 @@ import type { Address } from "viem";
 import { isAddress } from "viem";
 import { useAccount } from "wagmi";
 import { type AddressBookEntry, useAddressBook } from "../../context/AddressBookContext";
+import { ALL_CHAINS, chainLabel } from "../../utils/addressBookChain";
 import AccountAddress from "../common/AccountAddress";
+
+const ChainField: React.FC<{
+  id: string;
+  chainId: number;
+  fallbackChainId: number;
+  onChange: (id: number) => void;
+}> = ({ id, chainId, fallbackChainId, onChange }) => {
+  const allChains = chainId === ALL_CHAINS;
+  return (
+    <>
+      <FormControl fullWidth disabled={allChains}>
+        <InputLabel htmlFor={id}>Chain ID</InputLabel>
+        <OutlinedInput
+          id={id}
+          type="number"
+          value={allChains ? "" : chainId}
+          onChange={(e) => onChange(Number(e.target.value) || 1)}
+          label="Chain ID"
+          placeholder="1"
+        />
+      </FormControl>
+      <FormControlLabel
+        control={
+          <Checkbox
+            size="small"
+            checked={allChains}
+            onChange={(e) => onChange(e.target.checked ? ALL_CHAINS : fallbackChainId)}
+          />
+        }
+        label="All chains"
+      />
+      {allChains && (
+        <FormHelperText>Only for wallets you control directly (EOAs), not Safes or contracts.</FormHelperText>
+      )}
+    </>
+  );
+};
 
 interface AddressBookDialogProps {
   open: boolean;
@@ -44,6 +85,8 @@ const AddressBookDialog: React.FC<AddressBookDialogProps> = ({ open, onClose }) 
 
   const [isAdding, setIsAdding] = useState(false);
   const [editingEntry, setEditingEntry] = useState<AddressBookEntry | null>(null);
+  // The entry's chain before editing, since the form can change it.
+  const [editingChainId, setEditingChainId] = useState(0);
   const [newEntry, setNewEntry] = useState({
     address: "",
     name: "",
@@ -83,14 +126,14 @@ const AddressBookDialog: React.FC<AddressBookDialogProps> = ({ open, onClose }) 
     }
 
     try {
-      await updateEntry(editingEntry.address, {
+      await updateEntry(editingEntry.address, editingChainId, {
         name: editingEntry.name,
         chainId: editingEntry.chainId,
       });
       setEditingEntry(null);
       setError("");
     } catch (err) {
-      setError("Failed to update entry");
+      setError(err instanceof Error ? err.message : "Failed to update entry");
     }
   };
 
@@ -186,17 +229,12 @@ const AddressBookDialog: React.FC<AddressBookDialogProps> = ({ open, onClose }) 
                 </FormControl>
               </Grid>
               <Grid size={4}>
-                <FormControl fullWidth>
-                  <InputLabel htmlFor="new-chainid">Chain ID</InputLabel>
-                  <OutlinedInput
-                    id="new-chainid"
-                    type="number"
-                    value={newEntry.chainId}
-                    onChange={(e) => setNewEntry((prev) => ({ ...prev, chainId: Number(e.target.value) || 1 }))}
-                    label="Chain ID"
-                    placeholder="1"
-                  />
-                </FormControl>
+                <ChainField
+                  id="new-chainid"
+                  chainId={newEntry.chainId}
+                  fallbackChainId={account.chainId || 1}
+                  onChange={(chainId) => setNewEntry((prev) => ({ ...prev, chainId }))}
+                />
               </Grid>
               <Grid size={12}>
                 <Button variant="contained" onClick={handleAddEntry} sx={{ mr: 1 }}>
@@ -240,19 +278,12 @@ const AddressBookDialog: React.FC<AddressBookDialogProps> = ({ open, onClose }) 
                 </FormControl>
               </Grid>
               <Grid size={4}>
-                <FormControl fullWidth>
-                  <InputLabel htmlFor="edit-chainid">Chain ID</InputLabel>
-                  <OutlinedInput
-                    id="edit-chainid"
-                    type="number"
-                    value={editingEntry.chainId}
-                    onChange={(e) =>
-                      setEditingEntry((prev) => (prev ? { ...prev, chainId: Number(e.target.value) || 1 } : null))
-                    }
-                    label="Chain ID"
-                    placeholder="1"
-                  />
-                </FormControl>
+                <ChainField
+                  id="edit-chainid"
+                  chainId={editingEntry.chainId}
+                  fallbackChainId={editingChainId || account.chainId || 1}
+                  onChange={(chainId) => setEditingEntry((prev) => (prev ? { ...prev, chainId } : null))}
+                />
               </Grid>
               <Grid size={12}>
                 <Button variant="contained" onClick={handleEditEntry} sx={{ mr: 1 }}>
@@ -311,7 +342,15 @@ const AddressBookDialog: React.FC<AddressBookDialogProps> = ({ open, onClose }) 
                     key={`${entry.address}-${entry.chainId}`}
                     secondaryAction={
                       <div>
-                        <IconButton edge="end" aria-label="edit" onClick={() => setEditingEntry(entry)} sx={{ mr: 1 }}>
+                        <IconButton
+                          edge="end"
+                          aria-label="edit"
+                          onClick={() => {
+                            setEditingEntry(entry);
+                            setEditingChainId(entry.chainId);
+                          }}
+                          sx={{ mr: 1 }}
+                        >
                           <EditIcon />
                         </IconButton>
                         <IconButton
@@ -328,8 +367,8 @@ const AddressBookDialog: React.FC<AddressBookDialogProps> = ({ open, onClose }) 
                       primary={entry.name}
                       secondary={
                         <>
-                          <AccountAddress address={entry.address} size="small" showCopy={false} /> · Chain{" "}
-                          {entry.chainId}
+                          <AccountAddress address={entry.address} size="small" showCopy={false} /> ·{" "}
+                          {chainLabel(entry.chainId)}
                         </>
                       }
                       slotProps={{ secondary: { component: "div" } }}

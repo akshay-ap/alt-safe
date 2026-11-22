@@ -3,6 +3,7 @@ import { Box, Divider, IconButton, InputAdornment, Menu, MenuItem, Typography } 
 import React from "react";
 import { useChainId } from "wagmi";
 import { useAddressBook } from "../../context/AddressBookContext";
+import { chainLabel } from "../../utils/addressBookChain";
 import AccountAddress from "./AccountAddress";
 
 export interface AddressBookSelectorProps {
@@ -140,7 +141,7 @@ const AddressBookMenuContent: React.FC<AddressBookMenuContentProps> = ({ address
               <AccountAddress address={entry.address as `0x${string}`} size="small" showCopy={false} />
             </Box>
             <Typography variant="caption" color="textSecondary">
-              Chain ID: {entry.chainId}
+              {chainLabel(entry.chainId)}
             </Typography>
           </Box>
         </MenuItem>
