@@ -1,7 +1,7 @@
 import type React from "react";
 import { createContext, useContext, useEffect, useState } from "react";
 import type { Address } from "viem";
-import { isAddress } from "viem";
+import { getAddress, isAddress, isAddressEqual } from "viem";
 import { STORAGE_KEY } from "../constants";
 import { entriesForChain } from "../utils/addressBookChain";
 import { useSafeWalletContext } from "./WalletContext";
@@ -103,14 +103,15 @@ export const AddressBookProvider: React.FC<AddressBookProviderProps> = ({ childr
     }
   };
 
-  const addEntry = async (entry: AddressBookEntry) => {
-    if (!isAddress(entry.address)) {
+  const addEntry = async (input: AddressBookEntry) => {
+    if (!isAddress(input.address)) {
       throw new Error("Invalid address");
     }
+    const entry = { ...input, address: getAddress(input.address) };
 
     const existingIndex = addressBook.findIndex(
       (existingEntry) =>
-        existingEntry.address.toLowerCase() === entry.address.toLowerCase() && existingEntry.chainId === entry.chainId,
+        isAddressEqual(existingEntry.address, entry.address) && existingEntry.chainId === entry.chainId,
     );
 
     let newAddressBook: AddressBookEntry[];
@@ -133,7 +134,7 @@ export const AddressBookProvider: React.FC<AddressBookProviderProps> = ({ childr
     updates: Partial<Omit<AddressBookEntry, "address">>,
   ) => {
     const indexOf = (id: number) =>
-      addressBook.findIndex((entry) => entry.address.toLowerCase() === address.toLowerCase() && entry.chainId === id);
+      addressBook.findIndex((entry) => isAddressEqual(entry.address, address) && entry.chainId === id);
     const entryIndex = indexOf(chainId);
 
     if (entryIndex === -1) {
@@ -152,7 +153,7 @@ export const AddressBookProvider: React.FC<AddressBookProviderProps> = ({ childr
 
   const removeEntry = async (address: Address, chainId: number) => {
     const newAddressBook = addressBook.filter(
-      (entry) => !(entry.address.toLowerCase() === address.toLowerCase() && entry.chainId === chainId),
+      (entry) => !(isAddressEqual(entry.address, address) && entry.chainId === chainId),
     );
 
     setAddressBook(newAddressBook);
@@ -160,17 +161,16 @@ export const AddressBookProvider: React.FC<AddressBookProviderProps> = ({ childr
   };
 
   const importEntries = async (entries: AddressBookEntry[]) => {
-    const validEntries = entries.filter(
-      (entry) => isAddress(entry.address) && entry.name && typeof entry.chainId === "number",
-    );
+    const validEntries = entries
+      .filter((entry) => isAddress(entry.address) && entry.name && typeof entry.chainId === "number")
+      .map((entry) => ({ ...entry, address: getAddress(entry.address) }));
 
     // Merge with existing entries, avoiding duplicates
     const mergedEntries = [...addressBook];
 
     for (const entry of validEntries) {
       const existingIndex = mergedEntries.findIndex(
-        (existing) =>
-          existing.address.toLowerCase() === entry.address.toLowerCase() && existing.chainId === entry.chainId,
+        (existing) => isAddressEqual(existing.address, entry.address) && existing.chainId === entry.chainId,
       );
 
       if (existingIndex >= 0) {
@@ -191,7 +191,7 @@ export const AddressBookProvider: React.FC<AddressBookProviderProps> = ({ childr
   };
 
   const findEntry = (address: Address, chainId: number): AddressBookEntry | undefined => {
-    return entriesForChain(addressBook, chainId).find((entry) => entry.address.toLowerCase() === address.toLowerCase());
+    return entriesForChain(addressBook, chainId).find((entry) => isAddressEqual(entry.address, address));
   };
 
   const contextValue: AddressBookContextValue = {

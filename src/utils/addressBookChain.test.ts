@@ -2,12 +2,12 @@ import { describe, expect, it } from "vitest";
 import type { AddressBookEntry } from "../context/AddressBookContext";
 import { ALL_CHAINS, entriesForChain } from "./addressBookChain";
 
-const alice = "0x00000000000000000000000000000000000000A1";
-const bob = "0x00000000000000000000000000000000000000B0";
+const alice = "0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B";
+const bob = "0x5B38Da6a701c568545dCfcB03FcB875f56beddC4";
 
 const book: AddressBookEntry[] = [
   { address: alice, name: "Alice (all)", chainId: ALL_CHAINS },
-  { address: alice.toLowerCase() as `0x${string}`, name: "Alice on Sepolia", chainId: 11155111 },
+  { address: alice, name: "Alice on Sepolia", chainId: 11155111 },
   { address: bob, name: "Bob mainnet", chainId: 1 },
 ];
 
