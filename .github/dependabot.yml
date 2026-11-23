@@ -10,3 +10,10 @@ updates:
    directory: "/"
    schedule:
      interval: weekly
+ - package-ecosystem: "npm"
+   directory: "/"
+   schedule:
+     interval: weekly
+   # Malicious releases are usually caught and pulled within days (#57).
+   cooldown:
+     default-days: 7
