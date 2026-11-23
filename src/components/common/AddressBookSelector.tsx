@@ -1,7 +1,9 @@
 import { ContactsOutlined } from "@mui/icons-material";
 import { Box, Divider, IconButton, InputAdornment, Menu, MenuItem, Typography } from "@mui/material";
 import React from "react";
+import { useChainId } from "wagmi";
 import { useAddressBook } from "../../context/AddressBookContext";
+import { chainLabel } from "../../utils/addressBookChain";
 import AccountAddress from "./AccountAddress";
 
 export interface AddressBookSelectorProps {
@@ -21,7 +23,7 @@ export const useAddressBookSelector = ({
   size = "small",
   variant = "icon",
 }: AddressBookSelectorProps) => {
-  const { addressBook } = useAddressBook();
+  const addressBook = useAddressBook().getEntriesByChain(useChainId());
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const isMenuOpen = Boolean(anchorEl);
 
@@ -139,7 +141,7 @@ const AddressBookMenuContent: React.FC<AddressBookMenuContentProps> = ({ address
               <AccountAddress address={entry.address as `0x${string}`} size="small" showCopy={false} />
             </Box>
             <Typography variant="caption" color="textSecondary">
-              Chain ID: {entry.chainId}
+              {chainLabel(entry.chainId)}
             </Typography>
           </Box>
         </MenuItem>
