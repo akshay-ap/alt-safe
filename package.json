@@ -30,7 +30,7 @@
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "react-router-dom": "^7.18.5",
-    "viem": "^2.57.13",
+    "viem": "^2.57.20",
     "wagmi": "^3.7.9"
   },
   "devDependencies": {
