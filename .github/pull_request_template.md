@@ -15,7 +15,6 @@ Related #
 - [ ] Screenshots or a recording attached for UI changes
 - [ ] No breaking changes, or they are described under Notes
 - [ ] No secrets, keys or private data in the diff or description
-- [ ] Self-reviewed
 
 ## Testing
 
