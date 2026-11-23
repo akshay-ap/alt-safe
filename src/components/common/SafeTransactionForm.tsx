@@ -22,7 +22,7 @@ const SafeTransactionForm: React.FC<SafeTransactionFormProps> = ({ transaction, 
         <TextField
           label="To"
           placeholder="0x"
-          defaultValue={transaction.to}
+          value={transaction.to}
           fullWidth
           slotProps={{
             input: {
@@ -37,7 +37,7 @@ const SafeTransactionForm: React.FC<SafeTransactionFormProps> = ({ transaction, 
         <TextField
           label="Value"
           placeholder="0"
-          defaultValue={transaction.value.toString()}
+          value={transaction.value.toString()}
           fullWidth
           slotProps={{
             input: {
@@ -51,7 +51,7 @@ const SafeTransactionForm: React.FC<SafeTransactionFormProps> = ({ transaction, 
       <Grid size={12}>
         <TextField
           label="Data"
-          defaultValue={transaction.data}
+          value={transaction.data}
           placeholder={transaction.data}
           fullWidth
           multiline
@@ -69,7 +69,7 @@ const SafeTransactionForm: React.FC<SafeTransactionFormProps> = ({ transaction, 
         <TextField
           label="Operation"
           placeholder="0"
-          defaultValue={transaction.operation.toString()}
+          value={transaction.operation.toString()}
           fullWidth
           slotProps={{
             input: {
@@ -83,7 +83,7 @@ const SafeTransactionForm: React.FC<SafeTransactionFormProps> = ({ transaction, 
       <Grid size={{ xs: 6, md: 3 }}>
         <TextField
           label="SafeTxGas"
-          defaultValue={transaction.safeTxGas.toString()}
+          value={transaction.safeTxGas.toString()}
           fullWidth
           slotProps={{
             input: {
@@ -97,7 +97,7 @@ const SafeTransactionForm: React.FC<SafeTransactionFormProps> = ({ transaction, 
       <Grid size={{ xs: 6, md: 3 }}>
         <TextField
           label="BaseGas"
-          defaultValue={transaction.baseGas.toString()}
+          value={transaction.baseGas.toString()}
           fullWidth
           slotProps={{
             input: {
@@ -111,7 +111,7 @@ const SafeTransactionForm: React.FC<SafeTransactionFormProps> = ({ transaction, 
       <Grid size={{ xs: 6, md: 3 }}>
         <TextField
           label="GasPrice"
-          defaultValue={transaction.gasPrice.toString()}
+          value={transaction.gasPrice.toString()}
           fullWidth
           slotProps={{
             input: {
@@ -125,7 +125,7 @@ const SafeTransactionForm: React.FC<SafeTransactionFormProps> = ({ transaction, 
       <Grid size={{ xs: 12, md: 5 }}>
         <TextField
           label="GasToken"
-          defaultValue={transaction.gasToken}
+          value={transaction.gasToken}
           fullWidth
           slotProps={{
             input: {
@@ -139,7 +139,7 @@ const SafeTransactionForm: React.FC<SafeTransactionFormProps> = ({ transaction, 
       <Grid size={{ xs: 12, md: 5 }}>
         <TextField
           label="RefundReceiver"
-          defaultValue={transaction.refundReceiver}
+          value={transaction.refundReceiver}
           fullWidth
           slotProps={{
             input: {
@@ -153,7 +153,7 @@ const SafeTransactionForm: React.FC<SafeTransactionFormProps> = ({ transaction, 
       <Grid size={{ xs: 12, md: 2 }}>
         <TextField
           label="Nonce"
-          defaultValue={transaction.nonce.toString()}
+          value={transaction.nonce.toString()}
           fullWidth
           slotProps={{
             input: {
