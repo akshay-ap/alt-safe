@@ -1,7 +1,18 @@
 import FingerprintIcon from "@mui/icons-material/Fingerprint";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import RefreshIcon from "@mui/icons-material/Refresh";
-import { Alert, Box, Button, Chip, CircularProgress, Paper, Stack, TextField, Typography } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  Paper,
+  Snackbar,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { signTypedData, simulateContract, writeContract } from "@wagmi/core";
 import { useEffect, useState } from "react";
 import {
@@ -71,11 +82,7 @@ const SignatureCollector: React.FC<{
   const [input, setInput] = useState("");
   const [error, setError] = useState<string>();
   const [busy, setBusy] = useState(false);
-
-  const refreshApprovals = () => {
-    if (safeAccount && owners.length) fetchApprovals(owners, safeTransactionHash, safeAccount).then(setApprovals);
-  };
-  useEffect(refreshApprovals, [safeAccount, safeTransactionHash, owners.length]);
+  const [notice, setNotice] = useState<string>();
 
   const hasSigned = (owner: Address) => signatures.some((s) => isAddressEqual(s.signer as Address, owner));
   const statusOf = (owner: Address) =>
@@ -93,7 +100,7 @@ const SignatureCollector: React.FC<{
   const confirmed = owners.filter((owner) => ["signed", "approved"].includes(statusOf(owner))).length;
   const canExecute = threshold > 0 && confirmed + (executorCounts ? 1 : 0) >= threshold;
 
-  const run = async (action: () => Promise<void>) => {
+  const run = async (action: () => Promise<unknown>) => {
     setBusy(true);
     setError(undefined);
     try {
@@ -106,10 +113,30 @@ const SignatureCollector: React.FC<{
     }
   };
 
+  // Returns how many owners have approved the hash on chain.
+  const loadApprovals = async () => {
+    if (!safeAccount || !owners.length) return 0;
+    const found = await fetchApprovals(owners, safeTransactionHash, safeAccount);
+    setApprovals(found);
+    return Object.values(found).filter(Boolean).length;
+  };
+  useEffect(() => {
+    run(loadApprovals);
+  }, [safeAccount, safeTransactionHash, owners.length]);
+
+  const checkApprovals = () =>
+    run(async () => {
+      const count = await loadApprovals();
+      setNotice(count ? `${count} owner${count > 1 ? "s" : ""} approved on chain` : "No on-chain approvals yet");
+    });
+
   const addSignatures = () =>
     run(async () => {
-      setSignatures(mergeSignatures(signatures, await parseSignatures(input, safeTransactionHash, owners)));
+      const merged = mergeSignatures(signatures, await parseSignatures(input, safeTransactionHash, owners));
+      const added = merged.length - signatures.length;
+      setSignatures(merged);
       setInput("");
+      setNotice(added ? `Added ${added} signature${added > 1 ? "s" : ""}` : "Already added");
     });
 
   const sign = () =>
@@ -196,7 +223,7 @@ const SignatureCollector: React.FC<{
         <Typography variant="h5" component="h2" sx={{ flex: 1 }}>
           Signatures {confirmed} of {threshold}
         </Typography>
-        <Button size="small" startIcon={<RefreshIcon />} onClick={refreshApprovals}>
+        <Button size="small" startIcon={<RefreshIcon />} onClick={checkApprovals} disabled={busy}>
           Check on-chain approvals
         </Button>
         {shareOptions.length > 0 && <ShareMenu options={shareOptions} />}
@@ -271,6 +298,7 @@ const SignatureCollector: React.FC<{
           Execute
         </Button>
       </Stack>
+      <Snackbar open={Boolean(notice)} autoHideDuration={3000} onClose={() => setNotice(undefined)} message={notice} />
     </Paper>
   );
 };
