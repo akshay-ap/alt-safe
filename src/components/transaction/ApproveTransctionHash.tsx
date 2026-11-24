@@ -73,6 +73,7 @@ const ApproveTransactionHash: React.FC = () => {
       setApprovals(approvalsStatus);
     } catch (err) {
       console.error("Error fetching approvals:", err);
+      setApprovals({});
     } finally {
       setFetchingApprovals(false);
     }

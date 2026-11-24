@@ -231,19 +231,15 @@ export const fetchApprovals = async (
 ): Promise<Record<string, boolean>> => {
   const approvalsStatus: Record<string, boolean> = {};
 
+  // Errors propagate: a failed read must not look like "not approved".
   for (const owner of owners) {
-    try {
-      const isApproved = await readContract(config, {
-        abi: safe,
-        address: safeAccount,
-        functionName: "approvedHashes",
-        args: [owner, safeTransactionHash],
-      });
-      approvalsStatus[owner] = isApproved === 1n; // Non-zero means approved
-    } catch (err) {
-      console.error(`Error checking approval for owner ${owner}:`, err);
-      approvalsStatus[owner] = false; // Default to not approved on error
-    }
+    const isApproved = await readContract(config, {
+      abi: safe,
+      address: safeAccount,
+      functionName: "approvedHashes",
+      args: [owner, safeTransactionHash],
+    });
+    approvalsStatus[owner] = isApproved === 1n; // Non-zero means approved
   }
 
   return approvalsStatus;
