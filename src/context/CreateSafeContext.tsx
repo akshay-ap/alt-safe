@@ -1,7 +1,7 @@
 import { simulateContract, writeContract } from "@wagmi/core";
 import type React from "react";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { type Address, isAddress, zeroAddress } from "viem";
+import { type Address, isAddress, maxUint256, zeroAddress } from "viem";
 import { useAccount, useChainId, usePublicClient } from "wagmi";
 import safeProxyFactoryABI from "../abis/SafeProxyFactory.json";
 import { STORAGE_KEY } from "../constants";
@@ -37,6 +37,8 @@ type CreateSafeState = {
   initData: `0x${string}`;
   proxyAddress: Address | undefined;
   isAlreadyDeployed: boolean;
+  /** Set when the factory's creation code can't be read, so no address can be predicted. */
+  proxyCreationCodeError?: string;
   error: string | undefined;
   safeCreationTxHash: string | undefined;
   isCreating: boolean;
@@ -132,6 +134,7 @@ export const CreateSafeProvider: React.FC<CreateSafeProviderProps> = ({ children
   const [safeCreationTxHash, setSafeCreationTxHash] = useState<string>();
   const [isCreating, setIsCreating] = useState<boolean>(false);
   const [proxyCreationCode, setProxyCreationCode] = useState<`0x${string}`>();
+  const [proxyCreationCodeError, setProxyCreationCodeError] = useState<string>();
 
   const defaultModules: DefaultModules = RECOMMENDED_MODULES;
 
@@ -160,17 +163,23 @@ export const CreateSafeProvider: React.FC<CreateSafeProviderProps> = ({ children
     setSingleton(deployment.singleton);
   }, [deployment]);
 
+  // The predicted address depends on this factory's own creation code, so never reuse another factory's.
   useEffect(() => {
-    (async () => {
-      if (publicClient && proxyFactory) {
-        const data = await publicClient.readContract({
-          address: proxyFactory,
-          abi: safeProxyFactoryABI,
-          functionName: "proxyCreationCode",
-        });
-        setProxyCreationCode(data as `0x${string}`);
-      }
-    })();
+    setProxyCreationCode(undefined);
+    setProxyCreationCodeError(undefined);
+    if (!publicClient || !isAddress(proxyFactory)) return;
+    let current = true;
+    publicClient
+      .readContract({ address: proxyFactory, abi: safeProxyFactoryABI, functionName: "proxyCreationCode" })
+      .then((data) => current && setProxyCreationCode(data as `0x${string}`))
+      .catch((err) => {
+        if (!current) return;
+        console.error("Failed to read proxyCreationCode:", err);
+        setProxyCreationCodeError("Couldn't read the proxy factory on this network, so the Safe address is unknown.");
+      });
+    return () => {
+      current = false;
+    };
   }, [publicClient, proxyFactory]);
 
   // Update initData when owners, threshold, or fallbackHandler change
@@ -207,8 +216,14 @@ export const CreateSafeProvider: React.FC<CreateSafeProviderProps> = ({ children
   // Update proxyAddress when configuration changes
   useEffect(() => {
     const safeSingleton = useSingletonL2 ? singletonL2 : singleton;
-    // getProxyAddress throws on a malformed singleton, which would unmount the whole app.
-    if (proxyFactory && initData !== "0x" && isAddress(safeSingleton)) {
+    // getProxyAddress throws on a malformed address or salt, which would unmount the whole app.
+    if (
+      isAddress(proxyFactory) &&
+      initData !== "0x" &&
+      isAddress(safeSingleton) &&
+      salt <= maxUint256 &&
+      proxyCreationCode
+    ) {
       setProxyAddress(getProxyAddress(proxyFactory, safeSingleton, initData, salt, proxyCreationCode));
     } else {
       setProxyAddress(undefined);
@@ -308,6 +323,7 @@ export const CreateSafeProvider: React.FC<CreateSafeProviderProps> = ({ children
     initData,
     proxyAddress,
     isAlreadyDeployed,
+    proxyCreationCodeError,
     error,
     safeCreationTxHash,
     isCreating,
