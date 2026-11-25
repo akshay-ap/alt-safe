@@ -6,6 +6,7 @@ import {
   encodePacked,
   getContractAddress,
   keccak256,
+  maxUint256,
   zeroAddress,
 } from "viem";
 import safeABI from "../abis/Safe.json";
@@ -19,6 +20,13 @@ export const SAFE_TX_TYPEHASH = keccak256(
     "SafeTx(address to,uint256 value,bytes data,uint8 operation,uint256 safeTxGas,uint256 baseGas,uint256 gasPrice,address gasToken,address refundReceiver,uint256 nonce)",
   ),
 );
+
+/** Salt typed by the user: digits only and within uint256, otherwise undefined. */
+export const parseSalt = (value: string): bigint | undefined => {
+  if (!/^\d*$/.test(value)) return undefined;
+  const salt = BigInt(value || 0);
+  return salt <= maxUint256 ? salt : undefined;
+};
 
 export const getProxyAddress = (
   factory: `0x${string}`,

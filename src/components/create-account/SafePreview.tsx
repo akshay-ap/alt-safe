@@ -71,8 +71,16 @@ const Submitted: React.FC<{ hash: `0x${string}` }> = ({ hash }) => {
 
 const SafePreview: React.FC = () => {
   const [initDataOpen, setInitDataOpen] = useState(false);
-  const { initData, proxyAddress, isAlreadyDeployed, error, safeCreationTxHash, handleCreateSafe, isCreating } =
-    useCreateSafeContext();
+  const {
+    initData,
+    proxyAddress,
+    proxyCreationCodeError,
+    isAlreadyDeployed,
+    error,
+    safeCreationTxHash,
+    handleCreateSafe,
+    isCreating,
+  } = useCreateSafeContext();
   const hasValidInitData = initData !== "0x" && error === undefined;
 
   return (
@@ -89,7 +97,7 @@ const SafePreview: React.FC = () => {
         <AccountAddress address={proxyAddress} />
       ) : (
         <Typography variant="body2" color="warning.main">
-          Fix the owners and settings to see the address.
+          {proxyCreationCodeError ?? "Fix the owners and settings to see the address."}
         </Typography>
       )}
       {hasValidInitData && (
@@ -112,7 +120,7 @@ const SafePreview: React.FC = () => {
             variant="contained"
             size="large"
             onClick={handleCreateSafe}
-            disabled={!hasValidInitData || isAlreadyDeployed || isCreating}
+            disabled={!hasValidInitData || !proxyAddress || isAlreadyDeployed || isCreating}
             startIcon={isCreating ? <CircularProgress size={18} color="inherit" /> : undefined}
           >
             {isCreating ? "Confirm in your wallet…" : "Create Safe"}
