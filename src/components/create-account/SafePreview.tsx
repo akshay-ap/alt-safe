@@ -81,7 +81,7 @@ const SafePreview: React.FC = () => {
     handleCreateSafe,
     isCreating,
   } = useCreateSafeContext();
-  const hasValidInitData = initData !== "0x" && error === undefined;
+  const hasValidInitData = initData !== "0x";
 
   return (
     <Paper variant="outlined" sx={{ p: 2.5 }}>
@@ -128,7 +128,7 @@ const SafePreview: React.FC = () => {
         )}
       </Stack>
 
-      <InitDataDialog open={initDataOpen} onClose={() => setInitDataOpen(false)} initData={initData} error={error} />
+      <InitDataDialog open={initDataOpen} onClose={() => setInitDataOpen(false)} initData={initData} />
     </Paper>
   );
 };

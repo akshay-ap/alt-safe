@@ -8,7 +8,6 @@ interface InitDataDialogProps {
   open: boolean;
   onClose: () => void;
   initData: `0x${string}`;
-  error?: string;
 }
 
 interface DecodedInitData {
@@ -16,9 +15,9 @@ interface DecodedInitData {
   args?: readonly unknown[];
 }
 
-const InitDataDialog: React.FC<InitDataDialogProps> = ({ open, onClose, initData, error }) => {
+const InitDataDialog: React.FC<InitDataDialogProps> = ({ open, onClose, initData }) => {
   const decodedInitData: DecodedInitData | null =
-    initData !== "0x" && error === undefined
+    initData !== "0x"
       ? (() => {
           try {
             const { functionName, args } = decodeFunctionData({
