@@ -19,12 +19,11 @@ import { v4 as uuidv4 } from "uuid";
 import {
   type Address,
   type Hex,
-  keccak256,
+  hashMessage,
   parseSignature,
   recoverTypedDataAddress,
   type Signature,
   serializeSignature,
-  toHex,
 } from "viem";
 import { useAccount } from "wagmi";
 import fallbackHandlerABI from "../abis/CompatibilityFallbackHandler.json";
@@ -41,7 +40,9 @@ const SignMessage: React.FC = () => {
   const [encodedSignature, setEncodedSignature] = useState<string>();
   const [errors, setErrors] = useState<string[]>([]);
   const [copied, setCopied] = useState<boolean>(false);
-  const [isValidSignature, setIsValidSignature] = useState<boolean>(false);
+  const [isValidSignature, setIsValidSignature] = useState<boolean>();
+  // EIP-191 hash, as Safe{Wallet} and ERC-1271 verifiers use; signing, recovery and verification must all use it.
+  const dataHash = hashMessage(message);
 
   const threshold = safeStorage?.threshold ? Number(safeStorage.threshold) : 0;
   const signatureCount = Object.keys(signatures).length;
@@ -49,6 +50,9 @@ const SignMessage: React.FC = () => {
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setMessage(event.target.value);
+    setSignatures({});
+    setEncodedSignature(undefined);
+    setIsValidSignature(undefined);
   };
 
   const EIP712_SAFE_MESSAGE_TYPE = {
@@ -69,7 +73,7 @@ const SignMessage: React.FC = () => {
         },
         types: EIP712_SAFE_MESSAGE_TYPE,
         primaryType: "SafeMessage",
-        message: { message: keccak256(toHex(message)) },
+        message: { message: dataHash },
       });
 
       setSignatures((prev) => {
@@ -100,7 +104,7 @@ const SignMessage: React.FC = () => {
         },
         types: EIP712_SAFE_MESSAGE_TYPE,
         primaryType: "SafeMessage",
-        message: { message: toHex(message) },
+        message: { message: dataHash },
         signature: value as `0x${string}`,
       });
 
@@ -137,10 +141,9 @@ const SignMessage: React.FC = () => {
   };
 
   const handleCheckSignature = async () => {
-    setIsValidSignature(false);
+    setIsValidSignature(undefined);
     try {
       if (!safeAccount) return;
-      const dataHash = keccak256(toHex(message) as `0x${string}`);
       const result = await readContract(config, {
         address: safeAccount,
         abi: fallbackHandlerABI,
@@ -148,10 +151,8 @@ const SignMessage: React.FC = () => {
         args: [dataHash, encodedSignature],
       });
 
-      if (result === "0x1626ba7e") {
-        setErrors([]);
-        setIsValidSignature(true);
-      }
+      setIsValidSignature(result === "0x1626ba7e");
+      if (result === "0x1626ba7e") setErrors([]);
     } catch (error) {
       setErrors((prevErrors) => [...prevErrors, `Error checking signature: ${error}`]);
     }
@@ -205,7 +206,7 @@ const SignMessage: React.FC = () => {
           </Typography>
           {Array.from({ length: requiredSignatures - 1 }).map((_, i) => (
             <TextField
-              key={`index-${i}-${uuidv4()}`}
+              key={`${dataHash}-${i}`}
               fullWidth
               label={`Signature ${i + 2} of ${requiredSignatures}`}
               placeholder="0x..."
@@ -332,12 +333,14 @@ const SignMessage: React.FC = () => {
             >
               This encoded signature can be verified by calling ERC-1271 isValidSignature function on the Safe account.
             </Typography>
-            <Button variant="contained" onClick={handleCheckSignature} sx={{ mt: 1.5 }}>
+            <Button variant="contained" onClick={handleCheckSignature} disabled={!encodedSignature} sx={{ mt: 1.5 }}>
               Verify
             </Button>
-            {isValidSignature && (
-              <Alert severity="success" sx={{ mt: 2 }}>
-                The signature is valid!
+            {isValidSignature !== undefined && (
+              <Alert severity={isValidSignature ? "success" : "error"} sx={{ mt: 2 }}>
+                {isValidSignature
+                  ? "The signature is valid!"
+                  : "The Safe does not accept this signature for this message."}
               </Alert>
             )}
           </Box>
