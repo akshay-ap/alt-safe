@@ -1,7 +1,7 @@
-import { getAddress, keccak256, toHex } from "viem";
+import { getAddress, keccak256, maxUint256, toHex } from "viem";
 import { describe, expect, it } from "vitest";
 import { encodeMultiSend } from "./multisend";
-import { getShortAddress, SafeOperation } from "./utils";
+import { getShortAddress, parseSalt, SafeOperation } from "./utils";
 
 const randomAddress = () => getAddress(keccak256(toHex(Math.random().toString())).slice(0, 42));
 
@@ -34,5 +34,21 @@ describe("encodeMultiSend", () => {
 
     expect(packed.length).toBe(2 + entryLength * 2);
     expect(packed.slice(2 + entryLength + 2, 2 + entryLength + 42)).toBe(second.slice(2).toLowerCase());
+  });
+});
+
+describe("parseSalt", () => {
+  it("accepts digits up to the uint256 maximum, with empty meaning 0", () => {
+    expect(parseSalt("")).toBe(0n);
+    expect(parseSalt("42")).toBe(42n);
+    expect(parseSalt(maxUint256.toString())).toBe(maxUint256);
+  });
+
+  it("rejects values above uint256, which would crash the address prediction", () => {
+    expect(parseSalt((maxUint256 + 1n).toString())).toBeUndefined();
+  });
+
+  it("rejects anything that isn't plain digits", () => {
+    for (const value of ["-1", "1.5", "1e5", "0x10", " 1"]) expect(parseSalt(value)).toBeUndefined();
   });
 });
