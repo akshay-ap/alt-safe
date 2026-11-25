@@ -18,13 +18,17 @@ import Grid from "@mui/material/Grid";
 import { format, formatDistanceToNow } from "date-fns";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { deleteDraftTransaction, getDraftTransactions } from "../../api/api";
+import { useChainId, useChains } from "wagmi";
+import { deleteDraftTransaction, getDraftTransactions, isDraftFor, isSameSafe } from "../../api/api";
 import type { SafeTransactionDraft } from "../../context/types";
 import { useSafeWalletContext } from "../../context/WalletContext";
 
 const TransactionDrafts: React.FC = () => {
   const { storage, safeAccount } = useSafeWalletContext();
   const navigate = useNavigate();
+  const chainId = useChainId();
+  const chains = useChains();
+  const chainName = (id: number) => chains.find((chain) => chain.id === id)?.name ?? `Chain ${id}`;
 
   const [drafts, setDrafts] = useState<SafeTransactionDraft[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -120,10 +124,17 @@ const TransactionDrafts: React.FC = () => {
     );
   }
 
-  // Group drafts by Safe Account
+  // This Safe's drafts from every chain come first; other chains' ones are listed but can't be edited here.
+  const currentSafeDrafts = drafts.filter((draft) => isSameSafe(draft, safeAccount));
+  const otherChainHint = (draft: SafeTransactionDraft) =>
+    isDraftFor(draft, safeAccount, chainId)
+      ? undefined
+      : `Saved on ${chainName(draft.chainId ?? 0)}, not the selected network. Switch networks to edit it.`;
+
+  // Group the other Safes' drafts by Safe Account
   const draftsByAccount: Record<string, SafeTransactionDraft[]> = {};
 
-  for (const draft of drafts) {
+  for (const draft of drafts.filter((draft) => !isSameSafe(draft, safeAccount))) {
     if (!draftsByAccount[draft.safeAccount]) {
       draftsByAccount[draft.safeAccount] = [];
     }
@@ -146,15 +157,21 @@ const TransactionDrafts: React.FC = () => {
       )}
 
       {/* Current Safe's drafts first */}
-      {safeAccount && draftsByAccount[safeAccount] && (
+      {currentSafeDrafts.length > 0 && (
         <Box sx={{ mb: 4 }}>
           <Typography variant="subtitle1" gutterBottom>
             Current Safe
           </Typography>
           <Grid container spacing={2}>
-            {draftsByAccount[safeAccount].map((draft) => (
+            {currentSafeDrafts.map((draft) => (
               <Grid key={draft.id} size={{ xs: 12, sm: 6, md: 4 }}>
-                <DraftCard draft={draft} onDelete={handleDeleteDraft} onEdit={handleEditDraft} isCurrentSafe />
+                <DraftCard
+                  draft={draft}
+                  onDelete={handleDeleteDraft}
+                  onEdit={handleEditDraft}
+                  chainName={chainName}
+                  disabledReason={otherChainHint(draft)}
+                />
               </Grid>
             ))}
           </Grid>
@@ -162,27 +179,26 @@ const TransactionDrafts: React.FC = () => {
       )}
 
       {/* Other Safes */}
-      {Object.keys(draftsByAccount)
-        .filter((account) => account !== safeAccount)
-        .map((account) => (
-          <Box key={account} sx={{ mb: 4 }}>
-            <Typography variant="subtitle1" gutterBottom>
-              Safe {account.substring(0, 6)}...{account.substring(38)}
-            </Typography>
-            <Grid container spacing={2}>
-              {draftsByAccount[account].map((draft) => (
-                <Grid key={draft.id} size={{ xs: 12, sm: 6, md: 4 }}>
-                  <DraftCard
-                    draft={draft}
-                    onDelete={handleDeleteDraft}
-                    onEdit={handleEditDraft}
-                    isCurrentSafe={false}
-                  />
-                </Grid>
-              ))}
-            </Grid>
-          </Box>
-        ))}
+      {Object.keys(draftsByAccount).map((account) => (
+        <Box key={account} sx={{ mb: 4 }}>
+          <Typography variant="subtitle1" gutterBottom>
+            Safe {account.substring(0, 6)}...{account.substring(38)}
+          </Typography>
+          <Grid container spacing={2}>
+            {draftsByAccount[account].map((draft) => (
+              <Grid key={draft.id} size={{ xs: 12, sm: 6, md: 4 }}>
+                <DraftCard
+                  draft={draft}
+                  onDelete={handleDeleteDraft}
+                  onEdit={handleEditDraft}
+                  chainName={chainName}
+                  disabledReason="This draft is for a different Safe account."
+                />
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
+      ))}
     </Box>
   );
 };
@@ -191,10 +207,13 @@ interface DraftCardProps {
   draft: SafeTransactionDraft;
   onDelete: (id: string) => void;
   onEdit: (id: string) => void;
-  isCurrentSafe: boolean;
+  chainName: (chainId: number) => string;
+  /** Why the draft can't be edited here; undefined when it can. */
+  disabledReason?: string;
 }
 
-const DraftCard: React.FC<DraftCardProps> = ({ draft, onDelete, onEdit, isCurrentSafe }) => {
+const DraftCard: React.FC<DraftCardProps> = ({ draft, onDelete, onEdit, chainName, disabledReason }) => {
+  const isCurrentSafe = !disabledReason;
   // Safely parse date with error handling
   const getFormattedDates = () => {
     try {
@@ -238,7 +257,7 @@ const DraftCard: React.FC<DraftCardProps> = ({ draft, onDelete, onEdit, isCurren
 
         <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
           <Chip size="small" label={`${draft.transactions.length} TX`} color="primary" />
-          <Chip size="small" label={draft.chainId ? `Chain ${draft.chainId}` : "Unknown Chain"} variant="outlined" />
+          <Chip size="small" label={draft.chainId ? chainName(draft.chainId) : "Unknown Chain"} variant="outlined" />
         </Box>
 
         <Tooltip title={exactDate} arrow>
@@ -251,6 +270,11 @@ const DraftCard: React.FC<DraftCardProps> = ({ draft, onDelete, onEdit, isCurren
             Last updated: {formattedDate}
           </Typography>
         </Tooltip>
+        {disabledReason && (
+          <Typography variant="body2" sx={{ color: "warning.main", mt: 1 }}>
+            {disabledReason}
+          </Typography>
+        )}
       </CardContent>
 
       <Divider />

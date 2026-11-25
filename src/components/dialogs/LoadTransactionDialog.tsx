@@ -22,8 +22,8 @@ import {
 } from "@mui/material";
 import { formatDistanceToNow } from "date-fns";
 import { useEffect, useState } from "react";
-import { useChainId } from "wagmi";
-import { deleteDraftTransaction, getDraftTransactions, isDraftFor } from "../../api/api";
+import { useChainId, useChains } from "wagmi";
+import { deleteDraftTransaction, getDraftTransactions, isDraftFor, isSameSafe } from "../../api/api";
 import type { SafeTransactionDraft } from "../../context/types";
 
 interface LoadTransactionDialogProps {
@@ -42,6 +42,7 @@ const LoadTransactionDialog: React.FC<LoadTransactionDialogProps> = ({
   currentSafeAccount,
 }) => {
   const chainId = useChainId();
+  const chains = useChains();
   const [drafts, setDrafts] = useState<SafeTransactionDraft[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | undefined>();
@@ -85,9 +86,15 @@ const LoadTransactionDialog: React.FC<LoadTransactionDialogProps> = ({
     onClose();
   };
 
-  const currentSafeDrafts = drafts.filter((draft) => isDraftFor(draft, currentSafeAccount, chainId));
+  const chainName = (id: number) => chains.find((chain) => chain.id === id)?.name ?? `Chain ${id}`;
 
-  const otherSafeDrafts = drafts.filter((draft) => !isDraftFor(draft, currentSafeAccount, chainId));
+  // This Safe's drafts from other chains stay visible but can't be loaded here.
+  const currentSafeDrafts = drafts.filter((draft) => isSameSafe(draft, currentSafeAccount));
+  const otherSafeDrafts = drafts.filter((draft) => !isSameSafe(draft, currentSafeAccount));
+  const otherChainHint = (draft: SafeTransactionDraft) =>
+    isDraftFor(draft, currentSafeAccount, chainId)
+      ? undefined
+      : `Saved on ${chainName(draft.chainId ?? 0)}, not the selected network. Switch networks to load it.`;
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
@@ -128,7 +135,8 @@ const LoadTransactionDialog: React.FC<LoadTransactionDialogProps> = ({
                       draft={draft}
                       onLoad={handleLoadDraft}
                       onDelete={handleDeleteDraft}
-                      isSameSafe={true}
+                      chainName={chainName}
+                      disabledReason={otherChainHint(draft)}
                     />
                   ))}
                 </List>
@@ -138,7 +146,7 @@ const LoadTransactionDialog: React.FC<LoadTransactionDialogProps> = ({
             {otherSafeDrafts.length > 0 && (
               <>
                 <Typography variant="subtitle1" gutterBottom sx={{ mt: 2 }}>
-                  Other Safes or networks
+                  Other Safes
                 </Typography>
                 <List>
                   {otherSafeDrafts.map((draft) => (
@@ -147,7 +155,8 @@ const LoadTransactionDialog: React.FC<LoadTransactionDialogProps> = ({
                       draft={draft}
                       onLoad={handleLoadDraft}
                       onDelete={handleDeleteDraft}
-                      isSameSafe={false}
+                      chainName={chainName}
+                      disabledReason="This draft is for a different Safe account."
                     />
                   ))}
                 </List>
@@ -167,10 +176,18 @@ interface TransactionDraftItemProps {
   draft: SafeTransactionDraft;
   onLoad: (draft: SafeTransactionDraft) => void;
   onDelete: (draftId: string, event: React.MouseEvent) => void;
-  isSameSafe: boolean;
+  chainName: (chainId: number) => string;
+  /** Why the draft can't be loaded here; undefined when it can. */
+  disabledReason?: string;
 }
 
-const TransactionDraftItem: React.FC<TransactionDraftItemProps> = ({ draft, onLoad, onDelete, isSameSafe }) => {
+const TransactionDraftItem: React.FC<TransactionDraftItemProps> = ({
+  draft,
+  onLoad,
+  onDelete,
+  chainName,
+  disabledReason,
+}) => {
   // Safely parse the date with error handling
   const getFormattedDate = () => {
     try {
@@ -192,7 +209,7 @@ const TransactionDraftItem: React.FC<TransactionDraftItemProps> = ({ draft, onLo
 
   return (
     <ListItem disablePadding divider>
-      <ListItemButton onClick={() => onLoad(draft)} disabled={!isSameSafe} sx={{ py: 2 }}>
+      <ListItemButton onClick={() => onLoad(draft)} disabled={!!disabledReason} sx={{ py: 2 }}>
         <ListItemText
           primary={
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -218,7 +235,7 @@ const TransactionDraftItem: React.FC<TransactionDraftItemProps> = ({ draft, onLo
               >
                 {draft.safeAccount.substring(0, 6)}...
                 {draft.safeAccount.substring(38)}
-                {draft.chainId && ` (Chain ID: ${draft.chainId})`}
+                {draft.chainId && ` · ${chainName(draft.chainId)}`}
               </Typography>
               <Typography
                 variant="caption"
@@ -228,13 +245,18 @@ const TransactionDraftItem: React.FC<TransactionDraftItemProps> = ({ draft, onLo
               >
                 Last modified: {formattedDate}
               </Typography>
+              {disabledReason && (
+                <Typography variant="caption" sx={{ color: "warning.main", display: "block" }}>
+                  {disabledReason}
+                </Typography>
+              )}
             </>
           }
         />
 
         <ListItemSecondaryAction>
-          {!isSameSafe && (
-            <Tooltip title="This draft is for a different Safe account">
+          {disabledReason && (
+            <Tooltip title={disabledReason}>
               <InfoOutlinedIcon color="warning" fontSize="small" sx={{ mr: 1 }} />
             </Tooltip>
           )}
@@ -245,7 +267,7 @@ const TransactionDraftItem: React.FC<TransactionDraftItemProps> = ({ draft, onLo
                 e.stopPropagation();
                 onLoad(draft);
               }}
-              disabled={!isSameSafe}
+              disabled={!!disabledReason}
               sx={{ mr: 1 }}
             >
               <EditIcon fontSize="small" />
