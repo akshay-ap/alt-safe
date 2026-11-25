@@ -268,7 +268,8 @@ const TransactionInputBuilder: React.FC<TransactionInputBuilderProps> = ({ onAdd
       type: spec.summaryView as TransactionType,
       groupName: groupInfo.name,
       actionName: spec.name,
-      value: parser.parse(spec.onFinalize.value).evaluate({ context, inputs }),
+      // Templates may evaluate to a number (e.g. "0"); shared payloads require wei as a decimal string.
+      value: BigInt(parser.parse(spec.onFinalize.value).evaluate({ context, inputs })).toString(),
       to: parser.parse(spec.onFinalize.to).evaluate({ context, inputs }),
       data: calldata,
     };
