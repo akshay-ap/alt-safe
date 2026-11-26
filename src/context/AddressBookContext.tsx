@@ -4,6 +4,7 @@ import type { Address } from "viem";
 import { getAddress, isAddress, isAddressEqual } from "viem";
 import { STORAGE_KEY } from "../constants";
 import { entriesForChain } from "../utils/addressBookChain";
+import { withoutSeededSamples } from "../utils/addressBookSamples";
 import { useSafeWalletContext } from "./WalletContext";
 
 export interface AddressBookEntry {
@@ -58,7 +59,11 @@ export const AddressBookProvider: React.FC<AddressBookProviderProps> = ({ childr
       try {
         setIsLoading(true);
         const storedAddressBook = (await storage.getItem(STORAGE_KEY.ADDRESS_BOOK)) as AddressBookEntry[] | null;
-        setAddressBook(storedAddressBook ?? []);
+        const book = withoutSeededSamples(storedAddressBook ?? []);
+        setAddressBook(book);
+        if (storedAddressBook && book.length !== storedAddressBook.length) {
+          await storage.setItem(STORAGE_KEY.ADDRESS_BOOK, book);
+        }
       } catch (error) {
         console.error("Failed to load address book from storage:", error);
         setAddressBook([]);
