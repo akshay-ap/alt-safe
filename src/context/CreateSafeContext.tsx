@@ -23,7 +23,6 @@ import { calculateInitData, getProxyAddress } from "../utils/utils";
 import { config } from "../wagmi";
 import { useSafeWalletContext } from "./WalletContext";
 
-// Like Safe{Wallet}: the L1 singleton (no per-tx events) only on Ethereum and its test chains, L2 elsewhere.
 const isL1Chain = (chainId: number) => chainId === mainnet.id || chainId === sepolia.id || chainId === hardhat.id;
 
 type DefaultModules = Array<{ name: string; address: Address }>;
