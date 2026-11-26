@@ -2,7 +2,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import FingerprintIcon from "@mui/icons-material/Fingerprint";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import { Alert, Box, Button, Paper, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { Alert, Box, Button, Paper, Snackbar, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { signTypedData, simulateContract } from "@wagmi/core";
 import { useState } from "react";
 import { BaseError, bytesToHex, ContractFunctionRevertedError, stringToBytes } from "viem";
@@ -12,6 +12,7 @@ import { STORAGE_KEY } from "../../../constants";
 import { useCreateTransactionContext } from "../../../context/CreateTransactionContext";
 import type { ImportData, Transaction } from "../../../context/types";
 import { type SafeTransactionInfo, useSafeWalletContext } from "../../../context/WalletContext";
+import { COPY_FAILED, copyText } from "../../../utils/clipboard";
 import { NONCE_LOADING_ERROR, nonceWarning, prepareSafeTransaction } from "../../../utils/safeTransaction";
 import { EIP712_SAFE_TX_TYPE, type SafeTransactionParams } from "../../../utils/utils";
 import { config } from "../../../wagmi";
@@ -78,7 +79,7 @@ const Review: React.FC<ReviewProps> = ({ setActiveStep }) => {
 
   const { safeAccount, safeDeployment, storage } = useSafeWalletContext();
 
-  const [copyUnsignedTxButtonEnabled, isCopyUnsignedTxButtonEnabled] = useState<boolean>(true);
+  const [copyMessage, setCopyMessage] = useState<string>();
   const [waitForTransactionDialogOpen, setWaitForTransactionDialogOpen] = useState<boolean>(false);
   const [viewDialogOpen, setViewDialogOpen] = useState<boolean>(false);
 
@@ -235,36 +236,12 @@ const Review: React.FC<ReviewProps> = ({ setActiveStep }) => {
     }
   };
 
+  // Copies the transaction built on entering Review (the hash shown above) with no await before the write,
+  // so Safari keeps the click's user activation.
   const handleCopyToClipboard = async () => {
-    isCopyUnsignedTxButtonEnabled(false);
-    const result = await getSafeTransactionInfo();
-    const safeTx = result.safeTx;
-
-    setSafeTransactionHash(result.safeTxHash);
-
-    setSafeTransaction({
-      to: safeTx.to,
-      value: safeTx.value,
-      data: safeTx.data,
-      operation: safeTx.operation,
-      safeTxGas: safeTx.safeTxGas,
-      baseGas: safeTx.baseGas,
-      gasPrice: safeTx.gasPrice,
-      gasToken: safeTx.gasToken,
-      refundReceiver: safeTx.refundReceiver,
-      nonce: safeTx.nonce,
-    });
-
-    if (safeTx) {
-      const hexString = getExportHex(transactions, safeTx, result.safeTxHash);
-      navigator.clipboard.writeText(hexString);
-
-      // TODO: Pass snackbar message to parent component
-      console.log("Unsigned transaction copied to clipboard");
-    } else {
-      console.error("safeTransaction undefined");
-    }
-    isCopyUnsignedTxButtonEnabled(true);
+    if (!safeTransaction || !safeTransactionHash) return;
+    const ok = await copyText(getExportHex(transactions, safeTransaction, safeTransactionHash));
+    setCopyMessage(ok ? "Copied for other signers" : COPY_FAILED);
   };
 
   return (
@@ -314,7 +291,7 @@ const Review: React.FC<ReviewProps> = ({ setActiveStep }) => {
             <Button
               startIcon={<ContentCopyIcon />}
               onClick={handleCopyToClipboard}
-              disabled={!copyUnsignedTxButtonEnabled}
+              disabled={!safeTransaction || !safeTransactionHash}
             >
               Copy for other signers
             </Button>
@@ -371,6 +348,12 @@ const Review: React.FC<ReviewProps> = ({ setActiveStep }) => {
         onClose={() => setViewDialogOpen(false)}
         safeTransaction={safeTransaction}
         safeTransactionHash={safeTransactionHash || "0x"}
+      />
+      <Snackbar
+        open={Boolean(copyMessage)}
+        autoHideDuration={3000}
+        onClose={() => setCopyMessage(undefined)}
+        message={copyMessage}
       />
     </Box>
   );

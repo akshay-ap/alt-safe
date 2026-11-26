@@ -16,6 +16,7 @@ import {
 import { useState } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import { useWaitForTransactionReceipt } from "wagmi";
+import { COPY_FAILED, copyText } from "../../../utils/clipboard";
 import HexValue from "../../common/HexValue";
 import TransactionHash from "../../common/TransactionHash";
 
@@ -36,8 +37,7 @@ export const ShareMenu: React.FC<{ options: ShareOption[] }> = ({ options }) => 
 
   const share = async (option: ShareOption) => {
     setAnchor(null);
-    await navigator.clipboard.writeText(option.value);
-    setCopiedMessage(option.copiedMessage);
+    setCopiedMessage((await copyText(option.value)) ? option.copiedMessage : COPY_FAILED);
   };
 
   return (

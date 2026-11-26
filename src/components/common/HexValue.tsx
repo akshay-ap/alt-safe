@@ -7,6 +7,7 @@ import { useChainId, useChains } from "wagmi";
 import { useAddressFormat } from "../../settings/addressFormat";
 import { font } from "../../theme/tokens";
 import { chunkHex } from "../../utils/address";
+import { COPY_FAILED, copyText } from "../../utils/clipboard";
 
 export type HexValueSize = "small" | "medium" | "large";
 
@@ -68,9 +69,7 @@ const HexValue: React.FC<HexValueProps> = ({
   const isGrouped = useAddressFormat() === "grouped";
 
   const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(value);
-    } catch {
+    if (!(await copyText(value))) {
       setCopyFailed(true);
       return;
     }
@@ -120,12 +119,7 @@ const HexValue: React.FC<HexValueProps> = ({
           </IconButton>
         </Tooltip>
       )}
-      <Snackbar
-        open={copyFailed}
-        autoHideDuration={4000}
-        onClose={() => setCopyFailed(false)}
-        message="Could not copy to the clipboard"
-      />
+      <Snackbar open={copyFailed} autoHideDuration={4000} onClose={() => setCopyFailed(false)} message={COPY_FAILED} />
     </Box>
   );
 };

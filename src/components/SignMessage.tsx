@@ -29,6 +29,7 @@ import {
 import { useAccount } from "wagmi";
 import fallbackHandlerABI from "../abis/CompatibilityFallbackHandler.json";
 import { useSafeWalletContext } from "../context/WalletContext";
+import { COPY_FAILED, copyText } from "../utils/clipboard";
 import { config } from "../wagmi";
 import Title from "./common/Title";
 
@@ -221,9 +222,12 @@ const SignMessage: React.FC = () => {
     return fields;
   };
 
-  const handleCopyToClipboard = () => {
+  const handleCopyToClipboard = async () => {
     if (encodedSignature) {
-      navigator.clipboard.writeText(encodedSignature);
+      if (!(await copyText(encodedSignature))) {
+        setErrors((prev) => [...prev, COPY_FAILED]);
+        return;
+      }
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }

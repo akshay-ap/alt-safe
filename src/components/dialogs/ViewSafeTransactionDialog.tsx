@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import type React from "react";
 import { useState } from "react";
+import { COPY_FAILED, copyText } from "../../utils/clipboard";
 import { safeTransactionToJson } from "../../utils/safeTransaction";
 import type { SafeTransactionParams } from "../../utils/utils";
 import SafeTransactionForm from "../common/SafeTransactionForm";
@@ -34,12 +35,12 @@ const ViewSafeTransactionDialog: React.FC<ViewSafeTransactionDialogProps> = ({
 }) => {
   const theme = useTheme();
 
-  const [copied, setCopied] = useState(false);
+  const [copyMessage, setCopyMessage] = useState<string>();
 
   const handleCopyJson = async () => {
     if (!safeTransaction || !safeTransactionHash) return;
-    await navigator.clipboard.writeText(safeTransactionToJson(safeTransaction, safeTransactionHash));
-    setCopied(true);
+    const ok = await copyText(safeTransactionToJson(safeTransaction, safeTransactionHash));
+    setCopyMessage(ok ? "Transaction JSON copied" : COPY_FAILED);
   };
 
   return (
@@ -105,10 +106,10 @@ const ViewSafeTransactionDialog: React.FC<ViewSafeTransactionDialogProps> = ({
         </Button>
       </DialogActions>
       <Snackbar
-        open={copied}
+        open={Boolean(copyMessage)}
         autoHideDuration={3000}
-        onClose={() => setCopied(false)}
-        message="Transaction JSON copied"
+        onClose={() => setCopyMessage(undefined)}
+        message={copyMessage}
       />
     </Dialog>
   );
