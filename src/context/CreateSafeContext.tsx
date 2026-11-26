@@ -3,6 +3,7 @@ import type React from "react";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { type Address, isAddress, maxUint256, zeroAddress } from "viem";
 import { useAccount, useChainId, usePublicClient } from "wagmi";
+import { hardhat, mainnet, sepolia } from "wagmi/chains";
 import safeProxyFactoryABI from "../abis/SafeProxyFactory.json";
 import { STORAGE_KEY } from "../constants";
 import {
@@ -21,6 +22,8 @@ import {
 import { calculateInitData, getProxyAddress } from "../utils/utils";
 import { config } from "../wagmi";
 import { useSafeWalletContext } from "./WalletContext";
+
+const isL1Chain = (chainId: number) => chainId === mainnet.id || chainId === sepolia.id || chainId === hardhat.id;
 
 type DefaultModules = Array<{ name: string; address: Address }>;
 
@@ -145,7 +148,7 @@ export const CreateSafeProvider: React.FC<CreateSafeProviderProps> = ({ children
   // Singleton configuration
   const [singleton, setSingleton] = useState<string>(deployment.singleton);
   const [singletonL2, setSingletonL2] = useState<string>(deployment.singletonL2);
-  const [useSingletonL2, setUseSingletonL2] = useState<boolean>(publicClient?.chain.sourceId !== undefined);
+  const [useSingletonL2, setUseSingletonL2] = useState<boolean>(!isL1Chain(chainId));
 
   const [fallbackHandler, setFallbackHandler] = useState<Address>(deployment.fallbackHandler);
 
@@ -162,6 +165,9 @@ export const CreateSafeProvider: React.FC<CreateSafeProviderProps> = ({ children
     setSingletonL2(deployment.singletonL2);
     setSingleton(deployment.singleton);
   }, [deployment]);
+
+  // Deployments are shared across chains, so the L2 default follows the chain itself.
+  useEffect(() => setUseSingletonL2(!isL1Chain(chainId)), [chainId]);
 
   // The predicted address depends on this factory's own creation code, so never reuse another factory's.
   useEffect(() => {
