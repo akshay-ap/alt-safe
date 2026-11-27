@@ -1,9 +1,11 @@
-import { Paper, Typography } from "@mui/material";
+import { Alert, Paper, Typography } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import type React from "react";
-import { formatEther } from "viem";
+import { decodeFunctionData, formatEther, isAddress, isAddressEqual } from "viem";
 import { useAccount } from "wagmi";
+import safeABI from "../../../abis/Safe.json";
 import { type Transaction, TransactionType } from "../../../context/types";
+import { useSafeWalletContext } from "../../../context/WalletContext";
 import AccountAddress from "../../common/AccountAddress";
 
 interface TransactionCardProps {
@@ -56,6 +58,40 @@ const EthTransferCard: React.FC<TransactionCardProps> = ({ transaction }) => (
   </Grid>
 );
 
+const decodeSafeCall = (data: `0x${string}`) => {
+  try {
+    const { functionName, args } = decodeFunctionData({ abi: safeABI, data });
+    return `${functionName}(${(args ?? []).map(String).join(", ")})`;
+  } catch {
+    return undefined;
+  }
+};
+
+// A call to the Safe itself can add owners, change the threshold, or enable modules and guards.
+const SelfCallWarning: React.FC<TransactionCardProps> = ({ transaction: { to, data } }) => {
+  const { safeAccount } = useSafeWalletContext();
+  if (!safeAccount || !isAddress(to, { strict: false }) || !isAddressEqual(to, safeAccount)) return null;
+  const decoded = decodeSafeCall(data);
+  return (
+    <Grid size={12}>
+      <Alert severity="warning">
+        This call targets your Safe itself and can change its owners, threshold, modules or guard.{" "}
+        {decoded ? (
+          <>
+            It calls{" "}
+            <Typography component="span" sx={{ fontFamily: "monospace", fontSize: "0.85em", overflowWrap: "anywhere" }}>
+              {decoded}
+            </Typography>
+            .
+          </>
+        ) : (
+          "Its data is not a known Safe function. Check it carefully before signing."
+        )}
+      </Alert>
+    </Grid>
+  );
+};
+
 const ContractCallCard: React.FC<TransactionCardProps> = ({ transaction }) => (
   <Grid container spacing={2}>
     <Grid size={12}>
@@ -69,6 +105,7 @@ const ContractCallCard: React.FC<TransactionCardProps> = ({ transaction }) => (
       </Typography>
       <AccountAddress showCopy={false} short address={transaction.to} />
     </Grid>
+    <SelfCallWarning transaction={transaction} />
 
     {transaction.value && BigInt(transaction.value) > 0n && (
       <Grid size={{ xs: 12, md: 6 }}>
