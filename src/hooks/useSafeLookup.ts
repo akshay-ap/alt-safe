@@ -16,14 +16,25 @@ const readVersion = async (client: PublicClient, address: Address) => {
   }
 };
 
+/** The app signs with the EIP-712 domain that includes chainId, which Safe added in v1.3.0. */
+export const isSupportedSafeVersion = (version: string) => {
+  const [major, minor] = version.split(".").map(Number);
+  return major > 1 || (major === 1 && minor >= 3);
+};
+
 const lookupSafe = async (client: PublicClient, address: Address): Promise<SafeLookup> => {
   const code = await client.getCode({ address });
   if (!code || code === "0x") throw new NotASafeError("No contract is deployed at this address on this network.");
+  // Before reading storage, so older Safes whose layout fails to load still get this message.
+  const version = await readVersion(client, address);
+  if (version && !isSupportedSafeVersion(version)) {
+    throw new NotASafeError(`Safe v${version} is not supported. Alt Safe works with Safe v1.3.0 and later.`);
+  }
   const { storage } = await fetchStorageData(address, client);
   if (isAddressEqual(storage.singleton, zeroAddress)) {
     throw new NotASafeError("This contract is not a Safe: it has no singleton.");
   }
-  return { storage, version: await readVersion(client, address) };
+  return { storage, version };
 };
 
 /** Reads a Safe's on-chain configuration once the address is valid. */
