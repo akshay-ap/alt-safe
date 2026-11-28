@@ -21,7 +21,7 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAccount, useChainId, usePublicClient } from "wagmi";
 import { deleteDraftTransaction, getDraftTransactionById, isDraftFor, updateDraftTransaction } from "../../../api/api";
 import { STORAGE_KEY } from "../../../constants";
@@ -469,6 +469,38 @@ const CreateTransaction: React.FC = () => {
         return null;
     }
   };
+
+  // A loaded draft was opened for one Safe and chain: unload it when either changes, so it can't be signed, saved or deleted elsewhere.
+  const draftScope = useRef<string>(undefined);
+  useEffect(() => {
+    const scope = `${safeAccount?.toLowerCase()}:${chainId}`;
+    if (currentDraftId && draftScope.current !== undefined && draftScope.current !== scope) {
+      // Unsaved edits were made for the draft's own Safe and chain, so keep them in the draft.
+      if (hasUnsavedChanges) updateDraftTransaction(storage, currentDraftId, { transactions }).catch(console.error);
+      setTransactions([]);
+      setSignature(undefined);
+      setSafeTransactionHash(undefined);
+      setSafeTransaction(undefined);
+      setActiveStep(0);
+      setCurrentDraftId(undefined);
+      setIsEditingDraft(false);
+      setHasUnsavedChanges(false);
+      setSnackbarMessage("Draft closed: it belongs to another Safe or network");
+      setSnackbarOpen(true);
+    }
+    draftScope.current = scope;
+  }, [
+    safeAccount,
+    chainId,
+    currentDraftId,
+    hasUnsavedChanges,
+    storage,
+    transactions,
+    setTransactions,
+    setSignature,
+    setSafeTransactionHash,
+    setSafeTransaction,
+  ]);
 
   useEffect(() => {
     const loadDraftFromParam = async () => {

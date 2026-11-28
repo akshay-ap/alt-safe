@@ -235,7 +235,7 @@ const TransactionDraftItem: React.FC<TransactionDraftItemProps> = ({
               >
                 {draft.safeAccount.substring(0, 6)}...
                 {draft.safeAccount.substring(38)}
-                {draft.chainId && ` · ${chainName(draft.chainId)}`}
+                {draft.chainId ? ` · ${chainName(draft.chainId)}` : " · Network unknown, check before signing"}
               </Typography>
               <Typography
                 variant="caption"
