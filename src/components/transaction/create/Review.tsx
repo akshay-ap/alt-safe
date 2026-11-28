@@ -13,9 +13,10 @@ import { useCreateTransactionContext } from "../../../context/CreateTransactionC
 import type { ImportData, Transaction } from "../../../context/types";
 import { type SafeTransactionInfo, useSafeWalletContext } from "../../../context/WalletContext";
 import { NONCE_LOADING_ERROR, nonceWarning, prepareSafeTransaction } from "../../../utils/safeTransaction";
-import { EIP712_SAFE_TX_TYPE, type SafeTransactionParams } from "../../../utils/utils";
+import { EIP712_SAFE_TX_TYPE, type SafeTransactionParams, safeTxHashParts } from "../../../utils/utils";
 import { config } from "../../../wagmi";
 import AccountAddress from "../../common/AccountAddress";
+import HexValue from "../../common/HexValue";
 import TransactionHash from "../../common/TransactionHash";
 import ViewSafeTransactionDialog from "../../dialogs/ViewSafeTransactionDialog";
 import WaitForTransactionDialog from "../../dialogs/WaitForTransactionDialog";
@@ -83,6 +84,12 @@ const Review: React.FC<ReviewProps> = ({ setActiveStep }) => {
   const [viewDialogOpen, setViewDialogOpen] = useState<boolean>(false);
 
   // Fixed height for consistent layout
+
+  // Hardware wallets show these two hashes instead of the safeTxHash, so signers can match them on the device.
+  const hashParts =
+    safeTransaction && safeAccount && account.chainId
+      ? safeTxHashParts(safeTransaction, account.chainId, safeAccount)
+      : undefined;
 
   const handleCloseWaitingDialog = () => {
     setWaitForTransactionDialogOpen(false);
@@ -290,6 +297,16 @@ const Review: React.FC<ReviewProps> = ({ setActiveStep }) => {
             <ReviewRow label="Safe transaction hash">
               <TransactionHash hash={safeTransactionHash} />
             </ReviewRow>
+            {hashParts && (
+              <>
+                <ReviewRow label="Domain hash">
+                  <HexValue value={hashParts.domainHash} noun="hash" />
+                </ReviewRow>
+                <ReviewRow label="Message hash">
+                  <HexValue value={hashParts.messageHash} noun="hash" />
+                </ReviewRow>
+              </>
+            )}
             <ReviewRow label="Safe">
               <AccountAddress address={safeAccount} />
             </ReviewRow>

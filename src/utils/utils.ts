@@ -5,6 +5,7 @@ import {
   encodeFunctionData,
   encodePacked,
   getContractAddress,
+  hashStruct,
   keccak256,
   maxUint256,
   zeroAddress,
@@ -189,6 +190,12 @@ export const EIP712_SAFE_TX_TYPE = {
     { type: "uint256", name: "nonce" },
   ],
 };
+
+/** The domain and message hashes that hardware wallets show for a SafeTx; together they make the safeTxHash. */
+export const safeTxHashParts = (safeTx: SafeTransactionParams, chainId: number, verifyingContract: Address) => ({
+  domainHash: domainSeparator(BigInt(chainId), verifyingContract),
+  messageHash: hashStruct({ data: { ...safeTx }, primaryType: "SafeTx", types: EIP712_SAFE_TX_TYPE }),
+});
 
 export interface SafeSignature {
   signer: string;
