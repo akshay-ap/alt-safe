@@ -1,7 +1,7 @@
-import { getAddress, keccak256, maxUint256, toHex } from "viem";
+import { concat, getAddress, keccak256, maxUint256, toHex, zeroAddress } from "viem";
 import { describe, expect, it } from "vitest";
 import { encodeMultiSend } from "./multisend";
-import { getShortAddress, parseSalt, SafeOperation } from "./utils";
+import { calculateSafeTransactionHash, getShortAddress, parseSalt, SafeOperation, safeTxHashParts } from "./utils";
 
 const randomAddress = () => getAddress(keccak256(toHex(Math.random().toString())).slice(0, 42));
 
@@ -50,5 +50,26 @@ describe("parseSalt", () => {
 
   it("rejects anything that isn't plain digits", () => {
     for (const value of ["-1", "1.5", "1e5", "0x10", " 1"]) expect(parseSalt(value)).toBeUndefined();
+  });
+});
+
+describe("safeTxHashParts", () => {
+  it("combines into the same safeTxHash the Safe contract computes", () => {
+    const safe = getAddress(keccak256(toHex("safe")).slice(0, 42));
+    const tx = {
+      to: getAddress(keccak256(toHex("to")).slice(0, 42)),
+      value: 10n ** 18n,
+      data: "0xa9059cbb" as const,
+      operation: SafeOperation.CALL,
+      safeTxGas: 1n,
+      baseGas: 2n,
+      gasPrice: 3n,
+      gasToken: zeroAddress,
+      refundReceiver: zeroAddress,
+      nonce: 7n,
+    };
+    const { domainHash, messageHash } = safeTxHashParts(tx, 11155111, safe);
+    const safeTxHash = calculateSafeTransactionHash(tx, safe, 11155111);
+    expect(keccak256(concat(["0x1901", domainHash, messageHash]))).toBe(safeTxHash);
   });
 });
